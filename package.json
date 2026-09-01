@@ -5,11 +5,12 @@
   "type": "module",
   "description": "Skyguard — precise-location weather, live radar, lightning and WBGT heat safety for school athletics",
   "scripts": {
-    "dev": "concurrently -n web,mail -c cyan,magenta \"npm:dev:web\" \"npm:dev:mail\"",
+    "dev": "vite",
     "dev:web": "vite",
     "dev:mail": "node --env-file-if-exists=.env server/index.js",
     "build": "vite build",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "dev:all": "concurrently -n web,mail -c cyan,magenta \"npm:dev:web\" \"npm:dev:mail\""
   },
   "dependencies": {
     "express": "^4.21.2",

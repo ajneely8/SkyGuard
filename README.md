@@ -19,51 +19,27 @@ place instead and everything still works.
 
 ---
 
-## Accounts and email verification
+## Accounts
 
-Sign up with a name, role, email and password, then enter a **6-digit code emailed to that address**
-before the account is created. Your name is recorded against every WBGT reading you log.
+Sign up with a name, role, email and password; sign in after that. One step, no
+email involved — `npm run dev` starts the web server and nothing else.
 
-`npm run dev` starts two processes: the Vite app on **5200** and a small mail server on **8787**
-(Vite proxies `/api` to it).
+**Email verification is currently off.** Set `EMAIL_VERIFICATION_ENABLED = true`
+in [src/lib/auth.js](src/lib/auth.js) to turn it back on; the code path and the
+mail server in [server/index.js](server/index.js) are intact and unchanged. With
+it on, run `npm run dev:all` so the mail server starts too, and set
+`RESEND_API_KEY` in `.env` to send real email (without a key the server prints
+codes to its own terminal and also accepts the fixed `DEV_CODE`, default
+`123456`).
 
-**Why there's a server.** A verification code only means something if the person signing up cannot
-read it. A browser-only app has to generate the code in the client, where anyone can open devtools
-and read it — that is theatre. So the code is generated on the server, never returned to the browser,
-and only compared there. `POST /api/auth/verify-code` hands back a short-lived token, and account
-creation re-checks that token with the server, so it cannot be invented client-side.
-
-Enforced server-side and verified: 10-minute expiry, 5 wrong attempts then the code dies, 60-second
-resend cooldown, 5 codes per email per hour, single-use codes, timing-safe comparison.
-
-### Sending real email
-
-Copy `.env.example` to `.env` and set `RESEND_API_KEY` (from [resend.com](https://resend.com)) plus a
-`MAIL_FROM` address on a domain you have verified there.
-
-**Without a key, sign-up still works two ways:**
-
-1. The fixed development code **`123456`** (change it with `DEV_CODE` in `.env`). The sign-up screen
-   shows it so you do not have to go looking.
-2. The real random code, which the server prints to its own terminal.
-
-The development code is accepted **only while `RESEND_API_KEY` is empty**. Setting a mail key disables
-it in the same breath — the server stops returning it to the browser and stops accepting it, so it
-cannot be left switched on in production by accident. Verified: with a key set, `/api/health` reports
-`mail: configured` and `123456` is rejected.
-
-> Building for static hosting: `npm run build` produces the front end only. The `/api` proxy is a dev
-> convenience — deploy `server/index.js` alongside it and point `/api` at it, or sign-up will fail with
-> "cannot reach the Skyguard mail server". Codes are held in memory, so restarting the server
-> invalidates pending ones; move the `codes` map to Redis for more than one instance.
-
-**This is device-local authentication.** There is no server, so accounts live in this browser's
-localStorage. Passwords are never stored in the clear — each is stretched with PBKDF2-SHA256 (210k
-iterations, per-account salt) and only the derived hash is kept — but anything running in this
-browser can read that store and nothing verifies against a server. It keeps staff out of each other's
-data on a shared sideline tablet; it is not a security boundary. To make it real, move
-`createAccount` / `verify` in [src/lib/auth.js](src/lib/auth.js) behind an API and issue a server
-session token. Nothing else in the app touches password material.
+**This is device-local authentication either way.** There is no server, so
+accounts live in this browser's localStorage. Passwords are never stored in the
+clear — each is stretched with PBKDF2-SHA256 (210k iterations, per-account salt)
+and only the derived hash is kept — but anything running in this browser can read
+that store and nothing verifies against a server. It keeps staff out of each
+other's data on a shared sideline tablet; it is not a security boundary. To make
+it real, move `createAccount` / `verify` behind an API and issue a server
+session token.
 
 ## Time zones
 

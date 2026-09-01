@@ -16,6 +16,18 @@
  * session record. Nothing else in the app touches password material.
  */
 
+/**
+ * Email verification is OFF.
+ *
+ * Sign-up creates the account straight away and never contacts the mail
+ * server, so the app runs with nothing but the web server.
+ *
+ * To turn it back on: set this to true and run the mail server alongside the
+ * app (`npm run dev:all`). The code path is intact — requestCode / verifyCode
+ * below and server/index.js are untouched.
+ */
+export const EMAIL_VERIFICATION_ENABLED = false
+
 const ACCOUNTS_KEY = 'skyguard.accounts'
 const SESSION_KEY = 'skyguard.session'
 
@@ -186,15 +198,18 @@ export async function createAccount({
   verifiedToken,
 }) {
   const e = normalizeEmail(email)
-  if (!verifiedToken) throw new Error('Verify your email address first.')
   const accounts = readAccounts()
   if (accounts.some((a) => a.email === e)) {
     throw new Error('An account already exists for that email. Sign in instead.')
   }
-  // Confirm with the server that this email really was proven, so the token
-  // cannot simply be invented in the client.
-  const check = await postJson('/api/auth/check-verified', { email: e, token: verifiedToken })
-  if (!check.ok) throw new Error('That verification has expired. Request a new code.')
+
+  if (EMAIL_VERIFICATION_ENABLED) {
+    if (!verifiedToken) throw new Error('Verify your email address first.')
+    // Confirm with the server that this email really was proven, so the token
+    // cannot simply be invented in the client.
+    const check = await postJson('/api/auth/check-verified', { email: e, token: verifiedToken })
+    if (!check.ok) throw new Error('That verification has expired. Request a new code.')
+  }
   const salt = randomHex(16)
   const hash = await derive(password, salt)
   const account = {
@@ -205,7 +220,7 @@ export async function createAccount({
     school: String(school || '').trim(),
     salt,
     hash,
-    emailVerified: true,
+    emailVerified: EMAIL_VERIFICATION_ENABLED,
     createdAt: new Date().toISOString(),
   }
   writeAccounts([...accounts, account])

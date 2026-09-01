@@ -1,9 +1,10 @@
 /**
  * Sign in / create account.
  *
- * Sign-up is two steps: details, then a 6-digit code emailed to the address.
- * The code is generated and checked on the mail server — this screen never
- * receives it, so it cannot be read out of devtools.
+ * Email verification is currently OFF (EMAIL_VERIFICATION_ENABLED in auth.js),
+ * so sign-up creates the account in one step and never contacts the mail
+ * server. With it on, a second step asks for a 6-digit code that is generated
+ * and checked server-side and never sent to this screen.
  */
 
 import { useEffect, useState } from 'react'
@@ -18,6 +19,7 @@ import {
   accountCount,
   accountExists,
   normalizeEmail,
+  EMAIL_VERIFICATION_ENABLED,
   emailProblem,
   passwordProblem,
   requestCode,
@@ -104,6 +106,11 @@ export default function SignIn() {
 
     setBusy(true)
     try {
+      if (!EMAIL_VERIFICATION_ENABLED) {
+        // No mail server involved — create the account and go.
+        finish(await createAccount({ name, email, password, role, school }))
+        return
+      }
       const res = await requestCode(email)
       setDelivered(res.delivered !== false)
       setDevCode(res.devCode || null)
@@ -167,8 +174,8 @@ export default function SignIn() {
     return <Navigate to={state.setupComplete && state.locations.length > 0 ? '/app' : '/welcome'} replace />
   }
 
-  /* ---- code step ---- */
-  if (isUp && step === 'code') {
+  /* ---- code step (only when verification is switched on) ---- */
+  if (EMAIL_VERIFICATION_ENABLED && isUp && step === 'code') {
     return (
       <div className="welcome-page">
         <div className="welcome-inner" style={{ maxWidth: 520 }}>
@@ -311,7 +318,7 @@ export default function SignIn() {
           <Field
             label="Email"
             id="suEmail"
-            hint={isUp ? 'We send a verification code here before the account is created.' : undefined}
+            hint={isUp && EMAIL_VERIFICATION_ENABLED ? 'We send a verification code here before the account is created.' : undefined}
           >
             <input
               id="suEmail"
@@ -357,7 +364,7 @@ export default function SignIn() {
           )}
 
           <button className="btn btn-lg btn-primary btn-block" type="submit" disabled={busy}>
-            {busy ? 'Working…' : isUp ? 'Send verification code' : 'Sign in'}
+            {busy ? 'Working…' : isUp ? (EMAIL_VERIFICATION_ENABLED ? 'Send verification code' : 'Create account') : 'Sign in'}
           </button>
 
           <button
