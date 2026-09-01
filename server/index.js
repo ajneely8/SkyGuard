@@ -217,10 +217,25 @@ app.get('/api/health', (_req, res) =>
   res.json({ ok: true, mail: process.env.RESEND_API_KEY ? 'configured' : 'not-configured' }),
 )
 
-app.listen(PORT, () => {
+const server = app.listen(PORT, () => {
   console.log(`[skyguard] mail server on http://localhost:${PORT}`)
   if (!process.env.RESEND_API_KEY) {
     console.log('[skyguard] RESEND_API_KEY not set — verification codes will print here instead of being emailed.')
     console.log(`[skyguard] development code ${DEV_CODE} also works. It stops working as soon as a mail key is set.`)
   }
+})
+
+// Without this the process exits silently on a port clash, leaving the web
+// server proxying /api at nothing and sign-up failing with a bare 404.
+server.on('error', (e) => {
+  if (e.code === 'EADDRINUSE') {
+    console.error(
+      `\n[skyguard] port ${PORT} is already in use — another Skyguard mail server is probably running.\n` +
+        `[skyguard] Stop it, or set VERIFY_PORT to a free port in skyguard/.env.\n` +
+        `[skyguard] Until this is fixed, creating an account will fail.\n`,
+    )
+  } else {
+    console.error('[skyguard] mail server failed to start:', e.message)
+  }
+  process.exit(1)
 })

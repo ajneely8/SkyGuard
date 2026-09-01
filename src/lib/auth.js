@@ -138,6 +138,9 @@ export async function verifyCode(email, code) {
   return res.token
 }
 
+const SERVER_DOWN =
+  'The Skyguard mail server is not running, so no code can be sent. Start it with "npm run dev" in the skyguard folder, then try again.'
+
 async function postJson(url, body) {
   let res
   try {
@@ -147,17 +150,24 @@ async function postJson(url, body) {
       body: JSON.stringify(body),
     })
   } catch {
-    throw new Error(
-      'Cannot reach the Skyguard mail server. Start it with "npm run dev" in the skyguard folder.',
-    )
+    throw new Error(SERVER_DOWN)
   }
+
+  // A 404 here means the request was answered by the web server rather than
+  // forwarded to the mail server — the mail server is down, or /api is not
+  // being proxied. Either way it is the same problem for the user, and the
+  // raw status code tells them nothing.
+  if (res.status === 404 || res.status === 502 || res.status === 504) {
+    throw new Error(SERVER_DOWN)
+  }
+
   let data = {}
   try {
     data = await res.json()
   } catch {
-    /* non-JSON error page */
+    /* HTML error page rather than JSON */
   }
-  if (!res.ok) throw new Error(data.error || `Request failed (${res.status}).`)
+  if (!res.ok) throw new Error(data.error || `The mail server returned an error (${res.status}).`)
   return data
 }
 
