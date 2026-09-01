@@ -168,7 +168,11 @@ app.post('/api/auth/verify-code', (req, res) => {
     return res.json({ ok: true, token })
   }
 
-  if (!rec) return res.status(400).json({ error: 'Request a code first.' })
+  // Codes live in memory, so a server restart clears them too — say something
+  // the user can act on rather than "request a code first".
+  if (!rec) {
+    return res.status(400).json({ error: 'That code is no longer valid. Request a new one.' })
+  }
   if (Date.now() > rec.expiresAt) {
     codes.delete(email)
     return res.status(400).json({ error: 'That code expired. Request a new one.' })

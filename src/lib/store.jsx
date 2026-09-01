@@ -35,10 +35,17 @@ function load() {
     return {
       ...base,
       ...parsed,
-      // Restored synchronously: the route guard reads `account` on the very
-      // first render, before any effect can run, so restoring it in an effect
+      // The session record is the ONLY source of truth for who is signed in.
+      //
+      // Restored synchronously because the route guard reads `account` on the
+      // very first render, before any effect can run — doing it in an effect
       // bounced a signed-in user to /signin on every reload.
-      account: loadSession() || parsed.account || null,
+      //
+      // It deliberately does not fall back to the `account` copy that gets
+      // persisted alongside the rest of the state: that copy is not validated
+      // against the accounts store, so falling back to it kept a user "signed
+      // in" after their session was cleared or their account deleted.
+      account: loadSession(),
       settings: {
         ...base.settings,
         ...(parsed.settings || {}),

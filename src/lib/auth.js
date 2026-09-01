@@ -50,6 +50,18 @@ export const accountCount = () => readAccounts().length
 
 export const normalizeEmail = (e) => String(e || '').trim().toLowerCase()
 
+/**
+ * Is this email already registered on this device?
+ *
+ * Checked BEFORE a verification code is sent. Without it, signing up with an
+ * existing address burns a code, makes the user verify it, and only then fails —
+ * leaving them with a spent code and a 60-second resend wait.
+ */
+export const accountExists = (email) => {
+  const e = normalizeEmail(email)
+  return readAccounts().some((a) => a.email === e)
+}
+
 /* ---------- crypto ---------- */
 
 const toHex = (buf) =>

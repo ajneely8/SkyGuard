@@ -7,7 +7,7 @@
  */
 
 import { useEffect, useState } from 'react'
-import { useNavigate, Link } from 'react-router-dom'
+import { useNavigate, Link, Navigate } from 'react-router-dom'
 import { useStore } from '../lib/store.jsx'
 import { Field, Notice } from '../components/ui.jsx'
 import { LogoLockup } from '../components/Logo.jsx'
@@ -16,6 +16,8 @@ import {
   verify,
   saveSession,
   accountCount,
+  accountExists,
+  normalizeEmail,
   emailProblem,
   passwordProblem,
   requestCode,
@@ -55,7 +57,19 @@ export default function SignIn() {
   const finish = (account) => {
     saveSession(account)
     setAccount(account)
-    navigate(state.setupComplete ? '/app' : '/welcome', { replace: true })
+    // Same invariant the route guard uses: the app needs a location, not just
+    // the setup flag, or /app would bounce straight back to /welcome.
+    const ready = state.setupComplete && state.locations.length > 0
+    navigate(ready ? '/app' : '/welcome', { replace: true })
+  }
+
+  /** Drop everything tied to a pending code. */
+  const resetCodeStep = () => {
+    setCode('')
+    setDevCode(null)
+    setDelivered(true)
+    setCooldown(0)
+    setError(null)
   }
 
   /* ---- step 1: details ---- */
@@ -83,6 +97,10 @@ export default function SignIn() {
     const pProblem = passwordProblem(password)
     if (pProblem) return setError(pProblem)
     if (password !== confirm) return setError('The two passwords do not match.')
+    // Catch a duplicate before spending a code on it.
+    if (accountExists(email)) {
+      return setError('An account already exists for that email. Sign in instead.')
+    }
 
     setBusy(true)
     try {
@@ -103,13 +121,27 @@ export default function SignIn() {
     e.preventDefault()
     setError(null)
     if (!/^\d{6}$/.test(code.trim())) return setError('Enter the 6-digit code from your email.')
+
     setBusy(true)
+    let token
     try {
-      const token = await verifyCode(email, code.trim())
+      token = await verifyCode(email, code.trim())
+    } catch (err) {
+      // Code was wrong or expired — it may still be usable, so leave it be.
+      setBusy(false)
+      return setError(err.message)
+    }
+
+    try {
       const account = await createAccount({ name, email, password, role, school, verifiedToken: token })
       finish(account)
     } catch (err) {
-      setError(err.message)
+      // Verification succeeded, so the code is spent. Clear the cooldown so the
+      // user can request another immediately instead of waiting out a timer for
+      // a code that can no longer work.
+      setCode('')
+      setCooldown(0)
+      setError(`${err.message} Request a new code to try again.`)
     } finally {
       setBusy(false)
     }
@@ -130,6 +162,11 @@ export default function SignIn() {
     }
   }
 
+  // Already signed in — nothing to do here. Guard sits below every hook.
+  if (state.account) {
+    return <Navigate to={state.setupComplete && state.locations.length > 0 ? '/app' : '/welcome'} replace />
+  }
+
   /* ---- code step ---- */
   if (isUp && step === 'code') {
     return (
@@ -141,7 +178,7 @@ export default function SignIn() {
 
           <h1 className="welcome-title">Check your email</h1>
           <p className="welcome-sub">
-            We sent a 6-digit code to <strong>{email}</strong>. It expires in 10 minutes.
+            We sent a 6-digit code to <strong>{normalizeEmail(email)}</strong>. It expires in 10 minutes.
           </p>
 
           <form onSubmit={submitCode} className="welcome-card">
@@ -205,8 +242,7 @@ export default function SignIn() {
                 className="btn"
                 onClick={() => {
                   setStep('details')
-                  setCode('')
-                  setError(null)
+                  resetCodeStep()
                 }}
               >
                 Change email
@@ -331,9 +367,9 @@ export default function SignIn() {
             onClick={() => {
               setMode(isUp ? 'in' : 'up')
               setStep('details')
-              setError(null)
               setPassword('')
               setConfirm('')
+              resetCodeStep()
             }}
           >
             {isUp ? 'I already have an account' : 'Create a new account'}
