@@ -292,7 +292,7 @@ input[type='checkbox'], input[type='range'] { accent-color: var(--accent); }
 }
 
 .metrics {
-  display: grid; grid-template-columns: repeat(auto-fit, minmax(104px, 1fr));
+  display: grid; grid-template-columns: repeat(4, 1fr);
   border-top: 1px solid var(--line-2);
 }
 .metrics.standalone { border-top: none; }
@@ -895,5 +895,6 @@ table.data td.num { font-family: var(--nums); font-variant-numeric: tabular-nums
   .welcome-page { padding: 24px 14px 48px; }
   .now-wbgt { text-align: left; }
   .radar-time { text-align: left; }
-  .metric { border-right: none; border-bottom: 1px solid var(--line-2); }
+  .metric { padding: 12px 6px; }
+  .metric .v { font-size: 15px; }
 }
