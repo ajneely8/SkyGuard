@@ -968,13 +968,17 @@ table.data td.num { font-family: var(--nums); font-variant-numeric: tabular-nums
 
   /* Same left/right edge as .metric above it, so the two rows line up. */
   .day-strip { padding: 2px 0 12px; }
-  .day-cell { flex-basis: 108px; padding: 12px 8px; }
-  .day-cell:first-child { padding-left: 6px; }
-  .day-cell:last-child { padding-right: 6px; }
-  .dc-time { font-size: 13px; }
-  .dc-icon { width: 18px; height: 18px; margin-top: 4px; }
-  .dc-wbgt { font-size: 22px; }
-  .dc-unit { font-size: 9px; }
+  .day-cell { flex-basis: 80px; padding: 8px 5px; }
+  .day-cell:first-child { padding-left: 3px; }
+  .day-cell:last-child { padding-right: 3px; }
+  .dc-time { font-size: 10.5px; }
+  .dc-icon { width: 14px; height: 14px; margin-top: 3px; }
+  .dc-wbgt { font-size: 17px; }
+  .dc-unit { font-size: 7.5px; }
+  /* Scaled down so the whole hourly section is visible on a phone without
+     scrolling — these three lines were what made each cell tall. */
+  .dc-cond, .dc-rain, .dc-band { display: none; }
+  .day-legend { display: none; }
 
   .hero-map-scrim { padding: 10px 14px; gap: 10px; }
   .hero-map-wbgt-value { font-size: 30px; }
