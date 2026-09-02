@@ -818,10 +818,9 @@ input[type='checkbox'], input[type='range'] { accent-color: var(--accent); }
   from { transform: rotate(0deg); }
   to { transform: rotate(360deg); }
 }
-/* A live strike bearing replaces the generic spin with a fixed pointer at
-   the real direction, pulsing to stay noticeable without implying motion
-   it hasn't measured. */
-.scope-sweep-alert { animation: none; }
+/* A live strike keeps the sweep spinning — just recolored (see
+   RadarScope.jsx) — with an extra pulse on top so it still reads as more
+   urgent than the plain decorative scan. */
 .scope-sweep-alert path { animation: scopeAlertPulse 1.6s ease-in-out infinite; }
 @keyframes scopeAlertPulse {
   0%, 100% { opacity: 0.7; }

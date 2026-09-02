@@ -16,7 +16,7 @@ const MILES_PER_DEG_LAT = 69.055
 // the sweep's color is literally "how close it is", not a fixed alert red.
 const TONE_COLOR = { yellow: '#eab308', orange: '#f97316', red: '#ef4444' }
 
-export default function RadarScope({ map, center, strikeBearingDeg = null, strikeTone = null }) {
+export default function RadarScope({ map, center, strikeTone = null }) {
   const [geom, setGeom] = useState(null)
 
   useEffect(() => {
@@ -56,19 +56,14 @@ export default function RadarScope({ map, center, strikeBearingDeg = null, strik
   // 60-degree wedge ending at 0 degrees (pointing right), rotated by CSS.
   const wedge = `M ${cx} ${cy} L ${cx + R * Math.cos(-Math.PI / 3)} ${cy + R * Math.sin(-Math.PI / 3)} A ${R} ${R} 0 0 1 ${cx + R} ${cy} Z`
 
-  // A real strike bearing takes over the sweep: it stops spinning and points,
-  // fixed, at the true compass direction the strike is in. Compass degrees
-  // are clockwise from north (up); the wedge is drawn pointing east (right,
-  // CSS angle 0), so shift by -90 to line the two up.
-  // Only take over the sweep once the strike is actually within the
-  // caution/advisory/warning radii — a distant strike outside those rings
-  // still shows as a bolt on the map, but "Clear" status keeps the sweep
-  // as the plain decorative scan, matching the app's own proximity tiers.
-  const hasBearing = Number.isFinite(strikeBearingDeg) && !!TONE_COLOR[strikeTone]
-  const sweepColor = hasBearing ? TONE_COLOR[strikeTone] : '#1c8fd0'
-  const sweepStyle = hasBearing
-    ? { transformOrigin: `${cx}px ${cy}px`, transform: `rotate(${((strikeBearingDeg - 90 + 360) % 360).toFixed(1)}deg)` }
-    : { transformOrigin: `${cx}px ${cy}px` }
+  // The sweep keeps spinning either way — a strike just recolors it, rather
+  // than freezing it in place. Only recolors once the strike is actually
+  // within the caution/advisory/warning radii; a distant strike outside
+  // those rings still shows as a bolt on the map, but "Clear" status keeps
+  // the sweep its plain decorative blue.
+  const alert = !!TONE_COLOR[strikeTone]
+  const sweepColor = alert ? TONE_COLOR[strikeTone] : '#1c8fd0'
+  const sweepStyle = { transformOrigin: `${cx}px ${cy}px` }
 
   return (
     <svg className="scope" viewBox={`0 0 ${w} ${h}`} width={w} height={h} aria-hidden="true">
@@ -80,11 +75,11 @@ export default function RadarScope({ map, center, strikeBearingDeg = null, strik
         </radialGradient>
       </defs>
 
-      {/* rotating sweep — or, when a strike is live, a fixed pointer at its
-          real bearing from the field */}
-      <g className={hasBearing ? 'scope-sweep scope-sweep-alert' : 'scope-sweep'} style={sweepStyle}>
+      {/* rotating sweep — always spinning, coloured by lightning proximity
+          when there's an active strike */}
+      <g className={`scope-sweep ${alert ? 'scope-sweep-alert' : ''}`} style={sweepStyle}>
         <path d={wedge} fill="url(#sgSweep)" />
-        <line x1={cx} y1={cy} x2={cx + R} y2={cy} stroke={sweepColor} strokeWidth={hasBearing ? 2 : 1.4} strokeOpacity="0.85" />
+        <line x1={cx} y1={cy} x2={cx + R} y2={cy} stroke={sweepColor} strokeWidth={alert ? 2 : 1.4} strokeOpacity="0.85" />
       </g>
 
       {/* range rings */}

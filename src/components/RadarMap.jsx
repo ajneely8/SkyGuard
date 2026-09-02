@@ -327,20 +327,11 @@ export default function RadarMap({ height = 440 }) {
   const overlayStatus = selectedLocation ? strikeStatusFor(selectedLocation.id) : null
   const overlayTone = overlayStatus?.level.tone || 'green'
   const overlayRadiusMiles = overlayStatus?.rules.warningMiles ?? 10
-  // The most recent strike's real compass bearing — the scope points at this
-  // instead of just spinning once a strike has actually been detected.
-  const strikeBearingDeg = overlayStatus?.nearest?.bearing?.degrees ?? null
-
   return (
     <div className={`radar-wrap ${fullscreen ? 'radar-fullscreen' : ''}`}>
       <div className="radar-map-frame" style={{ height: mapHeight }}>
         <div ref={mapEl} className="radar-map" style={{ height: mapHeight }} />
-        <RadarScope
-          map={mapReady}
-          center={selectedLocation}
-          strikeBearingDeg={strikeBearingDeg}
-          strikeTone={overlayStatus?.level.tone}
-        />
+        <RadarScope map={mapReady} center={selectedLocation} strikeTone={overlayStatus?.level.tone} />
 
         <button
           type="button"
