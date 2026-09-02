@@ -343,7 +343,7 @@ input[type='checkbox'], input[type='range'] { accent-color: var(--accent); }
 
 .source-strip {
   display: flex; gap: 24px; flex-wrap: wrap; padding: 12px 22px;
-  background: #0b1220; font-size: 12px; color: var(--ink-2);
+  font-size: 12px; color: var(--ink-2);
   border-top: 1px solid var(--line-2);
 }
 .source-strip b {
@@ -556,8 +556,7 @@ input[type='checkbox'], input[type='range'] { accent-color: var(--accent); }
 
 .lx-head {
   display: flex; justify-content: space-between; align-items: flex-start; gap: 18px; flex-wrap: wrap;
-  padding: 15px 17px 15px 14px; border-radius: var(--radius);
-  background: var(--surface-2); border: 1px solid var(--line); border-left: 3px solid var(--line);
+  padding: 0 0 15px 14px; border-left: 3px solid var(--line);
 }
 .lx-head.tone-green   { border-left-color: var(--green); }
 .lx-head.tone-yellow  { border-left-color: var(--amber); }
@@ -575,8 +574,7 @@ input[type='checkbox'], input[type='range'] { accent-color: var(--accent); }
 
 .lx-hold {
   display: flex; justify-content: space-between; align-items: center; gap: 18px; flex-wrap: wrap;
-  margin-top: 12px; padding: 15px 17px 15px 14px; border-radius: var(--radius);
-  background: var(--surface-2); border: 1px solid var(--line); border-left: 3px solid var(--red);
+  margin-top: 12px; padding: 12px 0 12px 14px; border-left: 3px solid var(--red);
 }
 .lx-countdown {
   font-size: 34px; font-weight: 700; line-height: 1; color: var(--red);
@@ -584,15 +582,12 @@ input[type='checkbox'], input[type='range'] { accent-color: var(--accent); }
 }
 .lx-hold .small { max-width: 42ch; color: var(--ink-2); }
 
-.lx-bands { display: grid; grid-template-columns: repeat(auto-fit, minmax(190px, 1fr)); gap: 10px; margin-top: 16px; }
-.lx-band {
-  border: 1px solid var(--line); border-left: 3px solid var(--ink-3);
-  border-radius: var(--radius); padding: 13px 14px; background: var(--surface-2);
-}
+.lx-bands { display: grid; grid-template-columns: repeat(auto-fit, minmax(190px, 1fr)); gap: 16px; margin-top: 16px; }
+.lx-band { border-left: 3px solid var(--ink-3); padding: 2px 0 2px 14px; }
 .lx-band.tone-yellow { border-left-color: var(--amber); }
 .lx-band.tone-orange { border-left-color: var(--orange); }
 .lx-band.tone-red    { border-left-color: var(--red); }
-.lx-band.active { background: var(--surface); border-color: var(--accent); }
+.lx-band.active { border-left-color: var(--accent); }
 .lx-band-top { display: flex; justify-content: space-between; align-items: center; gap: 8px; margin-bottom: 7px; }
 .lx-band-name { font-weight: 600; font-size: 13.5px; }
 .lx-band-count { font-size: 12px; color: var(--ink-2); font-variant-numeric: tabular-nums; margin-bottom: 6px; }
@@ -600,17 +595,18 @@ input[type='checkbox'], input[type='range'] { accent-color: var(--accent); }
 
 /* ---------------- rules ---------------- */
 
-.rules-list { display: grid; gap: 10px; }
+.rules-list { display: grid; gap: 4px; }
 .rule-band {
-  border: 1px solid var(--line); border-left: 3px solid var(--ink-3);
-  border-radius: var(--radius); padding: 16px; background: var(--surface-2);
+  border-left: 3px solid var(--ink-3); border-bottom: 1px solid var(--line-2);
+  padding: 16px 0 16px 16px;
 }
+.rule-band:last-child { border-bottom: none; }
 .rule-band.tone-green   { border-left-color: var(--green); }
 .rule-band.tone-yellow  { border-left-color: var(--amber); }
 .rule-band.tone-orange  { border-left-color: var(--orange); }
 .rule-band.tone-red     { border-left-color: var(--red); }
 .rule-band.tone-darkred { border-left-color: var(--darkred); }
-.rule-band.active { border-color: var(--accent); }
+.rule-band.active { border-left-color: var(--accent); }
 
 .rb-range { display: flex; align-items: baseline; gap: 12px; flex-wrap: wrap; margin-bottom: 13px; }
 .rb-wbgt { font-family: var(--nums); font-size: 15px; font-weight: 700; font-variant-numeric: tabular-nums; color: #fff; }

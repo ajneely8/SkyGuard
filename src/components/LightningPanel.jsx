@@ -166,7 +166,7 @@ export default function LightningPanel({ locationId, tz }) {
             be trusted while this says offline — use the sky, the radar and your own judgement.
           </Notice>
         )}
-        <div className="source-strip" style={{ borderRadius: 6, border: '1px solid var(--line)', marginTop: 8 }}>
+        <div className="source-strip" style={{ marginTop: 8, padding: '12px 0' }}>
           <div><b>Strike source</b>{SOURCE_NAME}</div>
           <div><b>Status</b>{strikeFeed.connected ? 'Connected' : strikeFeed.connecting ? 'Connecting' : 'Offline'}</div>
           <div><b>Bands</b>{rules.cautionMiles} / {rules.advisoryMiles} / {rules.warningMiles} mi</div>
