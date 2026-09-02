@@ -18,8 +18,7 @@ import LocationHeroMap from '../components/LocationHeroMap.jsx'
 import LightningPanel from '../components/LightningPanel.jsx'
 import { IconAlert, IconDroplet, IconThermometer, IconGauge, WeatherIcon } from '../components/Icons.jsx'
 import { timeOutsideLabel, clothingLabel, bandRange } from '../lib/guidelines.js'
-import { METHOD_LABEL } from '../lib/wbgt.js'
-import { fmtF, fmtTimeIn, fmtNum, ageString, untilString } from '../lib/format.js'
+import { fmtF, fmtTimeIn, fmtNum, untilString } from '../lib/format.js'
 import { dayThrough, peakHour } from '../lib/forecast.js'
 
 export default function Home() {
@@ -184,7 +183,7 @@ export default function Home() {
 
       {/* Current safety status */}
       {obs ? (
-        <div className={`now-card lvl-${band?.tone || cls.status}`}>
+        <div className="now-card">
           <div className="now-main">
             <div>
               <div className="now-temp">
@@ -199,13 +198,13 @@ export default function Home() {
                 {obs.wbgtF.toFixed(1)}
                 <span className="deg">°F</span>
               </div>
-              <div className={`badge badge-${cls.status}`}>{cls.classification}</div>
+              <div className="small muted">{cls.classification}</div>
             </div>
           </div>
 
           {/* THE ANSWER */}
           {band && (
-            <div className={`answer a-${band.tone}`}>
+            <div className="answer">
               <div className="answer-band">{band.name.toUpperCase()}</div>
               <div className="answer-grid">
                 <div>
@@ -235,13 +234,6 @@ export default function Home() {
               </div>
             </div>
           )}
-
-          <div className="source-strip">
-            <div><b>Weather</b>{obs.provider}</div>
-            <div><b>WBGT</b>{METHOD_LABEL[obs.method]}</div>
-            <div><b>Updated</b>{fmtTimeIn(obs.observedAt, tz)}</div>
-            <div><b>Data age</b>{ageString(obs.observedAt, now)}</div>
-          </div>
         </div>
       ) : (
         <Card title="Current safety status">
