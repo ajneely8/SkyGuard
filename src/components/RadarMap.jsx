@@ -257,21 +257,30 @@ export default function RadarMap({ height = 440 }) {
     strikeLayer.current.clearLayers()
 
     strikes.forEach((s) => {
-      const ageMin = (Date.now() - new Date(s.ts).getTime()) / 60000
-      // Fresh strikes are bright; older ones fade so the eye tracks the storm.
-      const opacity = Math.max(0.18, 1 - ageMin / 60)
+      const ageSec = (Date.now() - new Date(s.ts).getTime()) / 1000
+      const ageMin = ageSec / 60
+      // Fresh strikes flash and pulse a ring so the eye finds them immediately;
+      // older ones fade to a small, static bolt so the eye tracks the storm.
+      const justLanded = ageSec < 45
       const fresh = ageMin < 5
-      L.circleMarker([s.lat, s.lon], {
-        radius: fresh ? 6 : 4,
-        color: fresh ? '#ffd166' : '#e0a23c',
-        weight: fresh ? 2 : 1,
-        fillColor: fresh ? '#ffe08a' : '#c98f2e',
-        fillOpacity: opacity,
-        opacity,
+      const opacity = Math.max(0.32, 1 - ageMin / 60)
+      const size = justLanded ? 34 : fresh ? 26 : 16
+      const boltFill = fresh ? '#ffe08a' : '#e0a23c'
+
+      const html = `<div class="strike-mk ${justLanded ? 'landed' : ''}" style="opacity:${opacity}">
+          ${justLanded ? '<span class="strike-ring"></span><span class="strike-ring strike-ring-2"></span>' : ''}
+          <svg class="strike-bolt" width="${size}" height="${size}" viewBox="0 0 24 24">
+            <path d="M13 2 4 14h7l-2 8 11-13h-7l0-7z" fill="${boltFill}" stroke="#1a1200" stroke-width="1" stroke-linejoin="round"/>
+          </svg>
+        </div>`
+
+      L.marker([s.lat, s.lon], {
+        icon: L.divIcon({ className: 'strike-mk-wrap', html, iconSize: [size, size], iconAnchor: [size / 2, size / 2] }),
+        zIndexOffset: justLanded ? 1000 : fresh ? 500 : 0,
       })
         .bindPopup(
           `<div class="pop">
-             <div class="pop-title">Lightning strike</div>
+             <div class="pop-title">⚡ Lightning strike</div>
              <div class="pop-sub">${escapeHtml(fmtTimeIn(s.ts, selectedLocation?.timezone))} · ${Math.round(ageMin)} min ago</div>
              <table class="pop-tbl">
                <tr><td>Distance</td><td><strong>${s.miles.toFixed(1)} miles</strong></td></tr>
@@ -296,12 +305,15 @@ export default function RadarMap({ height = 440 }) {
   const overlayStatus = selectedLocation ? strikeStatusFor(selectedLocation.id) : null
   const overlayTone = overlayStatus?.level.tone || 'green'
   const overlayRadiusMiles = overlayStatus?.rules.warningMiles ?? 10
+  // The most recent strike's real compass bearing — the scope points at this
+  // instead of just spinning once a strike has actually been detected.
+  const strikeBearingDeg = overlayStatus?.nearest?.bearing?.degrees ?? null
 
   return (
     <div className="radar-wrap">
       <div className="radar-map-frame" style={{ height: mapHeight }}>
         <div ref={mapEl} className="radar-map" style={{ height: mapHeight }} />
-        <RadarScope map={mapReady} center={selectedLocation} />
+        <RadarScope map={mapReady} center={selectedLocation} strikeBearingDeg={strikeBearingDeg} />
 
         {overlayObs && (
           <div className="hero-map-scrim">

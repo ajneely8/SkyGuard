@@ -12,7 +12,7 @@ import L from 'leaflet'
 const RING_MILES = [5, 10, 20, 40]
 const MILES_PER_DEG_LAT = 69.055
 
-export default function RadarScope({ map, center }) {
+export default function RadarScope({ map, center, strikeBearingDeg = null }) {
   const [geom, setGeom] = useState(null)
 
   useEffect(() => {
@@ -52,20 +52,31 @@ export default function RadarScope({ map, center }) {
   // 60-degree wedge ending at 0 degrees (pointing right), rotated by CSS.
   const wedge = `M ${cx} ${cy} L ${cx + R * Math.cos(-Math.PI / 3)} ${cy + R * Math.sin(-Math.PI / 3)} A ${R} ${R} 0 0 1 ${cx + R} ${cy} Z`
 
+  // A real strike bearing takes over the sweep: it stops spinning and points,
+  // fixed, at the true compass direction the strike is in. Compass degrees
+  // are clockwise from north (up); the wedge is drawn pointing east (right,
+  // CSS angle 0), so shift by -90 to line the two up.
+  const hasBearing = Number.isFinite(strikeBearingDeg)
+  const sweepColor = hasBearing ? '#ff6b5b' : '#1c8fd0'
+  const sweepStyle = hasBearing
+    ? { transformOrigin: `${cx}px ${cy}px`, transform: `rotate(${((strikeBearingDeg - 90 + 360) % 360).toFixed(1)}deg)` }
+    : { transformOrigin: `${cx}px ${cy}px` }
+
   return (
     <svg className="scope" viewBox={`0 0 ${w} ${h}`} width={w} height={h} aria-hidden="true">
       <defs>
         <radialGradient id="sgSweep" cx={cx} cy={cy} r={R} gradientUnits="userSpaceOnUse">
-          <stop offset="0" stopColor="#1c8fd0" stopOpacity="0.3" />
-          <stop offset="0.75" stopColor="#1c8fd0" stopOpacity="0.11" />
-          <stop offset="1" stopColor="#1c8fd0" stopOpacity="0" />
+          <stop offset="0" stopColor={sweepColor} stopOpacity="0.3" />
+          <stop offset="0.75" stopColor={sweepColor} stopOpacity="0.11" />
+          <stop offset="1" stopColor={sweepColor} stopOpacity="0" />
         </radialGradient>
       </defs>
 
-      {/* rotating sweep */}
-      <g className="scope-sweep" style={{ transformOrigin: `${cx}px ${cy}px` }}>
+      {/* rotating sweep — or, when a strike is live, a fixed pointer at its
+          real bearing from the field */}
+      <g className={hasBearing ? 'scope-sweep scope-sweep-alert' : 'scope-sweep'} style={sweepStyle}>
         <path d={wedge} fill="url(#sgSweep)" />
-        <line x1={cx} y1={cy} x2={cx + R} y2={cy} stroke="#1c8fd0" strokeWidth="1.4" strokeOpacity="0.75" />
+        <line x1={cx} y1={cy} x2={cx + R} y2={cy} stroke={sweepColor} strokeWidth={hasBearing ? 2 : 1.4} strokeOpacity="0.85" />
       </g>
 
       {/* range rings */}
