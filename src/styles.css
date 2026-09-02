@@ -621,6 +621,7 @@ input[type='checkbox'], input[type='range'] { accent-color: var(--accent); }
 /* ---------------- radar ---------------- */
 
 .radar-wrap { border-radius: var(--radius); overflow: hidden; border: 1px solid var(--line); position: relative; }
+.radar-map-frame { position: relative; }
 .radar-map { width: 100%; background: #0b1220; }
 .leaflet-container { font: inherit; background: #0b1220; }
 
@@ -640,14 +641,7 @@ input[type='checkbox'], input[type='range'] { accent-color: var(--accent); }
 }
 .radar-status .pulse { width: 7px; height: 7px; border-radius: 50%; background: var(--green); }
 
-.tl { flex: 1; min-width: 150px; }
-.tl-track { position: relative; height: 3px; border-radius: 2px; background: var(--line); overflow: hidden; }
-.tl-fill { position: absolute; inset: 0 auto 0 0; background: var(--accent); }
-.tl-marks { display: flex; gap: 2px; margin-top: 6px; }
-.tl-mark { flex: 1; height: 2px; border-radius: 1px; background: var(--line); }
-.tl-mark.past { background: #3a4a63; }
-.tl-mark.future { background: #3f4a5c; }
-.tl-mark.on { background: var(--accent); }
+.radar-bar-spacer { flex: 1; }
 
 .radar-time { text-align: right; flex: 0 0 auto; min-width: 84px; }
 .rt-clock {

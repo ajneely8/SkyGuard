@@ -143,8 +143,11 @@ export default function Home() {
         )}
 
         <div className="section-divider">
-          <div className="h3">{dayView.isTomorrow ? 'Tomorrow, through 9 PM' : 'Rest of today, through 9 PM'}</div>
-          <div className="small muted">Hour by hour in {loc.name} local time{zone ? ` (${zone})` : ''}</div>
+          <div className="h3">Hourly WBGT</div>
+          <div className="small muted">
+            {dayView.isTomorrow ? 'Tomorrow, through 9 PM' : 'Rest of today, through 9 PM'} — hour by hour in{' '}
+            {loc.name} local time{zone ? ` (${zone})` : ''}
+          </div>
         </div>
 
         {!fc ? (

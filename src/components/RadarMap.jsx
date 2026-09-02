@@ -26,6 +26,7 @@ import {
 } from '../lib/radar.js'
 import { fmtTimeIn, zoneLabel } from '../lib/format.js'
 import RadarScope from './RadarScope.jsx'
+import { IconCheck, IconAlert } from './Icons.jsx'
 
 const FRAME_MS = 520
 const HOLD_MS = 1500
@@ -33,8 +34,17 @@ const REFRESH_MS = 4 * 60000
 const RADAR_OPACITY = 0.82
 
 export default function RadarMap({ height = 440 }) {
-  const { state, selectedLocation, setSelectedLocation, current, classifyNow, guidelineNow, strikesFor, now } =
-    useStore()
+  const {
+    state,
+    selectedLocation,
+    setSelectedLocation,
+    current,
+    classifyNow,
+    guidelineNow,
+    strikesFor,
+    strikeStatusFor,
+    now,
+  } = useStore()
 
   const mapEl = useRef(null)
   const map = useRef(null)
@@ -253,14 +263,41 @@ export default function RadarMap({ height = 440 }) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [strikeKey, selectedLocation?.id, Math.floor(now / 60000)])
 
-  const progress = radarFrames.length ? ((shownIdx + 1) / radarFrames.length) * 100 : 0
   const tz = selectedLocation?.timezone || null
   const zone = zoneLabel(tz)
 
+  /* WBGT and lightning status for the selected field, overlaid on the map
+     the same way the location hero map does. */
+  const overlayObs = selectedLocation ? current(selectedLocation.id) : null
+  const overlayStatus = selectedLocation ? strikeStatusFor(selectedLocation.id) : null
+  const overlayTone = overlayStatus?.level.tone || 'green'
+  const overlayRadiusMiles = overlayStatus?.rules.warningMiles ?? 10
+
   return (
     <div className="radar-wrap">
-      <div ref={mapEl} className="radar-map" style={{ height }} />
-      <RadarScope map={mapReady} center={selectedLocation} />
+      <div className="radar-map-frame" style={{ height }}>
+        <div ref={mapEl} className="radar-map" style={{ height }} />
+        <RadarScope map={mapReady} center={selectedLocation} />
+
+        {overlayObs && (
+          <div className="hero-map-scrim">
+            <div className="hero-map-wbgt">
+              <span className="hero-map-wbgt-value">{overlayObs.wbgtF.toFixed(1)}°</span>
+              <span className="hero-map-wbgt-label">WBGT</span>
+            </div>
+
+            {overlayStatus && (
+              <div className={`hero-map-status tone-${overlayTone}`}>
+                {overlayTone === 'green' ? <IconCheck width={16} height={16} /> : <IconAlert width={16} height={16} />}
+                <div>
+                  <div className="hero-map-status-name">{overlayStatus.level.label}</div>
+                  <div className="hero-map-status-radius">0–{overlayRadiusMiles} mi</div>
+                </div>
+              </div>
+            )}
+          </div>
+        )}
+      </div>
 
       <div className="radar-bar">
         <span className="radar-status">
@@ -268,19 +305,7 @@ export default function RadarMap({ height = 440 }) {
           {ready ? 'Live' : 'Syncing'}
         </span>
 
-        <div className="tl">
-          <div className="tl-track">
-            <div className="tl-fill" style={{ width: `${progress}%` }} />
-          </div>
-          <div className="tl-marks">
-            {radarFrames.map((f, i) => (
-              <span
-                key={f.path}
-                className={`tl-mark ${i === shownIdx ? 'on' : f.kind === 'nowcast' ? 'future' : 'past'}`}
-              />
-            ))}
-          </div>
-        </div>
+        <div className="radar-bar-spacer" />
 
         <div className="radar-time">
           {/* Frame times are shown in the field's own time zone, so a coach in a
