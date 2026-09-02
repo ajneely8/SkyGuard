@@ -22,45 +22,14 @@ export default function Landing() {
           </Link>
         </nav>
 
-        <div className="landing-inner landing-hero-grid">
-          <div>
-            <h1>Know the WBGT. Know what to do.</h1>
-            <p className="sub">
-              Weather for your exact field, live radar, and the heat rules that tell you how long you can stay out and
-              what the athletes can wear.
-            </p>
-            <div className="landing-cta">
-              <Link className="btn btn-lg btn-primary" to="/app">Open the app</Link>
-            </div>
-          </div>
-
-          <div className="hero-preview" aria-label="Example display">
-            <div className="now-card lvl-orange" style={{ border: 0, boxShadow: 'none', borderRadius: 16 }}>
-              <div className="now-main">
-                <div>
-                  <div className="now-temp">92<span className="deg">°F</span></div>
-                  <div className="now-feels">Feels like 102°F</div>
-                </div>
-                <div className="now-wbgt">
-                  <div className="wbgt-eyebrow">WBGT</div>
-                  <div className="now-wbgt-value">88.8<span className="deg">°F</span></div>
-                </div>
-              </div>
-              <div className="answer a-orange">
-                <div className="answer-band">REDUCE TIME AND EQUIPMENT</div>
-                <div className="answer-grid">
-                  <div>
-                    <div className="label">How long outside</div>
-                    <div className="answer-big">2 hours maximum</div>
-                  </div>
-                  <div>
-                    <div className="label">What to wear</div>
-                    <div className="answer-big">Helmet, shoulder pads, shorts</div>
-                  </div>
-                </div>
-                <div className="answer-note">Example display — not live data.</div>
-              </div>
-            </div>
+        <div className="landing-inner">
+          <h1>Know the WBGT. Know what to do.</h1>
+          <p className="sub">
+            Weather for your exact field, live radar, and the heat rules that tell you how long you can stay out and
+            what the athletes can wear.
+          </p>
+          <div className="landing-cta">
+            <Link className="btn btn-lg btn-primary" to="/app">Open the app</Link>
           </div>
         </div>
       </div>
