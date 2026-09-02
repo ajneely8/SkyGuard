@@ -103,6 +103,22 @@ export function IconBolt(props) {
   )
 }
 
+export function IconExpand(props) {
+  return (
+    <svg {...base} {...props}>
+      <path d="M8 3H3v5M16 3h5v5M21 16v5h-5M3 16v5h5" />
+    </svg>
+  )
+}
+
+export function IconCollapse(props) {
+  return (
+    <svg {...base} {...props}>
+      <path d="M9 3v5H4M15 3v5h5M15 21v-5h5M9 21v-5H4" />
+    </svg>
+  )
+}
+
 /** Maps the icon key from lib/forecast.js's iconForCode() to a glyph. */
 export function WeatherIcon({ icon, ...rest }) {
   switch (icon) {

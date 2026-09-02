@@ -26,7 +26,7 @@ import {
 } from '../lib/radar.js'
 import { fmtTimeIn, zoneLabel } from '../lib/format.js'
 import RadarScope from './RadarScope.jsx'
-import { IconCheck, IconAlert } from './Icons.jsx'
+import { IconCheck, IconAlert, IconExpand, IconCollapse } from './Icons.jsx'
 
 const FRAME_MS = 520
 const HOLD_MS = 1500
@@ -58,6 +58,28 @@ export default function RadarMap({ height = 440 }) {
   const [idx, setIdx] = useState(0)
   const [mapReady, setMapReady] = useState(null)
   const strikeLayer = useRef(null)
+
+  /* ---- fullscreen ---- */
+  const [fullscreen, setFullscreen] = useState(false)
+  useEffect(() => {
+    if (!fullscreen) return
+    // Stop the page behind from scrolling while the map covers the screen.
+    const prevOverflow = document.body.style.overflow
+    document.body.style.overflow = 'hidden'
+    const onKey = (e) => e.key === 'Escape' && setFullscreen(false)
+    window.addEventListener('keydown', onKey)
+    // The frame just resized (CSS takes over its height); Leaflet needs to
+    // recompute its internal size once the layout has actually settled.
+    const t1 = setTimeout(() => map.current?.invalidateSize(), 0)
+    const t2 = setTimeout(() => map.current?.invalidateSize(), 260)
+    return () => {
+      document.body.style.overflow = prevOverflow
+      window.removeEventListener('keydown', onKey)
+      clearTimeout(t1)
+      clearTimeout(t2)
+      setTimeout(() => map.current?.invalidateSize(), 0)
+    }
+  }, [fullscreen])
 
   /* ---- the map's height scales with its own width, left to right, instead
      of sitting at one fixed number regardless of how wide the card is. ---- */
@@ -310,10 +332,20 @@ export default function RadarMap({ height = 440 }) {
   const strikeBearingDeg = overlayStatus?.nearest?.bearing?.degrees ?? null
 
   return (
-    <div className="radar-wrap">
+    <div className={`radar-wrap ${fullscreen ? 'radar-fullscreen' : ''}`}>
       <div className="radar-map-frame" style={{ height: mapHeight }}>
         <div ref={mapEl} className="radar-map" style={{ height: mapHeight }} />
         <RadarScope map={mapReady} center={selectedLocation} strikeBearingDeg={strikeBearingDeg} />
+
+        <button
+          type="button"
+          className="radar-fs-btn"
+          onClick={() => setFullscreen((v) => !v)}
+          aria-label={fullscreen ? 'Exit full screen' : 'View full screen'}
+          aria-pressed={fullscreen}
+        >
+          {fullscreen ? <IconCollapse width={17} height={17} /> : <IconExpand width={17} height={17} />}
+        </button>
 
         {overlayObs && (
           <div className="hero-map-scrim">

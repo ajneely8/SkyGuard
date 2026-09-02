@@ -641,6 +641,32 @@ input[type='checkbox'], input[type='range'] { accent-color: var(--accent); }
 .radar-map { width: 100%; background: #0b1220; }
 .leaflet-container { font: inherit; background: #0b1220; }
 
+/* Full-screen radar: covers the viewport above everything, including the
+   mobile tab bar. The bleed margin above is meaningless once this is fixed
+   to the viewport edges, so it's cancelled here. */
+.radar-wrap.radar-fullscreen {
+  position: fixed; inset: 0; margin: 0; z-index: 2000;
+  display: flex; flex-direction: column; border: none;
+  background: #0b1220;
+}
+.radar-fullscreen .radar-map-frame { flex: 1; min-height: 0; }
+.radar-fullscreen .radar-map-frame, .radar-fullscreen .radar-map { height: 100% !important; }
+.radar-fullscreen .radar-bar { flex: 0 0 auto; padding-bottom: max(9px, env(safe-area-inset-bottom, 0px)); }
+
+.radar-fs-btn {
+  position: absolute; top: 10px; right: 10px; z-index: 1000;
+  display: flex; align-items: center; justify-content: center;
+  width: 34px; height: 34px; padding: 0; border-radius: 4px;
+  background: #1a2332; border: 2px solid rgba(0, 0, 0, 0.2); color: #fff;
+  cursor: pointer;
+}
+.radar-fs-btn:hover { background: #232f42; }
+/* Leaflet's own attribution sits top-right too — push the button below it. */
+.radar-map-frame .radar-fs-btn { top: 30px; }
+@media (max-width: 480px) {
+  .radar-map-frame .radar-fs-btn { top: 8px; }
+}
+
 /* A dark map from plain OSM tiles. Neutral, not tinted — the radar returns and
    the range rings are the only colour on top. */
 .base-dark { filter: invert(1) hue-rotate(180deg) brightness(0.88) contrast(0.92) saturate(0.35); }
