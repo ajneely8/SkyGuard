@@ -59,20 +59,21 @@ export default function RadarMap({ height = 440 }) {
   const [mapReady, setMapReady] = useState(null)
   const strikeLayer = useRef(null)
 
-  /* ---- map height on a phone scales with the screen's own resolution,
-     instead of one fixed small number that looked cramped on every device. ---- */
-  const phoneHeight = (w, h) => (w > 640 ? height : Math.round(Math.max(170, Math.min(230, h * 0.24))))
-  const [mapHeight, setMapHeight] = useState(() =>
-    typeof window !== 'undefined' ? phoneHeight(window.innerWidth, window.innerHeight) : height,
-  )
+  /* ---- the map's height scales with its own width, left to right, instead
+     of sitting at one fixed number regardless of how wide the card is. ---- */
+  const heightFromWidth = (w) => Math.round(Math.max(170, Math.min(600, w * 0.46)))
+  const [mapHeight, setMapHeight] = useState(height)
   useEffect(() => {
-    const onResize = () => {
-      const next = phoneHeight(window.innerWidth, window.innerHeight)
+    if (!mapEl.current) return
+    const ro = new ResizeObserver((entries) => {
+      const w = entries[0]?.contentRect?.width
+      if (!w) return
+      const next = heightFromWidth(w)
       setMapHeight((h) => (h === next ? h : next))
-    }
-    onResize()
-    window.addEventListener('resize', onResize)
-    return () => window.removeEventListener('resize', onResize)
+    })
+    ro.observe(mapEl.current)
+    return () => ro.disconnect()
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [height])
   useEffect(() => {
     map.current?.invalidateSize()

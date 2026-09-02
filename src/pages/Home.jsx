@@ -193,7 +193,7 @@ export default function Home() {
               </div>
               <div className="now-wbgt">
                 <div className="wbgt-eyebrow">WBGT</div>
-                <div className="now-wbgt-value">
+                <div className={`now-wbgt-value tone-${band?.tone || cls.status}`}>
                   {obs.wbgtF.toFixed(1)}
                   <span className="deg">°F</span>
                 </div>

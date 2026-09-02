@@ -283,11 +283,11 @@ input[type='checkbox'], input[type='range'] { accent-color: var(--accent); }
   line-height: 1; font-variant-numeric: tabular-nums; color: #fff;
 }
 .now-temp .deg, .now-wbgt-value .deg { font-size: 0.38em; font-weight: 600; vertical-align: 0.6em; color: var(--ink-3); }
-.now-temp.tone-green   { color: var(--green); }
-.now-temp.tone-yellow  { color: var(--amber); }
-.now-temp.tone-orange  { color: var(--orange); }
-.now-temp.tone-red     { color: var(--red); }
-.now-temp.tone-darkred { color: var(--darkred); }
+.now-temp.tone-green   , .now-wbgt-value.tone-green   { color: var(--green); }
+.now-temp.tone-yellow  , .now-wbgt-value.tone-yellow  { color: var(--amber); }
+.now-temp.tone-orange  , .now-wbgt-value.tone-orange  { color: var(--orange); }
+.now-temp.tone-red     , .now-wbgt-value.tone-red     { color: var(--red); }
+.now-temp.tone-darkred , .now-wbgt-value.tone-darkred { color: var(--darkred); }
 .now-feels { font-size: 14px; color: var(--ink-2); margin-top: 8px; }
 .now-cond { font-size: 13.5px; color: var(--ink-3); }
 .now-wbgt { text-align: right; }
