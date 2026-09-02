@@ -4,9 +4,9 @@
  * Where am I, what is the WBGT, how long can we stay out, what can we wear,
  * is there a storm, and the live radar.
  *
- * Live radar, current conditions and the hourly WBGT check share one card
- * at the top of the page, then current safety status, active weather
- * threat, location, and everything else follow.
+ * The zone-threshold banner leads the page, then live radar, current
+ * conditions and the hourly WBGT check share one card, then current safety
+ * status, active weather threat, location, and everything else follow.
  */
 
 import { useEffect, useMemo } from 'react'
@@ -109,6 +109,21 @@ export default function Home() {
 
   return (
     <div className="stack">
+      {/* Reference: the thresholds that define the two most serious bands */}
+      {severeBands.length > 0 && (
+        <div className="zone-banner">
+          <IconAlert width={18} height={18} />
+          <div>
+            {severeBands.map((b, i) => (
+              <span key={b.id}>
+                <strong>WBGT {b.minF != null ? `${b.minF.toFixed(1)}°F` : `${b.maxF.toFixed(1)}°F`} or above</strong> —{' '}
+                {b.name} ({timeOutsideLabel(b)}).{i < severeBands.length - 1 ? ' ' : ''}
+              </span>
+            ))}
+          </div>
+        </div>
+      )}
+
       {/* Live radar, current conditions, and the hourly WBGT check — one card */}
       <Card
         title="Live radar"
@@ -212,21 +227,6 @@ export default function Home() {
           </>
         )}
       </Card>
-
-      {/* Reference: the thresholds that define the two most serious bands */}
-      {severeBands.length > 0 && (
-        <div className="zone-banner">
-          <IconAlert width={18} height={18} />
-          <div>
-            {severeBands.map((b, i) => (
-              <span key={b.id}>
-                <strong>WBGT {b.minF != null ? `${b.minF.toFixed(1)}°F` : `${b.maxF.toFixed(1)}°F`} or above</strong> —{' '}
-                {b.name} ({timeOutsideLabel(b)}).{i < severeBands.length - 1 ? ' ' : ''}
-              </span>
-            ))}
-          </div>
-        </div>
-      )}
 
       {/* Current safety status */}
       {obs ? (
