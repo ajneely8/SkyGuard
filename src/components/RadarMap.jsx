@@ -59,15 +59,15 @@ export default function RadarMap({ height = 440 }) {
   const [mapReady, setMapReady] = useState(null)
   const strikeLayer = useRef(null)
 
-  /* ---- shorter map on a phone, so the whole card — map, current
-     conditions, the start of the hourly row — fits without scrolling ---- */
-  const phoneHeight = (w) => (w <= 480 ? 130 : w <= 640 ? 220 : height)
+  /* ---- map height on a phone scales with the screen's own resolution,
+     instead of one fixed small number that looked cramped on every device. ---- */
+  const phoneHeight = (w, h) => (w > 640 ? height : Math.round(Math.max(260, Math.min(420, h * 0.42))))
   const [mapHeight, setMapHeight] = useState(() =>
-    typeof window !== 'undefined' ? phoneHeight(window.innerWidth) : height,
+    typeof window !== 'undefined' ? phoneHeight(window.innerWidth, window.innerHeight) : height,
   )
   useEffect(() => {
     const onResize = () => {
-      const next = phoneHeight(window.innerWidth)
+      const next = phoneHeight(window.innerWidth, window.innerHeight)
       setMapHeight((h) => (h === next ? h : next))
     }
     onResize()

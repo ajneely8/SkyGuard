@@ -944,45 +944,42 @@ table.data td.num { font-family: var(--nums); font-variant-numeric: tabular-nums
   .answer { margin: 12px -12px 0; padding: 14px 14px 16px 13px; }
 }
 
-/* Phone: compress the Live radar card hard enough that the map, current
-   conditions and the start of the hourly row all sit in view together
-   with no scrolling. */
+/* Phone: sized to the screen's own resolution rather than crammed as small
+   as possible — the map (see RadarMap.jsx) now scales with viewport height,
+   and everything below it scales up to match instead of staying tiny. */
 @media (max-width: 480px) {
-  .card-head { padding: 10px 14px; }
-  .card-body { padding: 12px; }
-  .section-divider { margin: 12px -12px 8px; padding: 10px 12px 0; }
+  .card-head { padding: 14px 16px; }
+  .card-body { padding: 16px; }
+  .section-divider { margin: 16px -16px 10px; padding: 12px 16px 0; }
 
-  .zone-banner { font-size: 12px; gap: 8px; margin-bottom: 12px !important; }
-  .zone-banner svg { width: 15px; height: 15px; }
+  .zone-banner { font-size: 13.5px; gap: 10px; margin-bottom: 14px !important; }
+  .zone-banner svg { width: 17px; height: 17px; }
 
-  .radar-bar { padding: 7px 10px; gap: 8px; }
-  .rt-clock { font-size: 12px; }
+  .radar-bar { padding: 9px 14px; gap: 10px; }
+  .rt-clock { font-size: 13px; }
 
-  .metric { padding: 8px 3px; }
-  .metric-icon { width: 16px; height: 16px; margin-bottom: 3px; }
-  .metric .k { font-size: 9.5px; }
-  .metric .v { font-size: 17px; }
-  .metric .v small { font-size: 10px; }
+  .metric { padding: 12px 6px; }
+  .metric-icon { width: 19px; height: 19px; margin-bottom: 4px; }
+  .metric .k { font-size: 10.5px; }
+  .metric .v { font-size: 19px; }
+  .metric .v small { font-size: 11px; }
 
-  /* Same left/right edge as .metric above it (3px), so the two rows line up. */
+  /* Same left/right edge as .metric above it, so the two rows line up. */
   .day-strip { padding: 2px 0 12px; }
-  .day-cell { flex-basis: 90px; padding: 8px 6px; }
-  .day-cell:first-child { padding-left: 3px; }
-  .day-cell:last-child { padding-right: 3px; }
-  .dc-time { font-size: 12px; }
-  .dc-icon { width: 16px; height: 16px; margin-top: 3px; }
-  .dc-wbgt { font-size: 19px; }
-  .dc-unit { font-size: 8.5px; }
-  /* These three lines are what make each hour cell tall; a shorter card
-     matters more on a phone than seeing them without a tap through to the
-     hour itself. */
-  .dc-cond, .dc-rain, .dc-band { display: none; }
-  .day-legend { display: none; }
+  .day-cell { flex-basis: 108px; padding: 12px 8px; }
+  .day-cell:first-child { padding-left: 6px; }
+  .day-cell:last-child { padding-right: 6px; }
+  .dc-time { font-size: 13px; }
+  .dc-icon { width: 18px; height: 18px; margin-top: 4px; }
+  .dc-wbgt { font-size: 22px; }
+  .dc-unit { font-size: 9px; }
 
-  .hero-map-scrim { padding: 6px 8px; gap: 6px; }
-  .hero-map-wbgt-value { font-size: 19px; }
-  .hero-map-wbgt-label { font-size: 8px; }
-  .hero-map-status svg { width: 12px; height: 12px; }
-  .hero-map-status-name { font-size: 10px; }
-  .hero-map-status-radius { font-size: 8px; }
+  .hero-map-scrim { padding: 10px 14px; gap: 10px; }
+  .hero-map-wbgt-value { font-size: 30px; }
+  .hero-map-wbgt-label { font-size: 10px; }
+  .hero-map-status svg { width: 14px; height: 14px; }
+  .hero-map-status-name { font-size: 12px; }
+  .hero-map-status-radius { font-size: 10px; }
+
+  .answer { margin: 16px -16px 0; }
 }
