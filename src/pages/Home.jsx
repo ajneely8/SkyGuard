@@ -4,9 +4,9 @@
  * What is the WBGT, how long can we stay out, what can we wear, is there a
  * storm, and the live radar. Lightning has its own page — see Lightning.jsx.
  *
- * The zone-threshold banner, live radar, current conditions and the hourly
- * WBGT check all share one card at the top of the page, then current safety
- * status, active weather threat, and everything else follow.
+ * Live radar, current conditions, the hourly WBGT check, the zone-threshold
+ * banner, current safety status and active weather threat all share one
+ * card; only Practice sits apart.
  */
 
 import { useEffect, useMemo } from 'react'
@@ -97,20 +97,6 @@ export default function Home() {
       {/* Zone-threshold reference, live radar, current conditions, and the
           hourly WBGT check — one card */}
       <Card title={<>Live radar<span className="live-dot" aria-hidden="true" /></>}>
-        {severeBands.length > 0 && (
-          <div className="zone-banner" style={{ marginBottom: 18 }}>
-            <IconAlert width={18} height={18} />
-            <div>
-              {severeBands.map((b, i) => (
-                <span key={b.id}>
-                  <strong>WBGT {b.minF != null ? `${b.minF.toFixed(1)}°F` : `${b.maxF.toFixed(1)}°F`} or above</strong> —{' '}
-                  {b.name} ({timeOutsideLabel(b)}).{i < severeBands.length - 1 ? ' ' : ''}
-                </span>
-              ))}
-            </div>
-          </div>
-        )}
-
         <RadarMap height={440} />
 
         <div className="section-divider">
@@ -177,130 +163,150 @@ export default function Home() {
             </div>
           </>
         )}
-      </Card>
+        <div className="section-divider">
+          <div className="h3">Current safety status</div>
+        </div>
 
-      {/* Current safety status */}
-      {obs ? (
-        <div className="now-card">
-          <div className="now-main">
+        {severeBands.length > 0 && (
+          <div className="zone-banner" style={{ marginBottom: 16 }}>
+            <IconAlert width={18} height={18} />
             <div>
-              <div className={`now-temp tone-${band?.tone || cls.status}`}>
-                {Math.round(obs.tempF)}
-                <span className="deg">°F</span>
-              </div>
-              <div className="now-feels">Feels like {Math.round(obs.apparentF ?? obs.heatIndexF)}°F</div>
-            </div>
-            <div className="now-wbgt">
-              <div className="wbgt-eyebrow">WBGT</div>
-              <div className="now-wbgt-value">
-                {obs.wbgtF.toFixed(1)}
-                <span className="deg">°F</span>
-              </div>
-              <div className="small muted">{cls.classification}</div>
+              {severeBands.map((b, i) => (
+                <span key={b.id}>
+                  <strong>WBGT {b.minF != null ? `${b.minF.toFixed(1)}°F` : `${b.maxF.toFixed(1)}°F`} or above</strong> —{' '}
+                  {b.name} ({timeOutsideLabel(b)}).{i < severeBands.length - 1 ? ' ' : ''}
+                </span>
+              ))}
             </div>
           </div>
+        )}
 
-          {/* THE ANSWER */}
-          {band && (
-            <div className="answer">
-              <div className="answer-band">{band.name.toUpperCase()}</div>
-              <div className="answer-grid">
-                <div>
-                  <div className="label">How long outside</div>
-                  <div className="answer-big">{timeOutsideLabel(band)}</div>
-                </div>
-                <div>
-                  <div className="label">What to wear</div>
-                  <div className="answer-big">{clothingLabel(band)}</div>
-                </div>
-                <div>
-                  <div className="label">Breaks</div>
-                  <div className="answer-mid">{band.breaks}</div>
-                </div>
-                <div>
-                  <div className="label">Conditioning</div>
-                  <div className="answer-mid">{band.conditioning}</div>
-                </div>
-              </div>
-              <div className="answer-detail">
-                <strong>Equipment:</strong> {band.equipment}
-              </div>
-              {band.note && <div className="answer-note">{band.note}</div>}
-              <div className="answer-why">
-                WBGT is {obs.wbgtF.toFixed(1)}°F, which falls in the {bandRange(band)} band of your rules.{' '}
-                <Link to="/app/rules">See all rules</Link>
-              </div>
-            </div>
-          )}
-        </div>
-      ) : (
-        <Card title="Current safety status">
-          <Notice kind="danger" title="WEATHER DATA UNAVAILABLE">
-            {slot.loading
-              ? 'Getting conditions…'
-              : slot.error
-                ? `Weather source error: ${slot.error}`
-                : 'The last reading is too old to show as current.'}
-            <br />
-            Do not use this screen to make a decision until a current reading is available.
-          </Notice>
-          <button className="btn btn-primary" style={{ marginTop: 12 }} onClick={() => refresh(locId)} disabled={slot.loading}>
-            {slot.loading ? 'Getting…' : 'Try again'}
-          </button>
-          {last && (
-            <div className="recommendation" style={{ marginTop: 14 }}>
-              <div className="label">Last reading (old — not current)</div>
+        {obs ? (
+          <>
+            <div className="now-main">
               <div>
-                <strong>{fmtF(last.wbgtF)}</strong> at {fmtTimeIn(last.ts, tz)}
+                <div className={`now-temp tone-${band?.tone || cls.status}`}>
+                  {Math.round(obs.tempF)}
+                  <span className="deg">°F</span>
+                </div>
+                <div className="now-feels">Feels like {Math.round(obs.apparentF ?? obs.heatIndexF)}°F</div>
+              </div>
+              <div className="now-wbgt">
+                <div className="wbgt-eyebrow">WBGT</div>
+                <div className="now-wbgt-value">
+                  {obs.wbgtF.toFixed(1)}
+                  <span className="deg">°F</span>
+                </div>
+                <div className="small muted">{cls.classification}</div>
               </div>
             </div>
-          )}
-        </Card>
-      )}
 
-      {/* Active weather threat */}
-      {myAlerts.map((a) => (
-        <div key={a.id} className="alert-banner" role="alert">
-          <div className="ab-body">
-            <h3>WBGT WENT UP — {loc.name}</h3>
-            <div className="small">
-              {fmtF(a.prevWbgtF)} → <strong>{fmtF(a.wbgtF)}</strong> ({a.prevClassification} →{' '}
-              {a.classification}) at {fmtTimeIn(a.ts, tz)}. {a.bandName ? `Now in: ${a.bandName}.` : ''} Review the practice
-              limits below.
+            {/* THE ANSWER */}
+            {band && (
+              <div className="answer">
+                <div className="answer-band">{band.name.toUpperCase()}</div>
+                <div className="answer-grid">
+                  <div>
+                    <div className="label">How long outside</div>
+                    <div className="answer-big">{timeOutsideLabel(band)}</div>
+                  </div>
+                  <div>
+                    <div className="label">What to wear</div>
+                    <div className="answer-big">{clothingLabel(band)}</div>
+                  </div>
+                  <div>
+                    <div className="label">Breaks</div>
+                    <div className="answer-mid">{band.breaks}</div>
+                  </div>
+                  <div>
+                    <div className="label">Conditioning</div>
+                    <div className="answer-mid">{band.conditioning}</div>
+                  </div>
+                </div>
+                <div className="answer-detail">
+                  <strong>Equipment:</strong> {band.equipment}
+                </div>
+                {band.note && <div className="answer-note">{band.note}</div>}
+                <div className="answer-why">
+                  WBGT is {obs.wbgtF.toFixed(1)}°F, which falls in the {bandRange(band)} band of your rules.{' '}
+                  <Link to="/app/rules">See all rules</Link>
+                </div>
+              </div>
+            )}
+          </>
+        ) : (
+          <>
+            <Notice kind="danger" title="WEATHER DATA UNAVAILABLE">
+              {slot.loading
+                ? 'Getting conditions…'
+                : slot.error
+                  ? `Weather source error: ${slot.error}`
+                  : 'The last reading is too old to show as current.'}
+              <br />
+              Do not use this screen to make a decision until a current reading is available.
+            </Notice>
+            <button className="btn btn-primary" style={{ marginTop: 12 }} onClick={() => refresh(locId)} disabled={slot.loading}>
+              {slot.loading ? 'Getting…' : 'Try again'}
+            </button>
+            {last && (
+              <div className="recommendation" style={{ marginTop: 14 }}>
+                <div className="label">Last reading (old — not current)</div>
+                <div>
+                  <strong>{fmtF(last.wbgtF)}</strong> at {fmtTimeIn(last.ts, tz)}
+                </div>
+              </div>
+            )}
+          </>
+        )}
+
+        {/* Active weather threat */}
+        {myAlerts.map((a) => (
+          <div key={a.id} className="alert-banner" role="alert" style={{ marginTop: 16 }}>
+            <div className="ab-body">
+              <h3>WBGT WENT UP — {loc.name}</h3>
+              <div className="small">
+                {fmtF(a.prevWbgtF)} → <strong>{fmtF(a.wbgtF)}</strong> ({a.prevClassification} →{' '}
+                {a.classification}) at {fmtTimeIn(a.ts, tz)}. {a.bandName ? `Now in: ${a.bandName}.` : ''} Review the practice
+                limits below.
+              </div>
             </div>
+            <button className="btn" onClick={() => acknowledgeAlert(a.id)}>Got it</button>
           </div>
-          <button className="btn" onClick={() => acknowledgeAlert(a.id)}>Got it</button>
-        </div>
-      ))}
+        ))}
 
-      {alerts.length > 0 && (
-        <Notice kind="danger" title={`${alerts.length} National Weather Service alert${alerts.length > 1 ? 's' : ''} here`}>
-          {alerts.map((a) => (
-            <div key={a.id}>
-              <strong>{a.event}</strong>
-              {a.headline ? ` — ${a.headline}` : ''}
-            </div>
-          ))}
-        </Notice>
-      )}
+        {alerts.length > 0 && (
+          <div style={{ marginTop: 16 }}>
+            <Notice kind="danger" title={`${alerts.length} National Weather Service alert${alerts.length > 1 ? 's' : ''} here`}>
+              {alerts.map((a) => (
+                <div key={a.id}>
+                  <strong>{a.event}</strong>
+                  {a.headline ? ` — ${a.headline}` : ''}
+                </div>
+              ))}
+            </Notice>
+          </div>
+        )}
 
-      {(storm.nearest || storm.level !== 'clear') && (
-        <Notice
-          kind={storm.level === 'critical' ? 'danger' : storm.level === 'warning' ? 'warn' : 'info'}
-          title={storm.headline}
-        >
-          {storm.nearest ? (
-            <>
-              {storm.nearest.event}
-              {storm.nearest.distanceMiles > 0
-                ? ` — ${storm.nearest.distanceMiles.toFixed(1)} miles ${storm.nearest.bearing?.compass || ''}`
-                : ' — overhead'}
-              . Your alert distance is {storm.alertMiles} miles.{' '}
-            </>
-          ) : null}
-          Distances are to National Weather Service storm warning areas, not to individual lightning strikes.
-        </Notice>
-      )}
+        {(storm.nearest || storm.level !== 'clear') && (
+          <div style={{ marginTop: 16 }}>
+            <Notice
+              kind={storm.level === 'critical' ? 'danger' : storm.level === 'warning' ? 'warn' : 'info'}
+              title={storm.headline}
+            >
+              {storm.nearest ? (
+                <>
+                  {storm.nearest.event}
+                  {storm.nearest.distanceMiles > 0
+                    ? ` — ${storm.nearest.distanceMiles.toFixed(1)} miles ${storm.nearest.bearing?.compass || ''}`
+                    : ' — overhead'}
+                  . Your alert distance is {storm.alertMiles} miles.{' '}
+                </>
+              ) : null}
+              Distances are to National Weather Service storm warning areas, not to individual lightning strikes.
+            </Notice>
+          </div>
+        )}
+      </Card>
 
       {/* Additional information */}
       <Card title={session ? 'Practice running' : 'Practice'}>

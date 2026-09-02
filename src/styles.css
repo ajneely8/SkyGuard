@@ -274,7 +274,7 @@ input[type='checkbox'], input[type='range'] { accent-color: var(--accent); }
 .now-card.lvl-darkred { border-top: 3px solid var(--darkred); }
 .now-card.lvl-none    { border-top: 3px solid var(--ink-3); }
 
-.now-main { display: flex; justify-content: space-between; gap: 24px; padding: 22px 22px 16px; flex-wrap: wrap; }
+.now-main { display: flex; justify-content: space-between; gap: 24px; padding: 6px 0 16px; flex-wrap: wrap; }
 .now-temp {
   font-size: clamp(48px, 10vw, 68px); font-weight: 800; letter-spacing: -0.03em;
   line-height: 1; font-variant-numeric: tabular-nums; color: #fff;
@@ -353,7 +353,7 @@ input[type='checkbox'], input[type='range'] { accent-color: var(--accent); }
 /* ---------------- the answer block ---------------- */
 
 .answer {
-  padding: 18px 22px 20px 19px; border-top: 1px solid var(--line-2);
+  margin: 16px -20px 0; padding: 18px 22px 20px 19px; border-top: 1px solid var(--line-2);
   background: var(--surface-2); border-left: 3px solid transparent;
 }
 .answer.a-green   { border-left-color: var(--green); }
@@ -698,6 +698,11 @@ input[type='checkbox'], input[type='range'] { accent-color: var(--accent); }
   letter-spacing: -0.02em; color: #fff; font-variant-numeric: tabular-nums;
 }
 .hero-map-wbgt-label { font-size: 11px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: var(--ink-2); }
+.hero-map-wbgt-value.tone-green   { color: var(--green); }
+.hero-map-wbgt-value.tone-yellow  { color: var(--amber); }
+.hero-map-wbgt-value.tone-orange  { color: var(--orange); }
+.hero-map-wbgt-value.tone-red     { color: var(--red); }
+.hero-map-wbgt-value.tone-darkred { color: var(--darkred); }
 
 .hero-map-status { display: flex; align-items: center; gap: 8px; text-align: right; }
 .hero-map-status-name { font-size: 13.5px; font-weight: 700; }
@@ -935,6 +940,8 @@ table.data td.num { font-family: var(--nums); font-variant-numeric: tabular-nums
   .day-cell { padding: 12px 6px; }
   .dc-wbgt { font-size: 21px; }
   .dc-time { font-size: 12.5px; }
+
+  .answer { margin: 12px -12px 0; padding: 14px 14px 16px 13px; }
 }
 
 /* Phone: compress the Live radar card hard enough that the map, current

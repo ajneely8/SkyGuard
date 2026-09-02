@@ -290,6 +290,8 @@ export default function RadarMap({ height = 440 }) {
   /* WBGT and lightning status for the selected field, overlaid on the map
      the same way the location hero map does. */
   const overlayObs = selectedLocation ? current(selectedLocation.id) : null
+  const overlayWbgtBand = guidelineNow(overlayObs?.wbgtF ?? null)
+  const overlayWbgtTone = overlayWbgtBand?.tone || classifyNow(overlayObs?.wbgtF ?? null).status
   const overlayStatus = selectedLocation ? strikeStatusFor(selectedLocation.id) : null
   const overlayTone = overlayStatus?.level.tone || 'green'
   const overlayRadiusMiles = overlayStatus?.rules.warningMiles ?? 10
@@ -303,7 +305,7 @@ export default function RadarMap({ height = 440 }) {
         {overlayObs && (
           <div className="hero-map-scrim">
             <div className="hero-map-wbgt">
-              <span className="hero-map-wbgt-value">{overlayObs.wbgtF.toFixed(1)}°</span>
+              <span className={`hero-map-wbgt-value tone-${overlayWbgtTone}`}>{overlayObs.wbgtF.toFixed(1)}°</span>
               <span className="hero-map-wbgt-label">WBGT</span>
             </div>
 
