@@ -101,10 +101,7 @@ export default function Home() {
     <div className="stack">
       {/* Zone-threshold reference, live radar, current conditions, and the
           hourly WBGT check — one card */}
-      <Card
-        title="Live radar"
-        subtitle="Past and forecast frames, looping. Drag the slider to scrub, tap a field for its WBGT."
-      >
+      <Card title="Live radar">
         {severeBands.length > 0 && (
           <div className="zone-banner" style={{ marginBottom: 18 }}>
             <IconAlert width={18} height={18} />
