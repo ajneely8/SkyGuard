@@ -4,8 +4,9 @@
  * Where am I, what is the WBGT, how long can we stay out, what can we wear,
  * is there a storm, and the live radar.
  *
- * Current conditions and the hourly WBGT check lead the page, then current
- * safety status, active weather threat, location, radar, and everything else.
+ * Live radar leads the page, then current conditions and the hourly WBGT
+ * check, then current safety status, active weather threat, location, and
+ * everything else.
  */
 
 import { useEffect, useMemo } from 'react'
@@ -108,7 +109,15 @@ export default function Home() {
 
   return (
     <div className="stack">
-      {/* Current conditions and the hourly WBGT check, together, first thing on the page */}
+      {/* Radar */}
+      <Card
+        title="Live radar"
+        subtitle="Past and forecast frames, looping. Drag the slider to scrub, tap a field for its WBGT."
+      >
+        <RadarMap height={440} />
+      </Card>
+
+      {/* Current conditions and the hourly WBGT check, together */}
       <Card title="Current conditions">
         {obs && (
           <div className="metrics standalone">
@@ -357,14 +366,6 @@ export default function Home() {
           and practice checks — is shown in the field's local time.
         </Notice>
       )}
-
-      {/* Radar */}
-      <Card
-        title="Live radar"
-        subtitle="Past and forecast frames, looping. Drag the slider to scrub, tap a field for its WBGT."
-      >
-        <RadarMap height={440} />
-      </Card>
 
       {/* Additional information */}
       <Card title={session ? 'Practice running' : 'Practice'}>
