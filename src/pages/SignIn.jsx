@@ -177,18 +177,18 @@ export default function SignIn() {
   /* ---- code step (only when verification is switched on) ---- */
   if (EMAIL_VERIFICATION_ENABLED && isUp && step === 'code') {
     return (
-      <div className="welcome-page">
-        <div className="welcome-inner" style={{ maxWidth: 520 }}>
-          <Link to="/" className="brand" style={{ padding: 0, border: 0, marginBottom: 30 }}>
+      <div className="auth-page">
+        <div className="auth-inner">
+          <Link to="/" className="brand">
             <LogoLockup size={38} />
           </Link>
 
-          <h1 className="welcome-title">Check your email</h1>
-          <p className="welcome-sub">
+          <h1 className="auth-title">Check your email</h1>
+          <p className="auth-sub">
             We sent a 6-digit code to <strong>{normalizeEmail(email)}</strong>. It expires in 10 minutes.
           </p>
 
-          <form onSubmit={submitCode} className="welcome-card">
+          <form onSubmit={submitCode} className="auth-card">
             {!delivered && (
               <div style={{ marginBottom: 16 }}>
                 <Notice kind="warn" title="Email delivery is not set up yet">
@@ -237,7 +237,7 @@ export default function SignIn() {
             <div className="row" style={{ marginTop: 10 }}>
               <button
                 type="button"
-                className="btn"
+                className="btn btn-subtle"
                 style={{ flex: 1 }}
                 onClick={resend}
                 disabled={busy || cooldown > 0}
@@ -246,7 +246,7 @@ export default function SignIn() {
               </button>
               <button
                 type="button"
-                className="btn"
+                className="btn btn-subtle"
                 onClick={() => {
                   setStep('details')
                   resetCodeStep()
@@ -257,7 +257,7 @@ export default function SignIn() {
             </div>
           </form>
 
-          <p className="welcome-fine">
+          <p className="auth-fine">
             {devCode
               ? 'Once email is configured, the code is created and checked on the Skyguard mail server and never sent to this browser — and this development code stops being accepted.'
               : 'The code is created and checked on the Skyguard mail server — it is never sent to this browser, so it cannot be read out of the page.'}
@@ -269,20 +269,20 @@ export default function SignIn() {
 
   /* ---- details step ---- */
   return (
-    <div className="welcome-page">
-      <div className="welcome-inner" style={{ maxWidth: 520 }}>
-        <Link to="/" className="brand" style={{ padding: 0, border: 0, marginBottom: 30 }}>
+    <div className="auth-page">
+      <div className="auth-inner">
+        <Link to="/" className="brand">
           <LogoLockup size={38} />
         </Link>
 
-        <h1 className="welcome-title">{isUp ? 'Create your account' : 'Sign in'}</h1>
-        <p className="welcome-sub">
+        <h1 className="auth-title">{isUp ? 'Create your account' : 'Sign in'}</h1>
+        <p className="auth-sub">
           {isUp
             ? 'One account keeps your fields, your rules and your readings together on this device.'
             : 'Welcome back. Sign in to get to your fields.'}
         </p>
 
-        <form onSubmit={submitDetails} className="welcome-card">
+        <form onSubmit={submitDetails} className="auth-card">
           {isUp && (
             <>
               <Field label="Your name" id="suName">
@@ -369,7 +369,7 @@ export default function SignIn() {
 
           <button
             type="button"
-            className="btn btn-block"
+            className="btn btn-subtle btn-block"
             style={{ marginTop: 10 }}
             onClick={() => {
               setMode(isUp ? 'in' : 'up')
@@ -383,7 +383,7 @@ export default function SignIn() {
           </button>
         </form>
 
-        <p className="welcome-fine">
+        <p className="auth-fine">
           Accounts on this build are stored in this browser only — there is no account server, so signing in here
           does not sync to another device. Passwords are stretched with PBKDF2 and never stored in the clear.
         </p>
