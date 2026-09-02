@@ -99,7 +99,7 @@ export default function Home() {
       <Card title={<>Live radar<span className="live-dot" aria-hidden="true" /></>}>
         <RadarMap height={440} />
 
-        <div className="section-divider">
+        <div className="section-divider section-divider-strong">
           <div className="h3">Current conditions</div>
         </div>
 

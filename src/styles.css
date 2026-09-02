@@ -305,6 +305,9 @@ input[type='checkbox'], input[type='range'] { accent-color: var(--accent); }
 .section-divider {
   margin: 20px -20px 16px; padding: 16px 20px 0; border-top: 1px solid var(--line-2);
 }
+/* Marks off the radar specifically — a clearer break than the thin lines
+   used between the sections below it. */
+.section-divider-strong { margin-top: 0; border-top: 2px solid var(--line); }
 .section-divider .h3 { font-size: 14px; font-weight: 600; color: var(--ink); }
 .section-divider .small { margin-top: 2px; }
 .metric { padding: 14px 16px; border-right: 1px solid var(--line-2); }
