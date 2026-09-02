@@ -4,9 +4,9 @@
  * Where am I, what is the WBGT, how long can we stay out, what can we wear,
  * is there a storm, and the live radar.
  *
- * Live radar leads the page, then current conditions and the hourly WBGT
- * check, then current safety status, active weather threat, location, and
- * everything else.
+ * Live radar, current conditions and the hourly WBGT check share one card
+ * at the top of the page, then current safety status, active weather
+ * threat, location, and everything else follow.
  */
 
 import { useEffect, useMemo } from 'react'
@@ -109,16 +109,17 @@ export default function Home() {
 
   return (
     <div className="stack">
-      {/* Radar */}
+      {/* Live radar, current conditions, and the hourly WBGT check — one card */}
       <Card
         title="Live radar"
         subtitle="Past and forecast frames, looping. Drag the slider to scrub, tap a field for its WBGT."
       >
         <RadarMap height={440} />
-      </Card>
 
-      {/* Current conditions and the hourly WBGT check, together */}
-      <Card title="Current conditions">
+        <div className="section-divider">
+          <div className="h3">Current conditions</div>
+        </div>
+
         {obs && (
           <div className="metrics standalone">
             <div className="metric">
