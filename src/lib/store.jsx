@@ -518,21 +518,56 @@ export function StoreProvider({ children }) {
   const locationsRef = useRef(state.locations)
   locationsRef.current = state.locations
 
+  const addStrike = useCallback((s) => {
+    setStrikes((prev) => {
+      if (prev.some((x) => x.id === s.id)) return prev
+      const cutoff = Date.now() - STRIKE_TTL_MS
+      return [...prev.filter((x) => new Date(x.ts).getTime() > cutoff), s].slice(-2000)
+    })
+  }, [])
+
   useEffect(() => {
     if (!state.locations.length) return
     const feed = createStrikeFeed({
       getWatched: () => locationsRef.current.map((l) => ({ lat: l.lat, lon: l.lon })),
-      onStrike: (s) =>
-        setStrikes((prev) => {
-          if (prev.some((x) => x.id === s.id)) return prev
-          const cutoff = Date.now() - STRIKE_TTL_MS
-          return [...prev.filter((x) => new Date(x.ts).getTime() > cutoff), s].slice(-2000)
-        }),
+      onStrike: addStrike,
       onStatus: setStrikeFeed,
     })
     return () => feed.stop()
     // Reconnect only when the set of fields appears/disappears entirely.
   }, [state.locations.length > 0])
+
+  /**
+   * Test button: drops one synthetic strike near a field, through the exact
+   * same pipeline a real one takes — the map marker, the band status, and the
+   * notification — so the whole chain can be checked without waiting on a
+   * real storm. Marked `test: true` so it can be told apart and cleared.
+   */
+  const simulateStrike = useCallback(
+    (locationId, miles = 4) => {
+      const loc = stateRef.current.locations.find((l) => l.id === locationId)
+      if (!loc) return
+      const bearingDeg = Math.random() * 360
+      const rad = (bearingDeg * Math.PI) / 180
+      const milesPerDegLat = 69.0
+      const dLat = (miles / milesPerDegLat) * Math.cos(rad)
+      const dLon = (miles / (milesPerDegLat * Math.cos((loc.lat * Math.PI) / 180))) * Math.sin(rad)
+      addStrike({
+        id: `test-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
+        lat: loc.lat + dLat,
+        lon: loc.lon + dLon,
+        ts: new Date().toISOString(),
+        receivedAt: Date.now(),
+        test: true,
+      })
+    },
+    [addStrike],
+  )
+
+  /** Clears only the synthetic strikes a test dropped in, leaving anything real. */
+  const clearTestStrikes = useCallback(() => {
+    setStrikes((prev) => prev.filter((s) => !s.test))
+  }, [])
 
   // Age strikes out so the map and the bands do not hold onto stale weather.
   useEffect(() => {
@@ -661,6 +696,8 @@ export function StoreProvider({ children }) {
     strikeFeed,
     strikesFor,
     strikeStatusFor,
+    simulateStrike,
+    clearTestStrikes,
     ensureNotificationPermission,
     forecasts,
     loadForecast,
