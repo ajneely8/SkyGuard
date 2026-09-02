@@ -702,6 +702,19 @@ input[type='checkbox'], input[type='range'] { accent-color: var(--accent); }
 .hero-map-status.tone-orange { color: var(--orange); }
 .hero-map-status.tone-red    { color: var(--red); }
 
+/* The overlay was sized for the 440px desktop map; scale it down to match
+   the shorter map on a phone so it doesn't crowd out the map underneath. */
+@media (max-width: 640px) {
+  .hero-map-scrim { padding: 8px 10px; gap: 8px; }
+  .hero-map-wbgt { gap: 5px; }
+  .hero-map-wbgt-value { font-size: 24px; }
+  .hero-map-wbgt-label { font-size: 9px; }
+  .hero-map-status { gap: 5px; }
+  .hero-map-status svg { width: 13px; height: 13px; }
+  .hero-map-status-name { font-size: 11px; }
+  .hero-map-status-radius { font-size: 9px; }
+}
+
 .hero-pin-wrap { background: none !important; border: none !important; }
 .hero-pin {
   display: block; width: 14px; height: 14px; border-radius: 50%;
@@ -942,4 +955,11 @@ table.data td.num { font-family: var(--nums); font-variant-numeric: tabular-nums
      hour itself. */
   .dc-cond, .dc-rain, .dc-band { display: none; }
   .day-legend { display: none; }
+
+  .hero-map-scrim { padding: 6px 8px; gap: 6px; }
+  .hero-map-wbgt-value { font-size: 19px; }
+  .hero-map-wbgt-label { font-size: 8px; }
+  .hero-map-status svg { width: 12px; height: 12px; }
+  .hero-map-status-name { font-size: 10px; }
+  .hero-map-status-radius { font-size: 8px; }
 }

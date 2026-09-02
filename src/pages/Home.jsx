@@ -19,7 +19,7 @@ import LightningPanel from '../components/LightningPanel.jsx'
 import { IconAlert, IconDroplet, IconThermometer, IconGauge, WeatherIcon } from '../components/Icons.jsx'
 import { timeOutsideLabel, clothingLabel, bandRange } from '../lib/guidelines.js'
 import { METHOD_LABEL } from '../lib/wbgt.js'
-import { fmtF, fmtTimeIn, fmtNum, ageString, untilString, zoneLabel } from '../lib/format.js'
+import { fmtF, fmtTimeIn, fmtNum, ageString, untilString } from '../lib/format.js'
 import { dayThrough, peakHour } from '../lib/forecast.js'
 
 export default function Home() {
@@ -57,7 +57,6 @@ export default function Home() {
 
   /* Every clock on this page reads in the field's zone, not the device's. */
   const tz = loc?.timezone || null
-  const zone = zoneLabel(tz)
 
   /* Rest of the day, in the field's local hours. */
   const fc = forecasts[locId]?.data
@@ -144,10 +143,6 @@ export default function Home() {
 
         <div className="section-divider">
           <div className="h3">Hourly WBGT</div>
-          <div className="small muted">
-            {dayView.isTomorrow ? 'Tomorrow, through 9 PM' : 'Rest of today, through 9 PM'} — hour by hour in{' '}
-            {loc.name} local time{zone ? ` (${zone})` : ''}
-          </div>
         </div>
 
         {!fc ? (
