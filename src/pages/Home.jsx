@@ -4,9 +4,8 @@
  * Where am I, what is the WBGT, how long can we stay out, what can we wear,
  * is there a storm, and the live radar.
  *
- * Section order follows one hierarchy, most important first: current safety
- * status, active weather threat, location, current conditions, radar,
- * hourly forecast, then everything else.
+ * Current conditions and the hourly WBGT check lead the page, then current
+ * safety status, active weather threat, location, radar, and everything else.
  */
 
 import { useEffect, useMemo } from 'react'
@@ -109,6 +108,98 @@ export default function Home() {
 
   return (
     <div className="stack">
+      {/* Current conditions and the hourly WBGT check, first thing on the page */}
+      {obs && (
+        <Card title="Current conditions">
+          <div className="metrics standalone">
+            <div className="metric">
+              <IconDroplet className="metric-icon" />
+              <div className="k">Humidity</div><div className="v">{fmtNum(obs.rh, 0, '%')}</div>
+            </div>
+            <div className="metric">
+              <IconWind className="metric-icon" />
+              <div className="k">Wind</div><div className="v">{fmtNum(obs.windMph, 0)} <small>mph</small></div>
+            </div>
+            <div className="metric">
+              <IconThermometer className="metric-icon" />
+              <div className="k">Heat index</div><div className="v">{fmtF(obs.heatIndexF, 0)}</div>
+            </div>
+            <div className="metric">
+              <IconBolt className="metric-icon" />
+              <div className="k">Storms</div>
+              <div className="v" style={{ fontSize: 14 }}>{storm.nearest ? `${storm.nearest.distanceMiles.toFixed(0)} mi` : 'Clear'}</div>
+            </div>
+          </div>
+        </Card>
+      )}
+
+      <Card
+        title={dayView.isTomorrow ? 'Tomorrow, through 9 PM' : 'Rest of today, through 9 PM'}
+        subtitle={`Hour by hour in ${loc.name} local time${zone ? ` (${zone})` : ''}`}
+      >
+        {!fc ? (
+          <div className="muted small" style={{ padding: '10px 2px' }}>
+            {forecasts[locId]?.error ? `Forecast unavailable: ${forecasts[locId].error}` : 'Loading the day…'}
+          </div>
+        ) : dayView.rows.length === 0 ? (
+          <div className="muted small" style={{ padding: '10px 2px' }}>No forecast hours left today.</div>
+        ) : (
+          <>
+            {peak && peak.band && (
+              <div className={`day-peak a-${peak.band.tone}`}>
+                <div>
+                  <div className="label">Hottest point</div>
+                  <div className="answer-big">
+                    {peak.wbgtF.toFixed(1)}°F at {fmtTimeIn(peak.ts, tz)}
+                  </div>
+                </div>
+                <div>
+                  <div className="label">Which means</div>
+                  <div className="answer-mid">{peak.band.name}</div>
+                </div>
+                <div>
+                  <div className="label">Outside limit then</div>
+                  <div className="answer-mid">{timeOutsideLabel(peak.band)}</div>
+                </div>
+              </div>
+            )}
+
+            {safeAfter && (
+              <div className="small muted" style={{ marginBottom: 12 }}>
+                WBGT drops back to <strong>{safeAfter.band.name.toLowerCase()}</strong> from{' '}
+                <strong>{fmtTimeIn(safeAfter.ts, tz)}</strong> — the first hour after the peak that eases up.
+              </div>
+            )}
+
+            <div className="day-strip">
+              {dayView.rows.map((h) => {
+                const band = guidelineNow(h.wbgtF)
+                const isPeak = peak && h.ts === peak.ts
+                return (
+                  <div key={h.ts} className={`day-cell tone-${band?.tone || 'none'} ${isPeak ? 'peak' : ''}`}>
+                    <div className="dc-time">{fmtTimeIn(h.ts, tz)}</div>
+                    <WeatherIcon icon={h.icon} className="dc-icon" />
+                    {/* One decimal: rounding to whole degrees makes the number
+                        disagree with its own colour band at the boundaries. */}
+                    <div className="dc-wbgt">{h.wbgtF != null ? h.wbgtF.toFixed(1) : '—'}</div>
+                    <div className="dc-unit">WBGT °F</div>
+                    <div className="dc-temp">{Math.round(h.tempF)}° air</div>
+                    <div className="dc-cond">{h.conditions}</div>
+                    <div className="dc-rain">{h.precipProb ?? 0}% rain</div>
+                    {band && <div className="dc-band">{timeOutsideLabel(band)}</div>}
+                  </div>
+                )
+              })}
+            </div>
+
+            <div className="day-legend small muted">
+              Each hour shows the modelled WBGT and what it would allow. Colours match the bands in{' '}
+              <Link to="/app/rules">Rules</Link>.
+            </div>
+          </>
+        )}
+      </Card>
+
       {/* Reference: the thresholds that define the two most serious bands */}
       {severeBands.length > 0 && (
         <div className="zone-banner">
@@ -124,7 +215,7 @@ export default function Home() {
         </div>
       )}
 
-      {/* 1. CURRENT SAFETY STATUS */}
+      {/* Current safety status */}
       {obs ? (
         <div className={`now-card lvl-${band?.tone || cls.status}`}>
           <div className="now-main">
@@ -210,7 +301,7 @@ export default function Home() {
         </Card>
       )}
 
-      {/* 2. ACTIVE WEATHER THREAT */}
+      {/* Active weather threat */}
       {myAlerts.map((a) => (
         <div key={a.id} className="alert-banner" role="alert">
           <div className="ab-body">
@@ -256,7 +347,7 @@ export default function Home() {
 
       <LightningPanel locationId={locId} tz={tz} />
 
-      {/* 3. LOCATION — the field's name already lives in the sidebar and the
+      {/* Location — the field's name already lives in the sidebar and the
           topbar selector on every screen, so this is just the map. */}
       <LocationHeroMap />
 
@@ -267,32 +358,7 @@ export default function Home() {
         </Notice>
       )}
 
-      {/* 4. CURRENT CONDITIONS */}
-      {obs && (
-        <Card title="Current conditions">
-          <div className="metrics standalone">
-            <div className="metric">
-              <IconDroplet className="metric-icon" />
-              <div className="k">Humidity</div><div className="v">{fmtNum(obs.rh, 0, '%')}</div>
-            </div>
-            <div className="metric">
-              <IconWind className="metric-icon" />
-              <div className="k">Wind</div><div className="v">{fmtNum(obs.windMph, 0)} <small>mph</small></div>
-            </div>
-            <div className="metric">
-              <IconThermometer className="metric-icon" />
-              <div className="k">Heat index</div><div className="v">{fmtF(obs.heatIndexF, 0)}</div>
-            </div>
-            <div className="metric">
-              <IconBolt className="metric-icon" />
-              <div className="k">Storms</div>
-              <div className="v" style={{ fontSize: 14 }}>{storm.nearest ? `${storm.nearest.distanceMiles.toFixed(0)} mi` : 'Clear'}</div>
-            </div>
-          </div>
-        </Card>
-      )}
-
-      {/* 5. RADAR */}
+      {/* Radar */}
       <Card
         title="Live radar"
         subtitle="Past and forecast frames, looping. Drag the slider to scrub, tap a field for its WBGT."
@@ -300,75 +366,7 @@ export default function Home() {
         <RadarMap height={440} />
       </Card>
 
-      {/* 6. HOURLY FORECAST */}
-      <Card
-        title={dayView.isTomorrow ? 'Tomorrow, through 9 PM' : 'Rest of today, through 9 PM'}
-        subtitle={`Hour by hour in ${loc.name} local time${zone ? ` (${zone})` : ''}`}
-      >
-        {!fc ? (
-          <div className="muted small" style={{ padding: '10px 2px' }}>
-            {forecasts[locId]?.error ? `Forecast unavailable: ${forecasts[locId].error}` : 'Loading the day…'}
-          </div>
-        ) : dayView.rows.length === 0 ? (
-          <div className="muted small" style={{ padding: '10px 2px' }}>No forecast hours left today.</div>
-        ) : (
-          <>
-            {peak && peak.band && (
-              <div className={`day-peak a-${peak.band.tone}`}>
-                <div>
-                  <div className="label">Hottest point</div>
-                  <div className="answer-big">
-                    {peak.wbgtF.toFixed(1)}°F at {fmtTimeIn(peak.ts, tz)}
-                  </div>
-                </div>
-                <div>
-                  <div className="label">Which means</div>
-                  <div className="answer-mid">{peak.band.name}</div>
-                </div>
-                <div>
-                  <div className="label">Outside limit then</div>
-                  <div className="answer-mid">{timeOutsideLabel(peak.band)}</div>
-                </div>
-              </div>
-            )}
-
-            {safeAfter && (
-              <div className="small muted" style={{ marginBottom: 12 }}>
-                WBGT drops back to <strong>{safeAfter.band.name.toLowerCase()}</strong> from{' '}
-                <strong>{fmtTimeIn(safeAfter.ts, tz)}</strong> — the first hour after the peak that eases up.
-              </div>
-            )}
-
-            <div className="day-strip">
-              {dayView.rows.map((h) => {
-                const band = guidelineNow(h.wbgtF)
-                const isPeak = peak && h.ts === peak.ts
-                return (
-                  <div key={h.ts} className={`day-cell tone-${band?.tone || 'none'} ${isPeak ? 'peak' : ''}`}>
-                    <div className="dc-time">{fmtTimeIn(h.ts, tz)}</div>
-                    <WeatherIcon icon={h.icon} className="dc-icon" />
-                    {/* One decimal: rounding to whole degrees makes the number
-                        disagree with its own colour band at the boundaries. */}
-                    <div className="dc-wbgt">{h.wbgtF != null ? h.wbgtF.toFixed(1) : '—'}</div>
-                    <div className="dc-unit">WBGT °F</div>
-                    <div className="dc-temp">{Math.round(h.tempF)}° air</div>
-                    <div className="dc-cond">{h.conditions}</div>
-                    <div className="dc-rain">{h.precipProb ?? 0}% rain</div>
-                    {band && <div className="dc-band">{timeOutsideLabel(band)}</div>}
-                  </div>
-                )
-              })}
-            </div>
-
-            <div className="day-legend small muted">
-              Each hour shows the modelled WBGT and what it would allow. Colours match the bands in{' '}
-              <Link to="/app/rules">Rules</Link>.
-            </div>
-          </>
-        )}
-      </Card>
-
-      {/* 7. ADDITIONAL INFORMATION */}
+      {/* Additional information */}
       <Card title={session ? 'Practice running' : 'Practice'}>
         {session ? (
           <>
