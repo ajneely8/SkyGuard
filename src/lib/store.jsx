@@ -60,7 +60,23 @@ function load() {
             ? 15
             : parsed.settings.monitoringIntervalMin,
         lightning: { ...base.settings.lightning, ...(parsed.settings?.lightning || {}) },
-        strikeRules: { ...base.settings.strikeRules, ...(parsed.settings?.strikeRules || {}) },
+        // Strike radii now cap at 20 miles (was 30/20/10) — carry anyone
+        // still on the old shipped defaults forward the same way, leaving
+        // any of the three alone the moment it differs from its old default
+        // (there's no UI to have customized these yet, but this stays safe
+        // if one is ever added).
+        strikeRules: {
+          ...base.settings.strikeRules,
+          ...(parsed.settings?.strikeRules || {}),
+          cautionMiles:
+            parsed.settings?.strikeRules?.cautionMiles == null || parsed.settings.strikeRules.cautionMiles === 30
+              ? 20
+              : parsed.settings.strikeRules.cautionMiles,
+          advisoryMiles:
+            parsed.settings?.strikeRules?.advisoryMiles == null || parsed.settings.strikeRules.advisoryMiles === 20
+              ? 15
+              : parsed.settings.strikeRules.advisoryMiles,
+        },
       },
     }
   } catch {

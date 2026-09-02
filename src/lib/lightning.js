@@ -51,8 +51,8 @@ export const ALERT_DISTANCES = [10, 8, 6, 5]
  * exist so staff see weather coming rather than being surprised by it.
  */
 export const DEFAULT_STRIKE_RULES = {
-  cautionMiles: 30,
-  advisoryMiles: 20,
+  cautionMiles: 20,
+  advisoryMiles: 15,
   warningMiles: 10,
   /** Minutes to wait after the last strike inside the warning radius. */
   holdMinutes: 30,

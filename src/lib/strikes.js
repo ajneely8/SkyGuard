@@ -25,8 +25,10 @@ export const SOURCE_COMMERCIAL = false
 
 const HOSTS = ['wss://ws1.blitzortung.org/', 'wss://ws7.blitzortung.org/', 'wss://ws8.blitzortung.org/']
 
-/** Strikes further than this from any watched field are discarded. */
-const KEEP_WITHIN_MILES = 80
+/** Strikes further than this from any watched field are discarded — only
+ * strikes actually relevant to a field's caution/advisory/warning rings are
+ * kept at all, rather than carrying a wide, mostly-irrelevant buffer. */
+export const KEEP_WITHIN_MILES = 20
 /** Strikes older than this are dropped — nothing uses them. */
 export const STRIKE_TTL_MS = 60 * 60 * 1000
 

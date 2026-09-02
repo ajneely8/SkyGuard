@@ -10,7 +10,7 @@ import { useEffect, useState } from 'react'
 import { useStore } from '../lib/store.jsx'
 import { Card, Notice } from './ui.jsx'
 import { STRIKE_LEVELS } from '../lib/lightning.js'
-import { SOURCE_NAME, SOURCE_COMMERCIAL } from '../lib/strikes.js'
+import { SOURCE_NAME, SOURCE_COMMERCIAL, KEEP_WITHIN_MILES } from '../lib/strikes.js'
 import { fmtTimeIn, ageString } from '../lib/format.js'
 import { notificationPermission, notificationsSupported } from '../lib/notify.js'
 
@@ -45,7 +45,7 @@ export default function LightningPanel({ locationId, tz }) {
       title="Lightning"
       subtitle={
         strikeFeed.connected
-          ? `Live strikes · ${strikes.length} within 80 miles in the last hour`
+          ? `Live strikes · ${strikes.length} within ${KEEP_WITHIN_MILES} miles in the last hour`
           : strikeFeed.connecting
             ? 'Connecting to the strike network…'
             : 'Strike feed offline'

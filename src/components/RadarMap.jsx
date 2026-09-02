@@ -356,9 +356,16 @@ export default function RadarMap({ height = 440 }) {
                 <div>
                   <div className="hero-map-status-name">{overlayStatus.level.label}</div>
                   <div className="hero-map-status-radius">0–{overlayRadiusMiles} mi</div>
+                  {/* Same restarting hold clock as the Lightning page, so a
+                      coach glancing at just the radar still sees it. */}
+                  {overlayStatus.holdActive && (
+                    <div className="hero-map-status-time">
+                      Resume in {mmss(overlayStatus.secondsRemaining)}
+                    </div>
+                  )}
                   {/* The moment the nearest close strike actually happened —
                       only once it's near enough to matter, not for every
-                      strike out to the 80-mile feed radius. */}
+                      strike out to the feed's own pickup radius. */}
                   {overlayTone !== 'green' && overlayStatus.nearest && (
                     <div className="hero-map-status-time">
                       Strike at {fmtTimeIn(overlayStatus.nearest.ts, tz)}
@@ -408,4 +415,10 @@ export default function RadarMap({ height = 440 }) {
 
 function escapeHtml(s) {
   return String(s ?? '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;')
+}
+
+function mmss(secs) {
+  const m = Math.floor(secs / 60)
+  const s = secs % 60
+  return `${m}:${String(s).padStart(2, '0')}`
 }
