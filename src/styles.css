@@ -633,8 +633,10 @@ input[type='checkbox'], input[type='range'] { accent-color: var(--accent); }
 /* Bleeds past both the card-body padding AND the page's own side padding,
    so the map runs edge to edge (flush with the sidebar / screen edge)
    instead of sitting inset — same bleed idiom as .answer below, just
-   stacked two containers deep. */
-.radar-wrap { margin: 0 -42px; border-radius: 0; overflow: hidden; border-left: none; border-right: none; border-top: 1px solid var(--line); border-bottom: 1px solid var(--line); position: relative; isolation: isolate; }
+   stacked two containers deep. The top also cancels card-body's own top
+   padding, so the map sits flush against the header instead of leaving a
+   gap under it. */
+.radar-wrap { margin: -20px -42px 0; border-radius: 0; overflow: hidden; border-left: none; border-right: none; border-top: 1px solid var(--line); border-bottom: 1px solid var(--line); position: relative; isolation: isolate; }
 .radar-map-frame { position: relative; }
 .radar-map { width: 100%; background: #0b1220; }
 .leaflet-container { font: inherit; background: #0b1220; }
@@ -923,7 +925,7 @@ table.data td.num { font-family: var(--nums); font-variant-numeric: tabular-nums
   .sidebar { display: none; }
   .content { padding: 14px 14px 92px; }
   .topbar { padding: 11px 14px; }
-  .radar-wrap { margin: 0 -34px; }
+  .radar-wrap { margin: -20px -34px 0; }
   .radar-card > .card-head { margin: 0 -14px; }
   .grid-2, .grid-4 { grid-template-columns: minmax(0, 1fr); }
   body { font-size: 16px; }
@@ -967,7 +969,7 @@ table.data td.num { font-family: var(--nums); font-variant-numeric: tabular-nums
   .card-head { padding: 14px 16px; }
   .card-body { padding: 16px; }
   .section-divider { margin: 16px -16px 10px; padding: 12px 16px 0; }
-  .radar-wrap { margin: 0 -30px; }
+  .radar-wrap { margin: -16px -30px 0; }
 
   .zone-banner { font-size: 13.5px; gap: 10px; margin-bottom: 14px !important; }
   .zone-banner svg { width: 17px; height: 17px; }
