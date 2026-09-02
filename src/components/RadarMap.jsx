@@ -61,7 +61,7 @@ export default function RadarMap({ height = 440 }) {
 
   /* ---- map height on a phone scales with the screen's own resolution,
      instead of one fixed small number that looked cramped on every device. ---- */
-  const phoneHeight = (w, h) => (w > 640 ? height : Math.round(Math.max(260, Math.min(420, h * 0.42))))
+  const phoneHeight = (w, h) => (w > 640 ? height : Math.round(Math.max(220, Math.min(320, h * 0.33))))
   const [mapHeight, setMapHeight] = useState(() =>
     typeof window !== 'undefined' ? phoneHeight(window.innerWidth, window.innerHeight) : height,
   )
