@@ -624,6 +624,12 @@ input[type='checkbox'], input[type='range'] { accent-color: var(--accent); }
    sticky topbar, sidebar and mobile nav bar once the map is interacted
    with (zoomed, panned). Isolating it contains that stacking entirely
    inside the map's own box. */
+/* The header sits one level shallower than .radar-wrap (a direct child of
+   .card, not nested inside .card-body), so it only needs to cancel the
+   page's own side padding to land at the same flush edge — its own
+   padding is untouched, so the title/logo don't move. */
+.radar-card > .card-head { margin: 0 -22px; }
+
 /* Bleeds past both the card-body padding AND the page's own side padding,
    so the map runs edge to edge (flush with the sidebar / screen edge)
    instead of sitting inset — same bleed idiom as .answer below, just
@@ -918,6 +924,7 @@ table.data td.num { font-family: var(--nums); font-variant-numeric: tabular-nums
   .content { padding: 14px 14px 92px; }
   .topbar { padding: 11px 14px; }
   .radar-wrap { margin: 0 -34px; }
+  .radar-card > .card-head { margin: 0 -14px; }
   .grid-2, .grid-4 { grid-template-columns: minmax(0, 1fr); }
   body { font-size: 16px; }
 

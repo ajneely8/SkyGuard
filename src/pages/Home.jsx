@@ -98,7 +98,7 @@ export default function Home() {
       {/* Zone-threshold reference, live radar, current conditions, and the
           hourly WBGT check — one card */}
       <Card
-        className="card-bare"
+        className="card-bare radar-card"
         title={<>Live radar<span className="live-dot" aria-hidden="true" /></>}
         actions={
           <div className="row" style={{ gap: 8 }}>
