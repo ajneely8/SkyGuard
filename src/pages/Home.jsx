@@ -184,7 +184,7 @@ export default function Home() {
         <div className="now-card">
           <div className="now-main">
             <div>
-              <div className="now-temp">
+              <div className={`now-temp tone-${band?.tone || cls.status}`}>
                 {Math.round(obs.tempF)}
                 <span className="deg">°F</span>
               </div>

@@ -280,6 +280,11 @@ input[type='checkbox'], input[type='range'] { accent-color: var(--accent); }
   line-height: 1; font-variant-numeric: tabular-nums; color: #fff;
 }
 .now-temp .deg, .now-wbgt-value .deg { font-size: 0.38em; font-weight: 600; vertical-align: 0.6em; color: var(--ink-3); }
+.now-temp.tone-green   { color: var(--green); }
+.now-temp.tone-yellow  { color: var(--amber); }
+.now-temp.tone-orange  { color: var(--orange); }
+.now-temp.tone-red     { color: var(--red); }
+.now-temp.tone-darkred { color: var(--darkred); }
 .now-feels { font-size: 14px; color: var(--ink-2); margin-top: 8px; }
 .now-cond { font-size: 13.5px; color: var(--ink-3); }
 .now-wbgt { text-align: right; }
@@ -432,11 +437,11 @@ input[type='checkbox'], input[type='range'] { accent-color: var(--accent); }
 
 /* Same flat, neutral treatment as .metric — columns divided by a hairline,
    no per-cell box or status colour. */
-.day-strip { display: flex; overflow-x: auto; padding: 2px 2px 12px; }
+.day-strip { display: flex; overflow-x: auto; padding: 2px 0 12px; }
 .day-cell {
   flex: 0 0 104px;
   padding: 11px 16px; border-right: 1px solid var(--line-2);
-  display: grid; gap: 2px; justify-items: center; text-align: center;
+  display: grid; gap: 2px; justify-items: start; text-align: left;
 }
 .day-cell:last-child { border-right: none; }
 .day-cell.peak .dc-time { color: var(--ink); }
@@ -922,7 +927,14 @@ table.data td.num { font-family: var(--nums); font-variant-numeric: tabular-nums
   .now-wbgt { text-align: left; }
   .radar-time { text-align: left; }
   .metric { padding: 12px 6px; }
-  .metric .v { font-size: 15px; }
+  .metric .v { font-size: 18px; }
+  .metric .k { font-size: 10.5px; }
+
+  /* Same horizontal padding as .metric above, so the two rows share a
+     left edge. */
+  .day-cell { padding: 12px 6px; }
+  .dc-wbgt { font-size: 21px; }
+  .dc-time { font-size: 12.5px; }
 }
 
 /* Phone: compress the Live radar card hard enough that the map, current
@@ -940,16 +952,20 @@ table.data td.num { font-family: var(--nums); font-variant-numeric: tabular-nums
   .rt-clock { font-size: 12px; }
 
   .metric { padding: 8px 3px; }
-  .metric-icon { width: 14px; height: 14px; margin-bottom: 3px; }
-  .metric .k { font-size: 8.5px; }
-  .metric .v { font-size: 13px; }
-  .metric .v small { font-size: 9px; }
+  .metric-icon { width: 16px; height: 16px; margin-bottom: 3px; }
+  .metric .k { font-size: 9.5px; }
+  .metric .v { font-size: 17px; }
+  .metric .v small { font-size: 10px; }
 
-  .day-cell { flex-basis: 84px; padding: 8px 10px; }
-  .dc-time { font-size: 10px; }
-  .dc-icon { width: 14px; height: 14px; margin-top: 3px; }
-  .dc-wbgt { font-size: 15px; }
-  .dc-unit { font-size: 7.5px; }
+  /* Same left/right edge as .metric above it (3px), so the two rows line up. */
+  .day-strip { padding: 2px 0 12px; }
+  .day-cell { flex-basis: 90px; padding: 8px 6px; }
+  .day-cell:first-child { padding-left: 3px; }
+  .day-cell:last-child { padding-right: 3px; }
+  .dc-time { font-size: 12px; }
+  .dc-icon { width: 16px; height: 16px; margin-top: 3px; }
+  .dc-wbgt { font-size: 19px; }
+  .dc-unit { font-size: 8.5px; }
   /* These three lines are what make each hour cell tall; a shorter card
      matters more on a phone than seeing them without a tap through to the
      hour itself. */
