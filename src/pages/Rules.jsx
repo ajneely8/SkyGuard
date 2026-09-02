@@ -6,6 +6,8 @@
 import { useState } from 'react'
 import { useStore } from '../lib/store.jsx'
 import { Card, Field, Notice } from '../components/ui.jsx'
+import WbgtDrivers from '../components/WbgtDrivers.jsx'
+import ZoneSwiper from '../components/ZoneSwiper.jsx'
 import { DEFAULT_BANDS, bandRange, timeOutsideLabel, clothingLabel } from '../lib/guidelines.js'
 import { DEFAULT_THRESHOLDS } from '../lib/wbgt.js'
 import { DISCLAIMER } from '../lib/seed.js'
@@ -84,6 +86,10 @@ export default function Rules() {
           </div>
         </div>
       )}
+
+      <WbgtDrivers obs={obs} band={activeBand} />
+
+      <ZoneSwiper bands={bands} currentBandId={activeBand?.id} />
 
       <Card
         title="WBGT activity rules"

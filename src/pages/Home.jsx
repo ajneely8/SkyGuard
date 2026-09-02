@@ -16,8 +16,6 @@ import { Card, Notice } from '../components/ui.jsx'
 import RadarMap from '../components/RadarMap.jsx'
 import LocationHeroMap from '../components/LocationHeroMap.jsx'
 import LightningPanel from '../components/LightningPanel.jsx'
-import WbgtDrivers from '../components/WbgtDrivers.jsx'
-import ZoneSwiper from '../components/ZoneSwiper.jsx'
 import { IconAlert, IconDroplet, IconWind, IconThermometer, IconBolt, WeatherIcon } from '../components/Icons.jsx'
 import { timeOutsideLabel, clothingLabel, bandRange } from '../lib/guidelines.js'
 import { METHOD_LABEL } from '../lib/wbgt.js'
@@ -392,10 +390,6 @@ export default function Home() {
       </Card>
 
       {/* 7. ADDITIONAL INFORMATION */}
-      <WbgtDrivers obs={obs} band={band} />
-
-      <ZoneSwiper bands={state.settings.bands} currentBandId={band?.id} />
-
       <Card title={session ? 'Practice running' : 'Practice'}>
         {session ? (
           <>
