@@ -59,6 +59,24 @@ export default function RadarMap({ height = 440 }) {
   const [mapReady, setMapReady] = useState(null)
   const strikeLayer = useRef(null)
 
+  /* ---- shorter map on a phone, so the card doesn't force a scroll before
+     the numbers below it are even visible ---- */
+  const [mapHeight, setMapHeight] = useState(() =>
+    typeof window !== 'undefined' && window.innerWidth <= 640 ? 220 : height,
+  )
+  useEffect(() => {
+    const onResize = () => {
+      const next = window.innerWidth <= 640 ? 220 : height
+      setMapHeight((h) => (h === next ? h : next))
+    }
+    onResize()
+    window.addEventListener('resize', onResize)
+    return () => window.removeEventListener('resize', onResize)
+  }, [height])
+  useEffect(() => {
+    map.current?.invalidateSize()
+  }, [mapHeight])
+
   const radarFrames = useMemo(() => allRadarFrames(frames), [frames])
   const ready = radarFrames.length > 0 && radarFrames.every((f) => loadedPaths.has(f.path))
   const nowIdx = radarFrames.length ? nowIndex(radarFrames) : 0
@@ -275,8 +293,8 @@ export default function RadarMap({ height = 440 }) {
 
   return (
     <div className="radar-wrap">
-      <div className="radar-map-frame" style={{ height }}>
-        <div ref={mapEl} className="radar-map" style={{ height }} />
+      <div className="radar-map-frame" style={{ height: mapHeight }}>
+        <div ref={mapEl} className="radar-map" style={{ height: mapHeight }} />
         <RadarScope map={mapReady} center={selectedLocation} />
 
         {overlayObs && (

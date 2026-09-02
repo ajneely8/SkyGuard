@@ -636,7 +636,20 @@ input[type='checkbox'], input[type='range'] { accent-color: var(--accent); }
   font-size: 10.5px; font-weight: 700; letter-spacing: 0.09em; color: var(--ink-2);
   text-transform: uppercase; flex: 0 0 auto;
 }
-.radar-status .pulse { width: 7px; height: 7px; border-radius: 50%; background: var(--green); }
+.radar-status .pulse { width: 7px; height: 7px; border-radius: 50%; background: var(--green); animation: livePulse 1.6s ease-in-out infinite; }
+
+.live-dot {
+  display: inline-block; width: 8px; height: 8px; border-radius: 50%;
+  background: var(--green); margin-left: 9px; vertical-align: middle;
+  animation: livePulse 1.6s ease-in-out infinite;
+}
+@keyframes livePulse {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50% { opacity: 0.4; transform: scale(0.8); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .radar-status .pulse, .live-dot { animation: none; }
+}
 
 .radar-bar-spacer { flex: 1; }
 

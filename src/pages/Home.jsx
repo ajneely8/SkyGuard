@@ -101,7 +101,7 @@ export default function Home() {
     <div className="stack">
       {/* Zone-threshold reference, live radar, current conditions, and the
           hourly WBGT check — one card */}
-      <Card title="Live radar">
+      <Card title={<>Live radar<span className="live-dot" aria-hidden="true" /></>}>
         {severeBands.length > 0 && (
           <div className="zone-banner" style={{ marginBottom: 18 }}>
             <IconAlert width={18} height={18} />
