@@ -296,6 +296,12 @@ input[type='checkbox'], input[type='range'] { accent-color: var(--accent); }
   border-top: 1px solid var(--line-2);
 }
 .metrics.standalone { border-top: none; }
+
+.section-divider {
+  margin: 20px -20px 16px; padding: 16px 20px 0; border-top: 1px solid var(--line-2);
+}
+.section-divider .h3 { font-size: 14px; font-weight: 600; color: var(--ink); }
+.section-divider .small { margin-top: 2px; }
 .metric { padding: 14px 16px; border-right: 1px solid var(--line-2); }
 .metric:last-child { border-right: none; }
 .metric-icon { color: var(--ink-3); margin-bottom: 6px; }

@@ -108,9 +108,9 @@ export default function Home() {
 
   return (
     <div className="stack">
-      {/* Current conditions and the hourly WBGT check, first thing on the page */}
-      {obs && (
-        <Card title="Current conditions">
+      {/* Current conditions and the hourly WBGT check, together, first thing on the page */}
+      <Card title="Current conditions">
+        {obs && (
           <div className="metrics standalone">
             <div className="metric">
               <IconDroplet className="metric-icon" />
@@ -130,13 +130,13 @@ export default function Home() {
               <div className="v" style={{ fontSize: 14 }}>{storm.nearest ? `${storm.nearest.distanceMiles.toFixed(0)} mi` : 'Clear'}</div>
             </div>
           </div>
-        </Card>
-      )}
+        )}
 
-      <Card
-        title={dayView.isTomorrow ? 'Tomorrow, through 9 PM' : 'Rest of today, through 9 PM'}
-        subtitle={`Hour by hour in ${loc.name} local time${zone ? ` (${zone})` : ''}`}
-      >
+        <div className="section-divider">
+          <div className="h3">{dayView.isTomorrow ? 'Tomorrow, through 9 PM' : 'Rest of today, through 9 PM'}</div>
+          <div className="small muted">Hour by hour in {loc.name} local time{zone ? ` (${zone})` : ''}</div>
+        </div>
+
         {!fc ? (
           <div className="muted small" style={{ padding: '10px 2px' }}>
             {forecasts[locId]?.error ? `Forecast unavailable: ${forecasts[locId].error}` : 'Loading the day…'}
