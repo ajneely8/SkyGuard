@@ -14,6 +14,7 @@ import { Link } from 'react-router-dom'
 import { useStore } from '../lib/store.jsx'
 import { Card, Notice } from '../components/ui.jsx'
 import RadarMap from '../components/RadarMap.jsx'
+import Logo from '../components/Logo.jsx'
 import { IconAlert, IconDroplet, IconThermometer, IconGauge, WeatherIcon } from '../components/Icons.jsx'
 import { timeOutsideLabel, clothingLabel, bandRange } from '../lib/guidelines.js'
 import { fmtF, fmtTimeIn, fmtNum, untilString } from '../lib/format.js'
@@ -96,7 +97,16 @@ export default function Home() {
     <div className="stack">
       {/* Zone-threshold reference, live radar, current conditions, and the
           hourly WBGT check — one card */}
-      <Card className="card-bare" title={<>Live radar<span className="live-dot" aria-hidden="true" /></>}>
+      <Card
+        className="card-bare"
+        title={<>Live radar<span className="live-dot" aria-hidden="true" /></>}
+        actions={
+          <div className="row" style={{ gap: 8 }}>
+            <Logo size={20} />
+            <span className="brand-name" style={{ fontSize: 13 }}>SKYGUARD</span>
+          </div>
+        }
+      >
         <RadarMap height={440} />
 
         <div className="section-divider section-divider-strong">
