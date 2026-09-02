@@ -96,7 +96,7 @@ export default function Home() {
     <div className="stack">
       {/* Zone-threshold reference, live radar, current conditions, and the
           hourly WBGT check — one card */}
-      <Card title={<>Live radar<span className="live-dot" aria-hidden="true" /></>}>
+      <Card className="card-bare" title={<>Live radar<span className="live-dot" aria-hidden="true" /></>}>
         <RadarMap height={440} />
 
         <div className="section-divider section-divider-strong">

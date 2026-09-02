@@ -152,6 +152,9 @@ ul { margin: 0 0 10px; padding-left: 20px; }
   border-radius: var(--radius-lg);
   box-shadow: var(--shadow);
 }
+/* No box around it — sits directly on the page background. Padding inside
+   card-head/card-body is untouched so everything nested still lines up. */
+.card-bare { background: none; border: none; border-radius: 0; box-shadow: none; }
 .card-head {
   padding: 16px 20px; border-bottom: 1px solid var(--line-2);
   display: flex; align-items: center; gap: 12px; flex-wrap: wrap;
