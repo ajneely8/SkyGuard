@@ -444,6 +444,90 @@ input[type='checkbox'], input[type='range'] { accent-color: var(--accent); }
 }
 .day-legend { margin-top: 2px; }
 
+/* ---------------- what moves the number ---------------- */
+
+.drv-list { display: grid; gap: 10px; }
+.drv {
+  display: block; width: 100%; text-align: left; cursor: pointer;
+  background: var(--surface-2); border: 1px solid var(--line);
+  border-radius: var(--radius); padding: 12px 14px; color: inherit; font: inherit;
+}
+.drv:hover { border-color: #2e4d60; }
+.drv.open { border-color: var(--accent); }
+.drv-top { display: flex; justify-content: space-between; align-items: baseline; gap: 10px; }
+.drv-name { font-weight: 650; font-size: 14px; }
+.drv-delta { font-family: var(--nums); font-weight: 700; font-variant-numeric: tabular-nums; font-size: 15px; }
+.drv-delta.up { color: var(--orange); }
+.drv-delta.down { color: var(--green); }
+.drv-bar { height: 5px; border-radius: 3px; background: var(--line); margin: 8px 0 6px; overflow: hidden; }
+.drv-fill { height: 100%; border-radius: 3px; }
+.drv-fill.up { background: var(--orange); }
+.drv-fill.down { background: var(--green); }
+.drv-ref { font-size: 11.5px; color: var(--ink-3); }
+.drv-detail {
+  margin-top: 10px; padding-top: 10px; border-top: 1px solid var(--line-2);
+  font-size: 12.5px; line-height: 1.55; color: var(--ink-2);
+}
+
+.drv-gap {
+  margin-top: 14px; padding: 11px 14px; border-radius: var(--radius);
+  background: var(--surface-2); border: 1px solid var(--line); font-size: 13px; color: var(--ink-2);
+}
+.drv-gap strong { color: var(--ink); font-family: var(--nums); }
+
+.sens-list { display: grid; gap: 1px; background: var(--line-2); border: 1px solid var(--line); border-radius: var(--radius); overflow: hidden; }
+.sens {
+  display: flex; justify-content: space-between; align-items: center; gap: 12px;
+  padding: 11px 14px; background: var(--surface);
+}
+.sens-label { font-size: 13.5px; font-weight: 550; }
+.sens-note { font-size: 11.5px; color: var(--ink-3); }
+.sens-delta { font-family: var(--nums); font-weight: 700; font-variant-numeric: tabular-nums; font-size: 14px; white-space: nowrap; }
+.sens-delta.up { color: var(--orange); }
+.sens-delta.down { color: var(--green); }
+
+/* ---------------- zones, swipeable ---------------- */
+
+.zone-track {
+  display: flex; gap: 12px; overflow-x: auto; scroll-snap-type: x mandatory;
+  padding: 2px 2px 10px; -webkit-overflow-scrolling: touch;
+}
+.zone-track::-webkit-scrollbar { height: 6px; }
+.zone-track:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; border-radius: var(--radius); }
+.zone {
+  flex: 0 0 min(320px, 86%); scroll-snap-align: start;
+  border: 1px solid var(--line); border-top: 3px solid var(--ink-3);
+  border-radius: var(--radius); padding: 16px; background: var(--surface-2);
+}
+.zone.tone-green   { border-top-color: var(--green); }
+.zone.tone-yellow  { border-top-color: var(--amber); }
+.zone.tone-orange  { border-top-color: var(--orange); }
+.zone.tone-red     { border-top-color: var(--red); }
+.zone.tone-darkred { border-top-color: var(--darkred); }
+.zone.now { background: var(--surface); border-color: var(--accent); }
+
+.zone-head { display: flex; justify-content: space-between; align-items: flex-start; gap: 10px; margin-bottom: 14px; }
+.zone-range { font-size: 15px; font-weight: 650; }
+.zone-name { font-size: 13px; color: var(--ink-2); margin-top: 2px; }
+.zone-headline { display: grid; gap: 12px; margin-bottom: 14px; }
+.zone-big { font-size: 17px; font-weight: 650; line-height: 1.25; }
+.zone-rules { display: grid; grid-template-columns: auto 1fr; gap: 6px 14px; font-size: 12.5px; margin: 0; }
+.zone-rules dt { color: var(--ink-3); }
+.zone-rules dd { margin: 0; color: var(--ink-2); line-height: 1.45; }
+.zone-note { margin-top: 12px; font-size: 11.5px; color: var(--ink-3); line-height: 1.5; }
+
+.zone-dots { display: flex; justify-content: center; gap: 7px; margin-top: 4px; }
+.zone-dot {
+  width: 8px; height: 8px; border-radius: 50%; border: none; padding: 0; cursor: pointer;
+  background: var(--line); transition: transform 0.15s;
+}
+.zone-dot.on { transform: scale(1.45); }
+.zone-dot.tone-green.on   { background: var(--green); }
+.zone-dot.tone-yellow.on  { background: var(--amber); }
+.zone-dot.tone-orange.on  { background: var(--orange); }
+.zone-dot.tone-red.on     { background: var(--red); }
+.zone-dot.tone-darkred.on { background: var(--darkred); }
+
 /* ---------------- lightning ---------------- */
 
 .lx-head {
