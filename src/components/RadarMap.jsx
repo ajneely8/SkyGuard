@@ -356,6 +356,14 @@ export default function RadarMap({ height = 440 }) {
                 <div>
                   <div className="hero-map-status-name">{overlayStatus.level.label}</div>
                   <div className="hero-map-status-radius">0–{overlayRadiusMiles} mi</div>
+                  {/* The moment the nearest close strike actually happened —
+                      only once it's near enough to matter, not for every
+                      strike out to the 80-mile feed radius. */}
+                  {overlayTone !== 'green' && overlayStatus.nearest && (
+                    <div className="hero-map-status-time">
+                      Strike at {fmtTimeIn(overlayStatus.nearest.ts, tz)}
+                    </div>
+                  )}
                 </div>
               </div>
             )}
