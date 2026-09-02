@@ -701,9 +701,9 @@ input[type='checkbox'], input[type='range'] { accent-color: var(--accent); }
 
 .zone-banner {
   display: flex; gap: 12px; align-items: flex-start;
-  padding: 16px 18px; border-radius: var(--radius-lg);
-  background: #14213a; border: 1px solid #24407a; color: #c7d7f0;
-  font-size: 14px; line-height: 1.5; box-shadow: var(--shadow);
+  padding: 16px 18px 16px 15px; border-radius: var(--radius-lg);
+  background: var(--surface); border: 1px solid var(--line); border-left: 3px solid var(--accent);
+  color: var(--ink-2); font-size: 14px; line-height: 1.5; box-shadow: var(--shadow);
 }
 .zone-banner svg { flex: 0 0 auto; margin-top: 1px; color: var(--accent); }
 .zone-banner strong { color: #fff; }
