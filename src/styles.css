@@ -727,11 +727,16 @@ input[type='checkbox'], input[type='range'] { accent-color: var(--accent); }
 .hero-map-band.tone-red     { background: var(--red); }
 .hero-map-band.tone-darkred { background: var(--darkred); }
 
+/* No bar behind this anymore — just the number and status sitting directly
+   on the map, so they need their own shadow to stay legible over whatever
+   the radar happens to be showing underneath. */
 .hero-map-scrim {
   position: absolute; left: 0; right: 0; bottom: 0; z-index: 500;
   display: flex; align-items: flex-end; justify-content: space-between; gap: 14px;
-  padding: 14px 16px; background: rgba(10, 16, 27, 0.72);
+  padding: 14px 16px;
 }
+.hero-map-scrim * { text-shadow: 0 1px 4px rgba(0, 0, 0, 0.85), 0 0 12px rgba(0, 0, 0, 0.6); }
+.hero-map-status svg { filter: drop-shadow(0 1px 3px rgba(0, 0, 0, 0.85)); }
 .hero-map-wbgt { display: flex; align-items: baseline; gap: 8px; }
 .hero-map-wbgt-value {
   font-family: var(--nums); font-size: 40px; font-weight: 800; line-height: 1;
@@ -744,9 +749,9 @@ input[type='checkbox'], input[type='range'] { accent-color: var(--accent); }
 .hero-map-wbgt-value.tone-red     { color: var(--red); }
 .hero-map-wbgt-value.tone-darkred { color: var(--darkred); }
 
-.hero-map-status { display: flex; align-items: center; gap: 8px; text-align: right; }
-.hero-map-status-name { font-size: 13.5px; font-weight: 700; }
-.hero-map-status-radius { font-size: 11px; color: var(--ink-2); font-variant-numeric: tabular-nums; }
+.hero-map-status { display: flex; align-items: center; gap: 9px; text-align: right; }
+.hero-map-status-name { font-size: 17px; font-weight: 700; }
+.hero-map-status-radius { font-size: 13px; color: var(--ink-2); font-variant-numeric: tabular-nums; }
 .hero-map-status.tone-green  { color: var(--green); }
 .hero-map-status.tone-yellow { color: var(--amber); }
 .hero-map-status.tone-orange { color: var(--orange); }
@@ -759,10 +764,10 @@ input[type='checkbox'], input[type='range'] { accent-color: var(--accent); }
   .hero-map-wbgt { gap: 5px; }
   .hero-map-wbgt-value { font-size: 24px; }
   .hero-map-wbgt-label { font-size: 9px; }
-  .hero-map-status { gap: 5px; }
-  .hero-map-status svg { width: 13px; height: 13px; }
-  .hero-map-status-name { font-size: 11px; }
-  .hero-map-status-radius { font-size: 9px; }
+  .hero-map-status { gap: 6px; }
+  .hero-map-status svg { width: 16px; height: 16px; }
+  .hero-map-status-name { font-size: 14px; }
+  .hero-map-status-radius { font-size: 11px; }
 }
 
 .hero-pin-wrap { background: none !important; border: none !important; }
@@ -1065,9 +1070,9 @@ table.data td.num { font-family: var(--nums); font-variant-numeric: tabular-nums
   .hero-map-scrim { padding: 10px 14px; gap: 10px; }
   .hero-map-wbgt-value { font-size: 30px; }
   .hero-map-wbgt-label { font-size: 11px; }
-  .hero-map-status svg { width: 14px; height: 14px; }
-  .hero-map-status-name { font-size: 13px; }
-  .hero-map-status-radius { font-size: 11px; }
+  .hero-map-status svg { width: 17px; height: 17px; }
+  .hero-map-status-name { font-size: 15px; }
+  .hero-map-status-radius { font-size: 12px; }
 
   .answer { margin: 16px -16px 0; }
 }

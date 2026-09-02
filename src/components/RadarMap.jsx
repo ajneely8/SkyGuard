@@ -356,7 +356,7 @@ export default function RadarMap({ height = 440 }) {
 
             {overlayStatus && (
               <div className={`hero-map-status tone-${overlayTone}`}>
-                {overlayTone === 'green' ? <IconCheck width={16} height={16} /> : <IconAlert width={16} height={16} />}
+                {overlayTone === 'green' ? <IconCheck width={20} height={20} /> : <IconAlert width={20} height={20} />}
                 <div>
                   <div className="hero-map-status-name">{overlayStatus.level.label}</div>
                   <div className="hero-map-status-radius">0–{overlayRadiusMiles} mi</div>
