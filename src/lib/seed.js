@@ -7,8 +7,9 @@
 
 import { DEFAULT_THRESHOLDS } from './wbgt.js'
 import { DEFAULT_BANDS } from './guidelines.js'
+import { DEFAULT_STRIKE_RULES } from './lightning.js'
 
-export const SCHEMA_VERSION = 4
+export const SCHEMA_VERSION = 5
 
 export const SPORTS = [
   'Football',
@@ -61,6 +62,8 @@ export function seedState() {
       staleAfterMin: 35,
       autoRefreshSec: 300,
       lightning: { alertMiles: 10, resumeWaitMin: 30 },
+      /** Caution / advisory / warning radii and the post-strike hold. */
+      strikeRules: { ...DEFAULT_STRIKE_RULES },
     },
     readings: [],
     sessions: [],

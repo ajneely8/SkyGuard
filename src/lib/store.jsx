@@ -16,7 +16,9 @@ import { seedState, SCHEMA_VERSION } from './seed.js'
 import { classify, METHOD, METHOD_LABEL } from './wbgt.js'
 import { activityGuideline } from './guidelines.js'
 import { fetchConditions, fetchAlerts, PROVIDER_NAME } from './weather.js'
-import { fetchStormProximity, lightningStatus } from './lightning.js'
+import { fetchStormProximity, lightningStatus, evaluateStrikes, DEFAULT_STRIKE_RULES } from './lightning.js'
+import { createStrikeFeed, strikeRelativeTo, STRIKE_TTL_MS, SOURCE_NAME } from './strikes.js'
+import { notifyLightning, ensureNotificationPermission } from './notify.js'
 import { fetchForecast } from './forecast.js'
 import { uid } from './format.js'
 import { loadSession, clearSession } from './auth.js'
@@ -50,6 +52,7 @@ function load() {
         ...base.settings,
         ...(parsed.settings || {}),
         lightning: { ...base.settings.lightning, ...(parsed.settings?.lightning || {}) },
+        strikeRules: { ...base.settings.strikeRules, ...(parsed.settings?.strikeRules || {}) },
       },
     }
   } catch {
@@ -62,6 +65,9 @@ export function StoreProvider({ children }) {
   const [conditions, setConditions] = useState({})
   const [forecasts, setForecasts] = useState({})
   const [storms, setStorms] = useState({})
+  /** Live strikes, newest last. Not persisted — they age out in an hour. */
+  const [strikes, setStrikes] = useState([])
+  const [strikeFeed, setStrikeFeed] = useState({ connected: false, connecting: true, source: SOURCE_NAME })
   const [nwsAlerts, setNwsAlerts] = useState({})
   const [now, setNow] = useState(() => Date.now())
 
@@ -210,6 +216,28 @@ export function StoreProvider({ children }) {
   const lightningFor = useCallback(
     (locationId) => lightningStatus(storms[locationId]?.data, null, state.settings.lightning.alertMiles),
     [storms, state.settings.lightning.alertMiles],
+  )
+
+  /* ------------------------------------------------------------------ */
+  /* Lightning strikes                                                   */
+  /* ------------------------------------------------------------------ */
+
+  /** Strikes near this field, nearest-first, with distance and bearing. */
+  const strikesFor = useCallback(
+    (locationId) => {
+      const loc = state.locations.find((l) => l.id === locationId)
+      if (!loc) return []
+      return strikes
+        .map((s) => strikeRelativeTo(s, loc))
+        .sort((a, b) => a.miles - b.miles)
+    },
+    [strikes, state.locations],
+  )
+
+  /** Caution / advisory / warning status, with the restarting hold clock. */
+  const strikeStatusFor = useCallback(
+    (locationId) => evaluateStrikes(strikesFor(locationId), state.settings.strikeRules, now),
+    [strikesFor, state.settings.strikeRules, now],
   )
 
   /* ------------------------------------------------------------------ */
@@ -486,6 +514,81 @@ export function StoreProvider({ children }) {
     return () => clearInterval(t)
   }, [monitoredIds, conditions, refresh, loadStorms, loadForecast, state.settings.autoRefreshSec])
 
+  /* ---- strike feed: one connection, filtered to the saved fields ---- */
+  const locationsRef = useRef(state.locations)
+  locationsRef.current = state.locations
+
+  useEffect(() => {
+    if (!state.locations.length) return
+    const feed = createStrikeFeed({
+      getWatched: () => locationsRef.current.map((l) => ({ lat: l.lat, lon: l.lon })),
+      onStrike: (s) =>
+        setStrikes((prev) => {
+          if (prev.some((x) => x.id === s.id)) return prev
+          const cutoff = Date.now() - STRIKE_TTL_MS
+          return [...prev.filter((x) => new Date(x.ts).getTime() > cutoff), s].slice(-2000)
+        }),
+      onStatus: setStrikeFeed,
+    })
+    return () => feed.stop()
+    // Reconnect only when the set of fields appears/disappears entirely.
+  }, [state.locations.length > 0])
+
+  // Age strikes out so the map and the bands do not hold onto stale weather.
+  useEffect(() => {
+    const t = setInterval(() => {
+      const cutoff = Date.now() - STRIKE_TTL_MS
+      setStrikes((prev) => {
+        const next = prev.filter((s) => new Date(s.ts).getTime() > cutoff)
+        return next.length === prev.length ? prev : next
+      })
+    }, 60000)
+    return () => clearInterval(t)
+  }, [])
+
+  /**
+   * Notify on band CHANGES only — escalation, and the all-clear when the hold
+   * expires. One per change, never one per strike.
+   */
+  const lastLevel = useRef({})
+  useEffect(() => {
+    monitoredIds.forEach((id) => {
+      const loc = stateRef.current.locations.find((l) => l.id === id)
+      if (!loc) return
+      const status = evaluateStrikes(
+        strikes.map((s) => strikeRelativeTo(s, loc)),
+        stateRef.current.settings.strikeRules,
+        now,
+      )
+      const prev = lastLevel.current[id]
+      const curr = status.level.id
+      if (prev === undefined) {
+        lastLevel.current[id] = curr
+        return
+      }
+      if (prev === curr) return
+      lastLevel.current[id] = curr
+
+      // Announce escalation, and the all-clear whenever the hold ends.
+      //
+      // The all-clear must fire on warning -> ANYTHING lower, not only
+      // warning -> clear: a storm that has moved off usually leaves strikes
+      // still inside the wider caution/advisory rings, so the level drops to
+      // advisory and the "safe to resume" message would never be sent.
+      const rank = { clear: 0, caution: 1, advisory: 2, warning: 3 }
+      const escalated = rank[curr] > rank[prev]
+      const holdEnded = prev === 'warning' && curr !== 'warning'
+      if (!escalated && !holdEnded) return
+
+      notifyLightning(holdEnded ? 'clear' : curr, {
+        locationName: loc.name,
+        miles: status.nearest?.miles,
+        compass: status.nearest?.bearing?.compass,
+        resumeMinutes: status.rules.holdMinutes,
+      })
+    })
+  }, [strikes, now, monitoredIds])
+
   const firing = useRef(new Set())
   useEffect(() => {
     activeSessions.forEach((ses) => {
@@ -554,6 +657,11 @@ export function StoreProvider({ children }) {
     nwsAlerts,
     refresh,
     loadStorms,
+    strikes,
+    strikeFeed,
+    strikesFor,
+    strikeStatusFor,
+    ensureNotificationPermission,
     forecasts,
     loadForecast,
     lightningFor,

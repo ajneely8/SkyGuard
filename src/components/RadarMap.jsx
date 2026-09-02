@@ -33,7 +33,8 @@ const REFRESH_MS = 4 * 60000
 const RADAR_OPACITY = 0.82
 
 export default function RadarMap({ height = 440 }) {
-  const { state, selectedLocation, setSelectedLocation, current, classifyNow, guidelineNow } = useStore()
+  const { state, selectedLocation, setSelectedLocation, current, classifyNow, guidelineNow, strikesFor, now } =
+    useStore()
 
   const mapEl = useRef(null)
   const map = useRef(null)
@@ -46,6 +47,7 @@ export default function RadarMap({ height = 440 }) {
   const [error, setError] = useState(null)
   const [idx, setIdx] = useState(0)
   const [mapReady, setMapReady] = useState(null)
+  const strikeLayer = useRef(null)
 
   const radarFrames = useMemo(() => allRadarFrames(frames), [frames])
   const ready = radarFrames.length > 0 && radarFrames.every((f) => loadedPaths.has(f.path))
@@ -80,6 +82,7 @@ export default function RadarMap({ height = 440 }) {
     }).addTo(map.current)
 
     markerLayer.current = L.layerGroup().addTo(map.current)
+    strikeLayer.current = L.layerGroup().addTo(map.current)
     setMapReady(map.current)
     return () => {
       map.current?.remove()
@@ -211,6 +214,44 @@ export default function RadarMap({ height = 440 }) {
     })
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [markerKey, selectedLocation?.id])
+
+  /* ---- lightning strikes ---- */
+  const strikes = selectedLocation ? strikesFor(selectedLocation.id) : []
+  // Only redraw when the set changes, not on every clock tick.
+  const strikeKey = strikes.map((s) => s.id).join('|')
+
+  useEffect(() => {
+    if (!map.current || !strikeLayer.current) return
+    strikeLayer.current.clearLayers()
+
+    strikes.forEach((s) => {
+      const ageMin = (Date.now() - new Date(s.ts).getTime()) / 60000
+      // Fresh strikes are bright; older ones fade so the eye tracks the storm.
+      const opacity = Math.max(0.18, 1 - ageMin / 60)
+      const fresh = ageMin < 5
+      L.circleMarker([s.lat, s.lon], {
+        radius: fresh ? 6 : 4,
+        color: fresh ? '#ffd166' : '#e0a23c',
+        weight: fresh ? 2 : 1,
+        fillColor: fresh ? '#ffe08a' : '#c98f2e',
+        fillOpacity: opacity,
+        opacity,
+      })
+        .bindPopup(
+          `<div class="pop">
+             <div class="pop-title">Lightning strike</div>
+             <div class="pop-sub">${escapeHtml(fmtTimeIn(s.ts, selectedLocation?.timezone))} · ${Math.round(ageMin)} min ago</div>
+             <table class="pop-tbl">
+               <tr><td>Distance</td><td><strong>${s.miles.toFixed(1)} miles</strong></td></tr>
+               <tr><td>Direction</td><td>${s.bearing?.compass || '—'} of ${escapeHtml(selectedLocation?.name || '')}</td></tr>
+             </table>
+             <div class="pop-coord mono">${s.lat.toFixed(4)}, ${s.lon.toFixed(4)}</div>
+           </div>`,
+        )
+        .addTo(strikeLayer.current)
+    })
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [strikeKey, selectedLocation?.id, Math.floor(now / 60000)])
 
   const progress = radarFrames.length ? ((shownIdx + 1) / radarFrames.length) * 100 : 0
   const tz = selectedLocation?.timezone || null

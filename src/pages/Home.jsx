@@ -10,6 +10,7 @@ import { Link } from 'react-router-dom'
 import { useStore } from '../lib/store.jsx'
 import { Card, Notice } from '../components/ui.jsx'
 import RadarMap from '../components/RadarMap.jsx'
+import LightningPanel from '../components/LightningPanel.jsx'
 import { timeOutsideLabel, clothingLabel, bandRange } from '../lib/guidelines.js'
 import { METHOD_LABEL } from '../lib/wbgt.js'
 import { fmtF, fmtTimeIn, fmtNum, ageString, untilString, zoneLabel, differsFromDevice } from '../lib/format.js'
@@ -329,6 +330,8 @@ export default function Home() {
           </>
         )}
       </Card>
+
+      <LightningPanel locationId={locId} tz={tz} />
 
       {/* Radar */}
       <Card

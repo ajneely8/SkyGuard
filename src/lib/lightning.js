@@ -42,6 +42,108 @@ export const SEVERE_EVENTS = new Set(['Tornado Warning', 'Severe Thunderstorm Wa
 /** Alert distances a district can choose from, in miles. */
 export const ALERT_DISTANCES = [10, 8, 6, 5]
 
+/* ------------------------------------------------------------------ */
+/* Strike-based status: caution / advisory / warning                   */
+/* ------------------------------------------------------------------ */
+
+/**
+ * Three bands, outermost first. Only WARNING suspends activity; the outer two
+ * exist so staff see weather coming rather than being surprised by it.
+ */
+export const DEFAULT_STRIKE_RULES = {
+  cautionMiles: 30,
+  advisoryMiles: 20,
+  warningMiles: 10,
+  /** Minutes to wait after the last strike inside the warning radius. */
+  holdMinutes: 30,
+}
+
+export const STRIKE_LEVELS = {
+  clear: {
+    id: 'clear',
+    label: 'Clear',
+    tone: 'green',
+    heading: 'No lightning nearby',
+    action: 'Normal activity. Keep watching the sky and the radar.',
+  },
+  caution: {
+    id: 'caution',
+    label: 'Caution',
+    tone: 'yellow',
+    heading: 'Lightning in the area',
+    action:
+      'Activity may continue. Monitor the storm, review where everyone would shelter, and be ready to move.',
+  },
+  advisory: {
+    id: 'advisory',
+    label: 'Advisory',
+    tone: 'orange',
+    heading: 'Lightning approaching',
+    action:
+      'Prepare to suspend. Move equipment, brief staff, and get everyone within a short walk of shelter.',
+  },
+  warning: {
+    id: 'warning',
+    label: 'Warning — suspend activity',
+    tone: 'red',
+    heading: 'Lightning within the warning radius',
+    action:
+      'Suspend activity now. Move everyone to a fully enclosed building or a fully enclosed metal-topped vehicle. Do not resume until the countdown reaches zero.',
+  },
+}
+
+/**
+ * Evaluate nearby strikes for one field.
+ *
+ * The hold clock restarts on EVERY strike inside the warning radius — that is
+ * the whole point of the rule, and the reason this takes the most recent
+ * qualifying strike rather than the first one.
+ *
+ * @param {Array} strikes strikes already relative to this field (see strikeRelativeTo)
+ * @param {object} rules  DEFAULT_STRIKE_RULES shape
+ * @param {number} now    ms
+ */
+export function evaluateStrikes(strikes, rules = DEFAULT_STRIKE_RULES, now = Date.now()) {
+  const r = { ...DEFAULT_STRIKE_RULES, ...(rules || {}) }
+  const holdMs = r.holdMinutes * 60000
+
+  const recent = (strikes || [])
+    .filter((s) => now - new Date(s.ts).getTime() < 60 * 60 * 1000)
+    .sort((a, b) => new Date(b.ts) - new Date(a.ts))
+
+  const within = (miles) => recent.filter((s) => s.miles <= miles)
+
+  const inWarning = within(r.warningMiles)
+  const lastWarningStrike = inWarning[0] || null
+  // Restarts on every strike inside the radius.
+  const resumeAt = lastWarningStrike ? new Date(lastWarningStrike.ts).getTime() + holdMs : null
+  const holdActive = resumeAt != null && now < resumeAt
+
+  const nearest = recent[0] || null
+
+  let level = STRIKE_LEVELS.clear
+  if (holdActive) level = STRIKE_LEVELS.warning
+  else if (within(r.advisoryMiles).length) level = STRIKE_LEVELS.advisory
+  else if (within(r.cautionMiles).length) level = STRIKE_LEVELS.caution
+
+  return {
+    level,
+    rules: r,
+    nearest,
+    strikeCount: recent.length,
+    countInWarning: inWarning.length,
+    lastWarningStrike,
+    resumeAt: resumeAt ? new Date(resumeAt).toISOString() : null,
+    secondsRemaining: holdActive ? Math.ceil((resumeAt - now) / 1000) : 0,
+    holdActive,
+    /**
+     * True the moment a hold has just expired — the caller compares this with
+     * the previous state to fire the all-clear once, not repeatedly.
+     */
+    resumable: resumeAt != null && !holdActive,
+  }
+}
+
 /**
  * @typedef {Object} StrikeProvider
  * @property {string} name              Vendor name shown in the data-source strip.
