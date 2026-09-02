@@ -1,12 +1,12 @@
 /**
  * Home — the whole app in one screen.
  *
- * Where am I, what is the WBGT, how long can we stay out, what can we wear,
- * is there a storm, and the live radar.
+ * What is the WBGT, how long can we stay out, what can we wear, is there a
+ * storm, and the live radar. Lightning has its own page — see Lightning.jsx.
  *
  * The zone-threshold banner, live radar, current conditions and the hourly
  * WBGT check all share one card at the top of the page, then current safety
- * status, active weather threat, location, and everything else follow.
+ * status, active weather threat, and everything else follow.
  */
 
 import { useEffect, useMemo } from 'react'
@@ -14,8 +14,6 @@ import { Link } from 'react-router-dom'
 import { useStore } from '../lib/store.jsx'
 import { Card, Notice } from '../components/ui.jsx'
 import RadarMap from '../components/RadarMap.jsx'
-import LocationHeroMap from '../components/LocationHeroMap.jsx'
-import LightningPanel from '../components/LightningPanel.jsx'
 import { IconAlert, IconDroplet, IconThermometer, IconGauge, WeatherIcon } from '../components/Icons.jsx'
 import { timeOutsideLabel, clothingLabel, bandRange } from '../lib/guidelines.js'
 import { fmtF, fmtTimeIn, fmtNum, untilString } from '../lib/format.js'
@@ -303,13 +301,6 @@ export default function Home() {
           Distances are to National Weather Service storm warning areas, not to individual lightning strikes.
         </Notice>
       )}
-
-      {/* Location — the field's name already lives in the sidebar and the
-          topbar selector on every screen, so this is just the map. */}
-      <LocationHeroMap />
-
-      {/* Lightning — its own section */}
-      <LightningPanel locationId={locId} tz={tz} />
 
       {/* Additional information */}
       <Card title={session ? 'Practice running' : 'Practice'}>

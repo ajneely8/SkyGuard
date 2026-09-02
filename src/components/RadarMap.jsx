@@ -100,7 +100,9 @@ export default function RadarMap({ height = 440 }) {
       // Leaflet's default attribution prefix embeds a Ukrainian flag graphic.
       attributionControl: false,
     })
-    L.control.attribution({ prefix: false }).addTo(map.current)
+    // Top-right, not bottom-right — the bottom of the map is where the
+    // WBGT/lightning overlay sits, and the two were colliding on a phone.
+    L.control.attribution({ prefix: false, position: 'topright' }).addTo(map.current)
 
     const cfg = BASE_LAYERS.street
     L.tileLayer(cfg.url, {

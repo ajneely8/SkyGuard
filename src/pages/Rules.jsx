@@ -6,21 +6,16 @@
 import { useState } from 'react'
 import { useStore } from '../lib/store.jsx'
 import { Card, Field, Notice } from '../components/ui.jsx'
-import WbgtDrivers from '../components/WbgtDrivers.jsx'
-import ZoneSwiper from '../components/ZoneSwiper.jsx'
-import { DEFAULT_BANDS, bandRange, timeOutsideLabel, clothingLabel } from '../lib/guidelines.js'
-import { DEFAULT_THRESHOLDS } from '../lib/wbgt.js'
-import { DISCLAIMER } from '../lib/seed.js'
+import { DEFAULT_BANDS, bandRange, timeOutsideLabel } from '../lib/guidelines.js'
 
 export default function Rules() {
-  const { state, patchSettings, current, selectedLocation, guidelineNow, resetAll } = useStore()
+  const { state, patchSettings, guidelineNow, current, selectedLocation } = useStore()
   const bands = state.settings.bands?.length ? state.settings.bands : DEFAULT_BANDS
   const obs = selectedLocation ? current(selectedLocation.id) : null
   const activeBand = guidelineNow(obs?.wbgtF ?? null)
 
   const [editing, setEditing] = useState(null)
   const [draft, setDraft] = useState(null)
-  const [th, setTh] = useState(state.settings.thresholds)
 
   const startEdit = (b) => {
     setEditing(b.id)
@@ -45,52 +40,8 @@ export default function Rules() {
     setDraft(null)
   }
 
-  const saveThresholds = () => {
-    const vals = {
-      elevatedMinF: Number(th.elevatedMinF),
-      class2MinF: Number(th.class2MinF),
-      class3MinF: Number(th.class3MinF),
-      extremeMinF: Number(th.extremeMinF),
-    }
-    if (Object.values(vals).some((v) => !Number.isFinite(v))) return alert('All thresholds must be numbers.')
-    if (!(vals.elevatedMinF < vals.class2MinF && vals.class2MinF < vals.class3MinF && vals.class3MinF <= vals.extremeMinF)) {
-      return alert('Thresholds must increase: caution < Class 2 < Class 3+ ≤ Extreme.')
-    }
-    patchSettings({ thresholds: vals })
-  }
-
   return (
     <div className="stack">
-      {activeBand && obs && (
-        <div className={`answer a-${activeBand.tone}`} style={{ margin: 0 }}>
-          <div className="answer-band">
-            RIGHT NOW AT {selectedLocation.name.toUpperCase()} — {activeBand.name.toUpperCase()}
-          </div>
-          <div className="answer-grid">
-            <div>
-              <div className="label">WBGT</div>
-              <div className="answer-big">{obs.wbgtF.toFixed(1)}°F</div>
-            </div>
-            <div>
-              <div className="label">How long outside</div>
-              <div className="answer-big">{timeOutsideLabel(activeBand)}</div>
-            </div>
-            <div>
-              <div className="label">What to wear</div>
-              <div className="answer-big">{clothingLabel(activeBand)}</div>
-            </div>
-            <div>
-              <div className="label">Breaks</div>
-              <div className="answer-mid">{activeBand.breaks}</div>
-            </div>
-          </div>
-        </div>
-      )}
-
-      <WbgtDrivers obs={obs} band={activeBand} />
-
-      <ZoneSwiper bands={bands} currentBandId={activeBand?.id} />
-
       <Card
         title="WBGT activity rules"
         subtitle="Each band sets the maximum time outside, the break pattern and the equipment allowed"
@@ -205,62 +156,6 @@ export default function Rules() {
           they change. Edit each band above so the app matches the rules you are actually held to.
         </Notice>
       </Card>
-
-      <Card title="Class labels" subtitle="Optional — for schools that use the Class 2 / Class 3+ language">
-        <div className="grid grid-4">
-          <Field label="Caution from (°F)" id="t1">
-            <input id="t1" type="number" step="0.1" value={th.elevatedMinF} onChange={(e) => setTh({ ...th, elevatedMinF: e.target.value })} />
-          </Field>
-          <Field label="Class 2 from (°F)" id="t2">
-            <input id="t2" type="number" step="0.1" value={th.class2MinF} onChange={(e) => setTh({ ...th, class2MinF: e.target.value })} />
-          </Field>
-          <Field label="Class 3+ from (°F)" id="t3">
-            <input id="t3" type="number" step="0.1" value={th.class3MinF} onChange={(e) => setTh({ ...th, class3MinF: e.target.value })} />
-          </Field>
-          <Field label="Extreme from (°F)" id="t4">
-            <input id="t4" type="number" step="0.1" value={th.extremeMinF} onChange={(e) => setTh({ ...th, extremeMinF: e.target.value })} />
-          </Field>
-        </div>
-        <div className="row">
-          <button className="btn btn-primary" onClick={saveThresholds}>Save labels</button>
-          <button className="btn" onClick={() => setTh(DEFAULT_THRESHOLDS)}>Reset</button>
-        </div>
-      </Card>
-
-      <Card title="Monitoring">
-        <div className="grid grid-2">
-          <Field label="Check every (minutes)" id="m1">
-            <input
-              id="m1"
-              type="number"
-              min="5"
-              max="120"
-              value={state.settings.monitoringIntervalMin}
-              onChange={(e) => patchSettings({ monitoringIntervalMin: Number(e.target.value) })}
-            />
-          </Field>
-          <Field label="Check before practice (minutes)" id="m2">
-            <input
-              id="m2"
-              type="number"
-              min="1"
-              max="60"
-              value={state.settings.preCheckMin}
-              onChange={(e) => patchSettings({ preCheckMin: Number(e.target.value) })}
-            />
-          </Field>
-        </div>
-        <button
-          className="btn btn-danger btn-sm"
-          onClick={() => {
-            if (confirm('Erase all locations, readings and practices from this browser?')) resetAll()
-          }}
-        >
-          Reset all app data
-        </button>
-      </Card>
-
-      <div className="small muted">{DISCLAIMER}</div>
     </div>
   )
 }

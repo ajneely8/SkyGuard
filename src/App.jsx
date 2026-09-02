@@ -8,6 +8,7 @@ import Home from './pages/Home.jsx'
 import SavedLocations from './pages/SavedLocations.jsx'
 import Practice from './pages/Practice.jsx'
 import Rules from './pages/Rules.jsx'
+import Lightning from './pages/Lightning.jsx'
 
 export default function App() {
   return (
@@ -23,6 +24,7 @@ export default function App() {
             <Route path="locations" element={<SavedLocations />} />
             <Route path="practice" element={<Practice />} />
             <Route path="rules" element={<Rules />} />
+            <Route path="lightning" element={<Lightning />} />
           </Route>
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
