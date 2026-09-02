@@ -178,6 +178,11 @@ ul { margin: 0 0 10px; padding-left: 20px; }
 .small { font-size: 12.5px; }
 .mono { font-family: var(--nums); font-variant-numeric: tabular-nums; }
 .tabnum { font-variant-numeric: tabular-nums; }
+.tabnum.tone-green   { color: var(--green); }
+.tabnum.tone-yellow  { color: var(--amber); }
+.tabnum.tone-orange  { color: var(--orange); }
+.tabnum.tone-red     { color: var(--red); }
+.tabnum.tone-darkred { color: var(--darkred); }
 
 .label {
   display: block; font-size: 10.5px; font-weight: 700; letter-spacing: 0.06em;
@@ -319,6 +324,11 @@ input[type='checkbox'], input[type='range'] { accent-color: var(--accent); }
 .metric .k { font-size: 10px; text-transform: uppercase; letter-spacing: 0.07em; color: var(--ink-3); font-weight: 700; }
 .metric .v { font-size: 18px; font-weight: 600; font-variant-numeric: tabular-nums; margin-top: 3px; }
 .metric .v small { font-size: 11.5px; font-weight: 500; color: var(--ink-3); }
+.metric .v.tone-green   { color: var(--green); }
+.metric .v.tone-yellow  { color: var(--amber); }
+.metric .v.tone-orange  { color: var(--orange); }
+.metric .v.tone-red     { color: var(--red); }
+.metric .v.tone-darkred { color: var(--darkred); }
 
 .status-bar {
   display: flex; align-items: center; gap: 10px;
@@ -379,6 +389,11 @@ input[type='checkbox'], input[type='range'] { accent-color: var(--accent); }
 
 .answer-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 18px; }
 .answer-big { font-size: 20px; font-weight: 700; letter-spacing: -0.01em; line-height: 1.2; color: #fff; }
+.answer-big.tone-green   { color: var(--green); }
+.answer-big.tone-yellow  { color: var(--amber); }
+.answer-big.tone-orange  { color: var(--orange); }
+.answer-big.tone-red     { color: var(--red); }
+.answer-big.tone-darkred { color: var(--darkred); }
 .answer-mid { font-size: 14px; font-weight: 500; line-height: 1.45; }
 .answer-detail { margin-top: 16px; font-size: 13.5px; line-height: 1.55; color: var(--ink-2); }
 .answer-detail strong { color: var(--ink); }
@@ -458,6 +473,11 @@ input[type='checkbox'], input[type='range'] { accent-color: var(--accent); }
   font-family: var(--nums); font-size: 19px; font-weight: 700; line-height: 1.1;
   font-variant-numeric: tabular-nums; color: var(--ink); margin-top: 2px;
 }
+.day-cell.tone-green   .dc-wbgt { color: var(--green); }
+.day-cell.tone-yellow  .dc-wbgt { color: var(--amber); }
+.day-cell.tone-orange  .dc-wbgt { color: var(--orange); }
+.day-cell.tone-red     .dc-wbgt { color: var(--red); }
+.day-cell.tone-darkred .dc-wbgt { color: var(--darkred); }
 .dc-unit { font-size: 8.5px; font-weight: 700; letter-spacing: 0.08em; color: var(--ink-3); }
 .dc-temp { font-size: 12px; color: var(--ink-2); margin-top: 4px; font-variant-numeric: tabular-nums; }
 .dc-cond { font-size: 10.5px; color: var(--ink-3); line-height: 1.3; }

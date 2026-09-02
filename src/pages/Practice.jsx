@@ -76,7 +76,7 @@ export default function Practice() {
           <div className="answer-grid">
             <div>
               <div className="label">WBGT now</div>
-              <div className="answer-big">{obs.wbgtF.toFixed(1)}°F</div>
+              <div className={`answer-big tone-${band.tone}`}>{obs.wbgtF.toFixed(1)}°F</div>
             </div>
             <div>
               <div className="label">How long outside</div>
@@ -198,7 +198,10 @@ export default function Practice() {
                   </div>
                   <div className="loc-wbgt">
                     <div className="label" style={{ marginBottom: 0 }}>Peak WBGT</div>
-                    <div className="tabnum" style={{ fontWeight: 650, fontSize: 16 }}>
+                    <div
+                      className={`tabnum ${h.peakBand ? `tone-${h.peakBand.tone}` : ''}`}
+                      style={{ fontWeight: 650, fontSize: 16 }}
+                    >
                       {h.peak ? `${h.peak.wbgtF.toFixed(1)}°F` : '—'}
                     </div>
                   </div>
@@ -232,7 +235,7 @@ export default function Practice() {
                                 return (
                                   <tr key={r.id}>
                                     <td className="small">{fmtTimeIn(r.ts, tz)}</td>
-                                    <td className="num">{r.wbgtF.toFixed(1)}°F</td>
+                                    <td className={`num tabnum ${b ? `tone-${b.tone}` : ''}`}>{r.wbgtF.toFixed(1)}°F</td>
                                     <td className="small">
                                       {b && <span className={`badge badge-${b.tone}`}>{b.name}</span>}{' '}
                                       <span className="muted">{b ? timeOutsideLabel(b) : ''}</span>

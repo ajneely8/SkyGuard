@@ -117,11 +117,11 @@ export default function Home() {
           <div className="metrics standalone">
             <div className="metric">
               <IconThermometer className="metric-icon" />
-              <div className="k">Temp</div><div className="v">{fmtF(obs.tempF, 0)}</div>
+              <div className="k">Temp</div><div className={`v tone-${band?.tone || cls.status}`}>{fmtF(obs.tempF, 0)}</div>
             </div>
             <div className="metric">
               <IconGauge className="metric-icon" />
-              <div className="k">WBGT</div><div className="v">{fmtF(obs.wbgtF, 1)}</div>
+              <div className="k">WBGT</div><div className={`v tone-${band?.tone || cls.status}`}>{fmtF(obs.wbgtF, 1)}</div>
             </div>
             <div className="metric">
               <IconDroplet className="metric-icon" />
@@ -129,7 +129,7 @@ export default function Home() {
             </div>
             <div className="metric">
               <IconThermometer className="metric-icon" />
-              <div className="k">Feels</div><div className="v">{fmtF(obs.apparentF ?? obs.heatIndexF, 0)}</div>
+              <div className="k">Feels</div><div className={`v tone-${band?.tone || cls.status}`}>{fmtF(obs.apparentF ?? obs.heatIndexF, 0)}</div>
             </div>
           </div>
         )}

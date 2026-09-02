@@ -51,6 +51,14 @@ function load() {
       settings: {
         ...base.settings,
         ...(parsed.settings || {}),
+        // Practice checks now default to every 15 minutes — carry anyone still
+        // sitting on the old 30-minute default forward. Nothing else in
+        // settings changes; there's no UI to have customized this away from
+        // the shipped default yet.
+        monitoringIntervalMin:
+          parsed.settings?.monitoringIntervalMin == null || parsed.settings.monitoringIntervalMin === 30
+            ? 15
+            : parsed.settings.monitoringIntervalMin,
         lightning: { ...base.settings.lightning, ...(parsed.settings?.lightning || {}) },
         strikeRules: { ...base.settings.strikeRules, ...(parsed.settings?.strikeRules || {}) },
       },

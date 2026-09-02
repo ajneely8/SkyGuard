@@ -57,7 +57,7 @@ export function seedState() {
       thresholds: { ...DEFAULT_THRESHOLDS },
       /** The rules that drive time outside and clothing. Editable in Rules. */
       bands: DEFAULT_BANDS,
-      monitoringIntervalMin: 30,
+      monitoringIntervalMin: 15,
       preCheckMin: 15,
       staleAfterMin: 35,
       autoRefreshSec: 300,

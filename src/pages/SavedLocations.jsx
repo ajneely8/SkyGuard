@@ -102,7 +102,10 @@ export default function SavedLocations() {
 
                     <div className="loc-wbgt">
                       <div className="label" style={{ marginBottom: 0 }}>WBGT</div>
-                      <div className="tabnum" style={{ fontWeight: 800, fontSize: 18 }}>
+                      <div
+                        className={`tabnum ${band && obs ? `tone-${band.tone}` : ''}`}
+                        style={{ fontWeight: 800, fontSize: 18 }}
+                      >
                         {obs ? fmtF(obs.wbgtF) : '—'}
                       </div>
                       {band && obs && <span className={`badge badge-${band.tone}`}>{band.name}</span>}
