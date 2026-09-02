@@ -911,3 +911,35 @@ table.data td.num { font-family: var(--nums); font-variant-numeric: tabular-nums
   .metric { padding: 12px 6px; }
   .metric .v { font-size: 15px; }
 }
+
+/* Phone: compress the Live radar card hard enough that the map, current
+   conditions and the start of the hourly row all sit in view together
+   with no scrolling. */
+@media (max-width: 480px) {
+  .card-head { padding: 10px 14px; }
+  .card-body { padding: 12px; }
+  .section-divider { margin: 12px -12px 8px; padding: 10px 12px 0; }
+
+  .zone-banner { font-size: 12px; gap: 8px; margin-bottom: 12px !important; }
+  .zone-banner svg { width: 15px; height: 15px; }
+
+  .radar-bar { padding: 7px 10px; gap: 8px; }
+  .rt-clock { font-size: 12px; }
+
+  .metric { padding: 8px 3px; }
+  .metric-icon { width: 14px; height: 14px; margin-bottom: 3px; }
+  .metric .k { font-size: 8.5px; }
+  .metric .v { font-size: 13px; }
+  .metric .v small { font-size: 9px; }
+
+  .day-cell { flex-basis: 84px; padding: 8px 10px; }
+  .dc-time { font-size: 10px; }
+  .dc-icon { width: 14px; height: 14px; margin-top: 3px; }
+  .dc-wbgt { font-size: 15px; }
+  .dc-unit { font-size: 7.5px; }
+  /* These three lines are what make each hour cell tall; a shorter card
+     matters more on a phone than seeing them without a tap through to the
+     hour itself. */
+  .dc-cond, .dc-rain, .dc-band { display: none; }
+  .day-legend { display: none; }
+}
