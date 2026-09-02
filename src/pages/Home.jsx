@@ -3,6 +3,10 @@
  *
  * Where am I, what is the WBGT, how long can we stay out, what can we wear,
  * is there a storm, and the live radar.
+ *
+ * Section order follows one hierarchy, most important first: current safety
+ * status, active weather threat, location, current conditions, radar,
+ * hourly forecast, then everything else.
  */
 
 import { useEffect, useMemo } from 'react'
@@ -108,32 +112,7 @@ export default function Home() {
 
   return (
     <div className="stack">
-      {myAlerts.map((a) => (
-        <div key={a.id} className="alert-banner" role="alert">
-          <div className="ab-body">
-            <h3>WBGT WENT UP — {loc.name}</h3>
-            <div className="small">
-              {fmtF(a.prevWbgtF)} → <strong>{fmtF(a.wbgtF)}</strong> ({a.prevClassification} →{' '}
-              {a.classification}) at {fmtTimeIn(a.ts, tz)}. {a.bandName ? `Now in: ${a.bandName}.` : ''} Review the practice
-              limits below.
-            </div>
-          </div>
-          <button className="btn" onClick={() => acknowledgeAlert(a.id)}>Got it</button>
-        </div>
-      ))}
-
-      {alerts.length > 0 && (
-        <Notice kind="danger" title={`${alerts.length} National Weather Service alert${alerts.length > 1 ? 's' : ''} here`}>
-          {alerts.map((a) => (
-            <div key={a.id}>
-              <strong>{a.event}</strong>
-              {a.headline ? ` — ${a.headline}` : ''}
-            </div>
-          ))}
-        </Notice>
-      )}
-
-      {/* The thresholds that matter most, before anything else on the page */}
+      {/* Reference: the thresholds that define the two most serious bands */}
       {severeBands.length > 0 && (
         <div className="zone-banner">
           <IconAlert width={18} height={18} />
@@ -148,38 +127,7 @@ export default function Home() {
         </div>
       )}
 
-      {/* Location */}
-      <div className="loc-header">
-        <div style={{ minWidth: 0 }}>
-          <div className="loc-name">{loc.name}</div>
-          <div className="small muted">
-            {shortPlace(loc) || loc.address || 'Saved location'}
-            {obs && <> · Updated {fmtTimeIn(obs.observedAt, tz)}</>}
-          </div>
-        </div>
-        <div className="loc-coords mono">
-          {Math.abs(loc.lat).toFixed(6)}° {loc.lat >= 0 ? 'N' : 'S'}
-          <br />
-          {Math.abs(loc.lon).toFixed(6)}° {loc.lon >= 0 ? 'E' : 'W'}
-        </div>
-        <div className="row" style={{ gap: 8 }}>
-          <span className={`badge badge-${loc.precise ? 'green' : 'yellow'}`}>
-            {loc.precise ? 'Using your precise location' : 'Approximate location'}
-          </span>
-          {zone && <span className="badge badge-blue">{zone}</span>}
-        </div>
-      </div>
-
-      <LocationHeroMap />
-
-      {tzDiffers && zone && (
-        <Notice kind="info" title={`Times shown in ${loc.name} local time (${zone})`}>
-          This device is in a different time zone. Every clock on this screen — radar frames, readings
-          and practice checks — is shown in the field's local time.
-        </Notice>
-      )}
-
-      {/* Weather + WBGT + the answer */}
+      {/* 1. CURRENT SAFETY STATUS */}
       {obs ? (
         <div className={`now-card lvl-${band?.tone || cls.status}`}>
           <div className="now-main">
@@ -197,26 +145,6 @@ export default function Home() {
                 <span className="deg">°F</span>
               </div>
               <div className={`badge badge-${cls.status}`}>{cls.classification}</div>
-            </div>
-          </div>
-
-          <div className="metrics">
-            <div className="metric">
-              <IconDroplet className="metric-icon" />
-              <div className="k">Humidity</div><div className="v">{fmtNum(obs.rh, 0, '%')}</div>
-            </div>
-            <div className="metric">
-              <IconWind className="metric-icon" />
-              <div className="k">Wind</div><div className="v">{fmtNum(obs.windMph, 0)} <small>mph</small></div>
-            </div>
-            <div className="metric">
-              <IconThermometer className="metric-icon" />
-              <div className="k">Heat index</div><div className="v">{fmtF(obs.heatIndexF, 0)}</div>
-            </div>
-            <div className="metric">
-              <IconBolt className="metric-icon" />
-              <div className="k">Storms</div>
-              <div className="v" style={{ fontSize: 14 }}>{storm.nearest ? `${storm.nearest.distanceMiles.toFixed(0)} mi` : 'Clear'}</div>
             </div>
           </div>
 
@@ -261,7 +189,7 @@ export default function Home() {
           </div>
         </div>
       ) : (
-        <Card title="Current conditions">
+        <Card title="Current safety status">
           <Notice kind="danger" title="WEATHER DATA UNAVAILABLE">
             {slot.loading
               ? 'Getting conditions…'
@@ -285,11 +213,32 @@ export default function Home() {
         </Card>
       )}
 
-      <WbgtDrivers obs={obs} band={band} />
+      {/* 2. ACTIVE WEATHER THREAT */}
+      {myAlerts.map((a) => (
+        <div key={a.id} className="alert-banner" role="alert">
+          <div className="ab-body">
+            <h3>WBGT WENT UP — {loc.name}</h3>
+            <div className="small">
+              {fmtF(a.prevWbgtF)} → <strong>{fmtF(a.wbgtF)}</strong> ({a.prevClassification} →{' '}
+              {a.classification}) at {fmtTimeIn(a.ts, tz)}. {a.bandName ? `Now in: ${a.bandName}.` : ''} Review the practice
+              limits below.
+            </div>
+          </div>
+          <button className="btn" onClick={() => acknowledgeAlert(a.id)}>Got it</button>
+        </div>
+      ))}
 
-      <ZoneSwiper bands={state.settings.bands} currentBandId={band?.id} />
+      {alerts.length > 0 && (
+        <Notice kind="danger" title={`${alerts.length} National Weather Service alert${alerts.length > 1 ? 's' : ''} here`}>
+          {alerts.map((a) => (
+            <div key={a.id}>
+              <strong>{a.event}</strong>
+              {a.headline ? ` — ${a.headline}` : ''}
+            </div>
+          ))}
+        </Notice>
+      )}
 
-      {/* Storms */}
       {(storm.nearest || storm.level !== 'clear') && (
         <Notice
           kind={storm.level === 'critical' ? 'danger' : storm.level === 'warning' ? 'warn' : 'info'}
@@ -308,7 +257,73 @@ export default function Home() {
         </Notice>
       )}
 
-      {/* Rest of the day */}
+      <LightningPanel locationId={locId} tz={tz} />
+
+      {/* 3. LOCATION */}
+      <div className="loc-header">
+        <div style={{ minWidth: 0 }}>
+          <div className="loc-name">{loc.name}</div>
+          <div className="small muted">
+            {shortPlace(loc) || loc.address || 'Saved location'}
+            {obs && <> · Updated {fmtTimeIn(obs.observedAt, tz)}</>}
+          </div>
+        </div>
+        <div className="loc-coords mono">
+          {Math.abs(loc.lat).toFixed(6)}° {loc.lat >= 0 ? 'N' : 'S'}
+          <br />
+          {Math.abs(loc.lon).toFixed(6)}° {loc.lon >= 0 ? 'E' : 'W'}
+        </div>
+        <div className="row" style={{ gap: 8 }}>
+          <span className={`badge badge-${loc.precise ? 'green' : 'yellow'}`}>
+            {loc.precise ? 'Using your precise location' : 'Approximate location'}
+          </span>
+          {zone && <span className="badge badge-blue">{zone}</span>}
+        </div>
+      </div>
+
+      <LocationHeroMap />
+
+      {tzDiffers && zone && (
+        <Notice kind="info" title={`Times shown in ${loc.name} local time (${zone})`}>
+          This device is in a different time zone. Every clock on this screen — radar frames, readings
+          and practice checks — is shown in the field's local time.
+        </Notice>
+      )}
+
+      {/* 4. CURRENT CONDITIONS */}
+      {obs && (
+        <Card title="Current conditions">
+          <div className="metrics standalone">
+            <div className="metric">
+              <IconDroplet className="metric-icon" />
+              <div className="k">Humidity</div><div className="v">{fmtNum(obs.rh, 0, '%')}</div>
+            </div>
+            <div className="metric">
+              <IconWind className="metric-icon" />
+              <div className="k">Wind</div><div className="v">{fmtNum(obs.windMph, 0)} <small>mph</small></div>
+            </div>
+            <div className="metric">
+              <IconThermometer className="metric-icon" />
+              <div className="k">Heat index</div><div className="v">{fmtF(obs.heatIndexF, 0)}</div>
+            </div>
+            <div className="metric">
+              <IconBolt className="metric-icon" />
+              <div className="k">Storms</div>
+              <div className="v" style={{ fontSize: 14 }}>{storm.nearest ? `${storm.nearest.distanceMiles.toFixed(0)} mi` : 'Clear'}</div>
+            </div>
+          </div>
+        </Card>
+      )}
+
+      {/* 5. RADAR */}
+      <Card
+        title="Live radar"
+        subtitle="Past and forecast frames, looping. Drag the slider to scrub, tap a field for its WBGT."
+      >
+        <RadarMap height={440} />
+      </Card>
+
+      {/* 6. HOURLY FORECAST */}
       <Card
         title={dayView.isTomorrow ? 'Tomorrow, through 9 PM' : 'Rest of today, through 9 PM'}
         subtitle={`Hour by hour in ${loc.name} local time${zone ? ` (${zone})` : ''}`}
@@ -376,17 +391,11 @@ export default function Home() {
         )}
       </Card>
 
-      <LightningPanel locationId={locId} tz={tz} />
+      {/* 7. ADDITIONAL INFORMATION */}
+      <WbgtDrivers obs={obs} band={band} />
 
-      {/* Radar */}
-      <Card
-        title="Live radar"
-        subtitle="Past and forecast frames, looping. Drag the slider to scrub, tap a field for its WBGT."
-      >
-        <RadarMap height={440} />
-      </Card>
+      <ZoneSwiper bands={state.settings.bands} currentBandId={band?.id} />
 
-      {/* Practice */}
       <Card title={session ? 'Practice running' : 'Practice'}>
         {session ? (
           <>
