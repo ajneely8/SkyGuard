@@ -972,28 +972,28 @@ table.data td.num { font-family: var(--nums); font-variant-numeric: tabular-nums
   .section-divider .h3 { font-size: 18px; }
   .radar-wrap { margin: -16px -30px 0; }
 
-  .zone-banner { font-size: 13.5px; gap: 10px; margin-bottom: 14px !important; }
+  .zone-banner { font-size: 14.5px; gap: 10px; margin-bottom: 14px !important; }
   .zone-banner svg { width: 17px; height: 17px; }
 
   .radar-bar { padding: 9px 14px; gap: 10px; }
-  .rt-clock { font-size: 13px; }
+  .rt-clock { font-size: 14px; }
 
   .metric { padding: 12px 6px; }
   .metric-icon { width: 19px; height: 19px; margin-bottom: 4px; }
-  .metric .k { font-size: 10.5px; }
+  .metric .k { font-size: 11.5px; }
   .metric .v { font-size: 19px; }
-  .metric .v small { font-size: 11px; }
+  .metric .v small { font-size: 12px; }
 
   /* Same left/right edge as .metric above it, so the two rows line up. */
   .day-strip { padding: 2px 0 12px; }
   .day-cell { flex-basis: 92px; padding: 10px 6px; }
   .day-cell:first-child { padding-left: 3px; }
   .day-cell:last-child { padding-right: 3px; }
-  .dc-time { font-size: 11.5px; }
+  .dc-time { font-size: 12.5px; }
   .dc-icon { width: 17px; height: 17px; margin-top: 4px; }
   .dc-wbgt { font-size: 19px; }
-  .dc-unit { font-size: 8.5px; }
-  .dc-temp { font-size: 13px; }
+  .dc-unit { font-size: 9.5px; }
+  .dc-temp { font-size: 14px; }
   /* Scaled down so the whole hourly section is visible on a phone without
      scrolling — these three lines were what made each cell tall. */
   .dc-cond, .dc-rain, .dc-band { display: none; }
@@ -1001,10 +1001,10 @@ table.data td.num { font-family: var(--nums); font-variant-numeric: tabular-nums
 
   .hero-map-scrim { padding: 10px 14px; gap: 10px; }
   .hero-map-wbgt-value { font-size: 30px; }
-  .hero-map-wbgt-label { font-size: 10px; }
+  .hero-map-wbgt-label { font-size: 11px; }
   .hero-map-status svg { width: 14px; height: 14px; }
-  .hero-map-status-name { font-size: 12px; }
-  .hero-map-status-radius { font-size: 10px; }
+  .hero-map-status-name { font-size: 13px; }
+  .hero-map-status-radius { font-size: 11px; }
 
   .answer { margin: 16px -16px 0; }
 }
