@@ -20,7 +20,6 @@ import { IconAlert, IconDroplet, IconWind, IconThermometer, IconBolt, WeatherIco
 import { timeOutsideLabel, clothingLabel, bandRange } from '../lib/guidelines.js'
 import { METHOD_LABEL } from '../lib/wbgt.js'
 import { fmtF, fmtTimeIn, fmtNum, ageString, untilString, zoneLabel, differsFromDevice } from '../lib/format.js'
-import { shortPlace } from '../lib/geo.js'
 import { dayThrough, peakHour } from '../lib/forecast.js'
 
 export default function Home() {
@@ -257,28 +256,8 @@ export default function Home() {
 
       <LightningPanel locationId={locId} tz={tz} />
 
-      {/* 3. LOCATION */}
-      <div className="loc-header">
-        <div style={{ minWidth: 0 }}>
-          <div className="loc-name">{loc.name}</div>
-          <div className="small muted">
-            {shortPlace(loc) || loc.address || 'Saved location'}
-            {obs && <> · Updated {fmtTimeIn(obs.observedAt, tz)}</>}
-          </div>
-        </div>
-        <div className="loc-coords mono">
-          {Math.abs(loc.lat).toFixed(6)}° {loc.lat >= 0 ? 'N' : 'S'}
-          <br />
-          {Math.abs(loc.lon).toFixed(6)}° {loc.lon >= 0 ? 'E' : 'W'}
-        </div>
-        <div className="row" style={{ gap: 8 }}>
-          <span className={`badge badge-${loc.precise ? 'green' : 'yellow'}`}>
-            {loc.precise ? 'Using your precise location' : 'Approximate location'}
-          </span>
-          {zone && <span className="badge badge-blue">{zone}</span>}
-        </div>
-      </div>
-
+      {/* 3. LOCATION — the field's name already lives in the sidebar and the
+          topbar selector on every screen, so this is just the map. */}
       <LocationHeroMap />
 
       {tzDiffers && zone && (
