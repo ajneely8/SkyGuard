@@ -69,18 +69,8 @@ export default function Home() {
     [fc, tz, Math.floor(now / 600000)],
   )
   const peakRaw = useMemo(() => peakHour(dayView.rows), [dayView.rows])
+  /** Marks the hottest hour in the strip below. */
   const peak = peakRaw ? { ...peakRaw, band: guidelineNow(peakRaw.wbgtF) } : null
-  /** First hour after the peak that falls into an easier band. */
-  const safeAfter = useMemo(() => {
-    if (!peak?.band) return null
-    const after = dayView.rows.filter((h) => new Date(h.ts) > new Date(peak.ts))
-    for (const h of after) {
-      const b = guidelineNow(h.wbgtF)
-      if (b && b.id !== peak.band.id) return { ...h, band: b }
-    }
-    return null
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [dayView.rows, peak?.ts, peak?.band?.id])
 
   // Guard sits below every hook — an early return above them changes hook
   // order between renders and React throws.
@@ -173,32 +163,6 @@ export default function Home() {
           <div className="muted small" style={{ padding: '10px 2px' }}>No forecast hours left today.</div>
         ) : (
           <>
-            {peak && peak.band && (
-              <div className={`day-peak a-${peak.band.tone}`}>
-                <div>
-                  <div className="label">Hottest point</div>
-                  <div className="answer-big">
-                    {peak.wbgtF.toFixed(1)}°F at {fmtTimeIn(peak.ts, tz)}
-                  </div>
-                </div>
-                <div>
-                  <div className="label">Which means</div>
-                  <div className="answer-mid">{peak.band.name}</div>
-                </div>
-                <div>
-                  <div className="label">Outside limit then</div>
-                  <div className="answer-mid">{timeOutsideLabel(peak.band)}</div>
-                </div>
-              </div>
-            )}
-
-            {safeAfter && (
-              <div className="small muted" style={{ marginBottom: 12 }}>
-                WBGT drops back to <strong>{safeAfter.band.name.toLowerCase()}</strong> from{' '}
-                <strong>{fmtTimeIn(safeAfter.ts, tz)}</strong> — the first hour after the peak that eases up.
-              </div>
-            )}
-
             <div className="day-strip">
               {dayView.rows.map((h) => {
                 const band = guidelineNow(h.wbgtF)
