@@ -624,6 +624,37 @@ export function StoreProvider({ children }) {
     })
   }, [strikes, now, monitoredIds])
 
+  /**
+   * Notify on EVERY qualifying strike, not just band changes — some coaches
+   * want to feel each one land rather than only the escalation. Same-tag
+   * renotify means these replace each other in the tray instead of piling
+   * up, so this doesn't turn into a wall of alerts even in a busy storm.
+   * Scoped to strikes inside the caution ring — anything farther out isn't
+   * relevant to this field yet.
+   */
+  const notifiedStrikeIds = useRef(new Map())
+  useEffect(() => {
+    monitoredIds.forEach((id) => {
+      const loc = stateRef.current.locations.find((l) => l.id === id)
+      if (!loc) return
+      const rules = stateRef.current.settings.strikeRules
+      const cautionMiles = rules?.cautionMiles ?? 30
+      const seen = notifiedStrikeIds.current.get(id) || new Set()
+
+      const relevant = strikes
+        .map((s) => strikeRelativeTo(s, loc))
+        .filter((s) => s.miles <= cautionMiles && !seen.has(s.id))
+        .sort((a, b) => new Date(a.ts) - new Date(b.ts))
+
+      if (!relevant.length) return
+      relevant.forEach((s) => {
+        seen.add(s.id)
+        notifyLightning('strike', { locationName: loc.name, miles: s.miles, compass: s.bearing?.compass })
+      })
+      notifiedStrikeIds.current.set(id, seen)
+    })
+  }, [strikes, monitoredIds])
+
   const firing = useRef(new Set())
   useEffect(() => {
     activeSessions.forEach((ses) => {

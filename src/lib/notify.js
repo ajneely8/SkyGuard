@@ -40,12 +40,17 @@ function show(title, body) {
 }
 
 /**
- * @param {'clear'|'caution'|'advisory'|'warning'} levelId
+ * @param {'clear'|'caution'|'advisory'|'warning'|'strike'} levelId
  * @param {object} info { locationName, miles, compass, resumeMinutes }
  */
 export function notifyLightning(levelId, info = {}) {
   const where = info.locationName ? ` — ${info.locationName}` : ''
   switch (levelId) {
+    case 'strike':
+      return show(
+        `⚡ Lightning strike${where}`,
+        `${info.miles?.toFixed(1)} miles ${info.compass || ''}`.trim(),
+      )
     case 'warning':
       return show(
         `Lightning warning${where}`,
