@@ -23,21 +23,21 @@
   --ink-3: #6e8496;
 
   /* heat bands — legible on dark, deliberately not neon */
-  --green: #22c55e;
-  --green-bg: #14291d;
-  --green-line: #235c3c;
-  --amber: #eab308;
-  --amber-bg: #332b0c;
-  --amber-line: #5c4b14;
-  --orange: #f97316;
-  --orange-bg: #3a220f;
-  --orange-line: #6b3c1a;
-  --red: #ef4444;
-  --red-bg: #3a1414;
-  --red-line: #6b2323;
-  --darkred: #b91c1c;
-  --darkred-bg: #2c0e0e;
-  --darkred-line: #521818;
+  --green: #4aa87b;
+  --green-bg: #17332a;
+  --green-line: #2c5c46;
+  --amber: #d1a33c;
+  --amber-bg: #332d17;
+  --amber-line: #5e4e26;
+  --orange: #dd8146;
+  --orange-bg: #36261a;
+  --orange-line: #64432a;
+  --red: #dd5f6c;
+  --red-bg: #361d23;
+  --red-line: #63333c;
+  --darkred: #c4485c;
+  --darkred-bg: #3d1a24;
+  --darkred-line: #6e2f3d;
 
   --radius: 6px;
   --radius-lg: 8px;
