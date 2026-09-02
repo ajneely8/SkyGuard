@@ -774,10 +774,14 @@ input[type='checkbox'], input[type='range'] { accent-color: var(--accent); }
 .hero-map-wbgt-value.tone-red     { color: var(--red); }
 .hero-map-wbgt-value.tone-darkred { color: var(--darkred); }
 
-.hero-map-status { display: flex; align-items: center; gap: 9px; text-align: right; }
+/* Top-aligned, not centered: the text block can run to four lines now
+   (name, radius, hold countdown, strike time), and centering the icon
+   against that made it drift away from the status name it belongs next to. */
+.hero-map-status { display: flex; align-items: flex-start; gap: 9px; text-align: right; }
+.hero-map-status svg { flex: 0 0 auto; margin-top: 1px; }
 .hero-map-status-name { font-size: 17px; font-weight: 700; }
 .hero-map-status-radius { font-size: 13px; color: var(--ink-2); font-variant-numeric: tabular-nums; }
-.hero-map-status-time { font-size: 10.5px; color: var(--ink-2); font-variant-numeric: tabular-nums; margin-top: 1px; }
+.hero-map-status-time { font-size: 14px; font-weight: 700; font-variant-numeric: tabular-nums; margin-top: 3px; }
 .hero-map-status.tone-green  { color: var(--green); }
 .hero-map-status.tone-yellow { color: var(--amber); }
 .hero-map-status.tone-orange { color: var(--orange); }
@@ -794,7 +798,7 @@ input[type='checkbox'], input[type='range'] { accent-color: var(--accent); }
   .hero-map-status svg { width: 16px; height: 16px; }
   .hero-map-status-name { font-size: 14px; }
   .hero-map-status-radius { font-size: 11px; }
-  .hero-map-status-time { font-size: 9.5px; }
+  .hero-map-status-time { font-size: 12px; }
 }
 
 .hero-pin-wrap { background: none !important; border: none !important; }
