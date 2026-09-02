@@ -10,9 +10,11 @@ import { Link } from 'react-router-dom'
 import { useStore } from '../lib/store.jsx'
 import { Card, Notice } from '../components/ui.jsx'
 import RadarMap from '../components/RadarMap.jsx'
+import LocationHeroMap from '../components/LocationHeroMap.jsx'
 import LightningPanel from '../components/LightningPanel.jsx'
 import WbgtDrivers from '../components/WbgtDrivers.jsx'
 import ZoneSwiper from '../components/ZoneSwiper.jsx'
+import { IconAlert, IconDroplet, IconWind, IconThermometer, IconBolt, WeatherIcon } from '../components/Icons.jsx'
 import { timeOutsideLabel, clothingLabel, bandRange } from '../lib/guidelines.js'
 import { METHOD_LABEL } from '../lib/wbgt.js'
 import { fmtF, fmtTimeIn, fmtNum, ageString, untilString, zoneLabel, differsFromDevice } from '../lib/format.js'
@@ -95,6 +97,9 @@ export default function Home() {
   const cls = classifyNow(obs?.wbgtF ?? null)
   const band = guidelineNow(obs?.wbgtF ?? null)
   const storm = lightningFor(locId)
+  /* The two most severe bands, most severe first — the thresholds a coach needs
+     to recognize on sight before anything else on this page. */
+  const severeBands = [...state.settings.bands].slice(-2).reverse()
   const session = activeSessions.find((s) => s.locationId === locId)
   const next = nextCheck(locId)
   const last = lastReading(locId)
@@ -128,11 +133,29 @@ export default function Home() {
         </Notice>
       )}
 
+      {/* The thresholds that matter most, before anything else on the page */}
+      {severeBands.length > 0 && (
+        <div className="zone-banner">
+          <IconAlert width={18} height={18} />
+          <div>
+            {severeBands.map((b, i) => (
+              <span key={b.id}>
+                <strong>WBGT {b.minF != null ? `${b.minF.toFixed(1)}°F` : `${b.maxF.toFixed(1)}°F`} or above</strong> —{' '}
+                {b.name} ({timeOutsideLabel(b)}).{i < severeBands.length - 1 ? ' ' : ''}
+              </span>
+            ))}
+          </div>
+        </div>
+      )}
+
       {/* Location */}
       <div className="loc-header">
         <div style={{ minWidth: 0 }}>
           <div className="loc-name">{loc.name}</div>
-          <div className="small muted">{shortPlace(loc) || loc.address || 'Saved location'}</div>
+          <div className="small muted">
+            {shortPlace(loc) || loc.address || 'Saved location'}
+            {obs && <> · Updated {fmtTimeIn(obs.observedAt, tz)}</>}
+          </div>
         </div>
         <div className="loc-coords mono">
           {Math.abs(loc.lat).toFixed(6)}° {loc.lat >= 0 ? 'N' : 'S'}
@@ -146,6 +169,8 @@ export default function Home() {
           {zone && <span className="badge badge-blue">{zone}</span>}
         </div>
       </div>
+
+      <LocationHeroMap />
 
       {tzDiffers && zone && (
         <Notice kind="info" title={`Times shown in ${loc.name} local time (${zone})`}>
@@ -176,10 +201,23 @@ export default function Home() {
           </div>
 
           <div className="metrics">
-            <div className="metric"><div className="k">Humidity</div><div className="v">{fmtNum(obs.rh, 0, '%')}</div></div>
-            <div className="metric"><div className="k">Wind</div><div className="v">{fmtNum(obs.windMph, 0)} <small>mph</small></div></div>
-            <div className="metric"><div className="k">Heat index</div><div className="v">{fmtF(obs.heatIndexF, 0)}</div></div>
-            <div className="metric"><div className="k">Storms</div><div className="v" style={{ fontSize: 14 }}>{storm.nearest ? `${storm.nearest.distanceMiles.toFixed(0)} mi` : 'Clear'}</div></div>
+            <div className="metric">
+              <IconDroplet className="metric-icon" />
+              <div className="k">Humidity</div><div className="v">{fmtNum(obs.rh, 0, '%')}</div>
+            </div>
+            <div className="metric">
+              <IconWind className="metric-icon" />
+              <div className="k">Wind</div><div className="v">{fmtNum(obs.windMph, 0)} <small>mph</small></div>
+            </div>
+            <div className="metric">
+              <IconThermometer className="metric-icon" />
+              <div className="k">Heat index</div><div className="v">{fmtF(obs.heatIndexF, 0)}</div>
+            </div>
+            <div className="metric">
+              <IconBolt className="metric-icon" />
+              <div className="k">Storms</div>
+              <div className="v" style={{ fontSize: 14 }}>{storm.nearest ? `${storm.nearest.distanceMiles.toFixed(0)} mi` : 'Clear'}</div>
+            </div>
           </div>
 
           {/* THE ANSWER */}
@@ -316,6 +354,7 @@ export default function Home() {
                 return (
                   <div key={h.ts} className={`day-cell tone-${band?.tone || 'none'} ${isPeak ? 'peak' : ''}`}>
                     <div className="dc-time">{fmtTimeIn(h.ts, tz)}</div>
+                    <WeatherIcon icon={h.icon} className="dc-icon" />
                     {/* One decimal: rounding to whole degrees makes the number
                         disagree with its own colour band at the boundaries. */}
                     <div className="dc-wbgt">{h.wbgtF != null ? h.wbgtF.toFixed(1) : '—'}</div>

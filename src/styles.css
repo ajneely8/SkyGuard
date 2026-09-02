@@ -294,8 +294,9 @@ input[type='checkbox'], input[type='range'] { accent-color: var(--accent); }
   display: grid; grid-template-columns: repeat(auto-fit, minmax(104px, 1fr));
   border-top: 1px solid var(--line-2);
 }
-.metric { padding: 12px 16px; border-right: 1px solid var(--line-2); }
+.metric { padding: 14px 16px; border-right: 1px solid var(--line-2); }
 .metric:last-child { border-right: none; }
+.metric-icon { color: var(--ink-3); margin-bottom: 6px; }
 .metric .k { font-size: 10px; text-transform: uppercase; letter-spacing: 0.07em; color: var(--ink-3); font-weight: 700; }
 .metric .v { font-size: 18px; font-weight: 600; font-variant-numeric: tabular-nums; margin-top: 3px; }
 .metric .v small { font-size: 11.5px; font-weight: 500; color: var(--ink-3); }
@@ -436,6 +437,7 @@ input[type='checkbox'], input[type='range'] { accent-color: var(--accent); }
 .day-cell.peak { border-color: var(--accent); }
 
 .dc-time { font-size: 11.5px; font-weight: 700; color: var(--ink-2); }
+.dc-icon { color: var(--ink-3); margin-top: 6px; }
 .dc-wbgt {
   font-family: var(--nums); font-size: 19px; font-weight: 700; line-height: 1.1;
   font-variant-numeric: tabular-nums; color: var(--ink); margin-top: 2px;
@@ -650,6 +652,59 @@ input[type='checkbox'], input[type='range'] { accent-color: var(--accent); }
   padding: 10px 14px; background: var(--surface-2); border-left: 3px solid var(--red);
   color: var(--red); font-size: 12.5px;
 }
+
+/* ---------------- hero map: field, radius, the two numbers that matter ---------------- */
+
+.hero-map-wrap {
+  position: relative; border-radius: var(--radius-lg); overflow: hidden;
+  border: 1px solid var(--line); background: #0b1220;
+}
+.hero-map { width: 100%; }
+.hero-map .leaflet-container { background: #0b1220; cursor: default; }
+
+.hero-map-band { position: absolute; top: 0; left: 0; right: 0; height: 3px; z-index: 500; }
+.hero-map-band.tone-green   { background: var(--green); }
+.hero-map-band.tone-yellow  { background: var(--amber); }
+.hero-map-band.tone-orange  { background: var(--orange); }
+.hero-map-band.tone-red     { background: var(--red); }
+.hero-map-band.tone-darkred { background: var(--darkred); }
+
+.hero-map-scrim {
+  position: absolute; left: 0; right: 0; bottom: 0; z-index: 500;
+  display: flex; align-items: flex-end; justify-content: space-between; gap: 14px;
+  padding: 14px 16px; background: rgba(10, 16, 27, 0.72);
+}
+.hero-map-wbgt { display: flex; align-items: baseline; gap: 8px; }
+.hero-map-wbgt-value {
+  font-family: var(--nums); font-size: 40px; font-weight: 800; line-height: 1;
+  letter-spacing: -0.02em; color: #fff; font-variant-numeric: tabular-nums;
+}
+.hero-map-wbgt-label { font-size: 11px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: var(--ink-2); }
+
+.hero-map-status { display: flex; align-items: center; gap: 8px; text-align: right; }
+.hero-map-status-name { font-size: 13.5px; font-weight: 700; }
+.hero-map-status-radius { font-size: 11px; color: var(--ink-2); font-variant-numeric: tabular-nums; }
+.hero-map-status.tone-green  { color: var(--green); }
+.hero-map-status.tone-yellow { color: var(--amber); }
+.hero-map-status.tone-orange { color: var(--orange); }
+.hero-map-status.tone-red    { color: var(--red); }
+
+.hero-pin-wrap { background: none !important; border: none !important; }
+.hero-pin {
+  display: block; width: 14px; height: 14px; border-radius: 50%;
+  background: var(--accent); border: 2px solid #fff;
+}
+
+/* ---------------- top zone-threshold banner ---------------- */
+
+.zone-banner {
+  display: flex; gap: 12px; align-items: flex-start;
+  padding: 14px 16px; border-radius: var(--radius-lg);
+  background: #14213a; border: 1px solid #24407a; color: #c7d7f0;
+  font-size: 14px; line-height: 1.5;
+}
+.zone-banner svg { flex: 0 0 auto; margin-top: 1px; color: var(--accent); }
+.zone-banner strong { color: #fff; }
 
 .scope { position: absolute; inset: 0; z-index: 450; pointer-events: none; width: 100%; height: 100%; }
 .scope-label { font-family: var(--nums); font-size: 9.5px; font-weight: 600; }
