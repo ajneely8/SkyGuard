@@ -12,7 +12,11 @@ import L from 'leaflet'
 const RING_MILES = [5, 10, 20, 40]
 const MILES_PER_DEG_LAT = 69.055
 
-export default function RadarScope({ map, center, strikeBearingDeg = null }) {
+// Same three tiers the Lightning page uses for caution / advisory / warning —
+// the sweep's color is literally "how close it is", not a fixed alert red.
+const TONE_COLOR = { yellow: '#eab308', orange: '#f97316', red: '#ef4444' }
+
+export default function RadarScope({ map, center, strikeBearingDeg = null, strikeTone = null }) {
   const [geom, setGeom] = useState(null)
 
   useEffect(() => {
@@ -56,8 +60,12 @@ export default function RadarScope({ map, center, strikeBearingDeg = null }) {
   // fixed, at the true compass direction the strike is in. Compass degrees
   // are clockwise from north (up); the wedge is drawn pointing east (right,
   // CSS angle 0), so shift by -90 to line the two up.
-  const hasBearing = Number.isFinite(strikeBearingDeg)
-  const sweepColor = hasBearing ? '#ff6b5b' : '#1c8fd0'
+  // Only take over the sweep once the strike is actually within the
+  // caution/advisory/warning radii — a distant strike outside those rings
+  // still shows as a bolt on the map, but "Clear" status keeps the sweep
+  // as the plain decorative scan, matching the app's own proximity tiers.
+  const hasBearing = Number.isFinite(strikeBearingDeg) && !!TONE_COLOR[strikeTone]
+  const sweepColor = hasBearing ? TONE_COLOR[strikeTone] : '#1c8fd0'
   const sweepStyle = hasBearing
     ? { transformOrigin: `${cx}px ${cy}px`, transform: `rotate(${((strikeBearingDeg - 90 + 360) % 360).toFixed(1)}deg)` }
     : { transformOrigin: `${cx}px ${cy}px` }

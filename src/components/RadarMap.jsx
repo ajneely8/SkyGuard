@@ -335,7 +335,12 @@ export default function RadarMap({ height = 440 }) {
     <div className={`radar-wrap ${fullscreen ? 'radar-fullscreen' : ''}`}>
       <div className="radar-map-frame" style={{ height: mapHeight }}>
         <div ref={mapEl} className="radar-map" style={{ height: mapHeight }} />
-        <RadarScope map={mapReady} center={selectedLocation} strikeBearingDeg={strikeBearingDeg} />
+        <RadarScope
+          map={mapReady}
+          center={selectedLocation}
+          strikeBearingDeg={strikeBearingDeg}
+          strikeTone={overlayStatus?.level.tone}
+        />
 
         <button
           type="button"
