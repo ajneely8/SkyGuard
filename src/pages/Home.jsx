@@ -184,7 +184,7 @@ export default function Home() {
             </div>
 
             <div className="day-legend small muted">
-              Each hour shows the modelled WBGT and what it would allow. Colours match the bands in{' '}
+              Each hour shows the modelled WBGT and what it would allow, per the bands in{' '}
               <Link to="/app/rules">Rules</Link>.
             </div>
           </>
