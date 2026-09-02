@@ -969,6 +969,7 @@ table.data td.num { font-family: var(--nums); font-variant-numeric: tabular-nums
   .card-head { padding: 14px 16px; }
   .card-body { padding: 16px; }
   .section-divider { margin: 0 -30px 10px; padding: 10px 16px 0; }
+  .section-divider .h3 { font-size: 18px; }
   .radar-wrap { margin: -16px -30px 0; }
 
   .zone-banner { font-size: 13.5px; gap: 10px; margin-bottom: 14px !important; }
