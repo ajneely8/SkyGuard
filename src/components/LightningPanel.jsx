@@ -41,6 +41,7 @@ export default function LightningPanel({ locationId, tz }) {
 
   return (
     <Card
+      className="card-bare"
       title="Lightning"
       subtitle={
         strikeFeed.connected

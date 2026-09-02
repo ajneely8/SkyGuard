@@ -51,7 +51,7 @@ export default function SavedLocations() {
   return (
     <div className="stack">
       <div className="grid grid-main">
-        <Card title="My locations" subtitle={`${state.locations.length} saved`}>
+        <Card className="card-bare" title="My locations" subtitle={`${state.locations.length} saved`}>
           {state.locations.length === 0 ? (
             <Empty>No locations yet. Add one on the right.</Empty>
           ) : (
@@ -146,6 +146,7 @@ export default function SavedLocations() {
 
         <div className="stack">
           <Card
+            className="card-bare"
             title="Add a location"
             subtitle="Standing on the field? GPS pins it to metres. A ZIP centroid can be miles away."
           >
@@ -182,7 +183,7 @@ export default function SavedLocations() {
             )}
           </Card>
 
-          <Card title="Privacy">
+          <Card className="card-bare" title="Privacy">
             <ul className="small" style={{ lineHeight: 1.7, paddingLeft: 18, margin: 0 }}>
               <li>Coordinates stay in this browser and are used only to request weather.</li>
               <li>Your location is never shown to anyone else.</li>

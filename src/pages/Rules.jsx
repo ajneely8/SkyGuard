@@ -43,6 +43,7 @@ export default function Rules() {
   return (
     <div className="stack">
       <Card
+        className="card-bare"
         title="WBGT activity rules"
         subtitle="Each band sets the maximum time outside, the break pattern and the equipment allowed"
       >

@@ -309,7 +309,7 @@ export default function Home() {
       </Card>
 
       {/* Additional information */}
-      <Card title={session ? 'Practice running' : 'Practice'}>
+      <Card className="card-bare" title={session ? 'Practice running' : 'Practice'}>
         {session ? (
           <>
             <div className="row-between">

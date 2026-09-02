@@ -124,7 +124,7 @@ export default function Practice() {
       )}
 
       {upcoming.length > 0 && (
-        <Card title="Scheduled" subtitle="Practices not yet finished">
+        <Card className="card-bare" title="Scheduled" subtitle="Practices not yet finished">
           <div className="stack-sm">
             {upcoming.map((s) => (
               <div key={s.id} className="item-row">
@@ -158,6 +158,7 @@ export default function Practice() {
       )}
 
       <Card
+        className="card-bare"
         title="Practice history"
         subtitle={
           history.length
@@ -276,6 +277,7 @@ function ActiveSession({ session, band, locName, tz, now, onEnd, onCheck }) {
 
   return (
     <Card
+      className="card-bare"
       title={`Practice running — ${session.sport}`}
       subtitle={`${fmtTimeIn(session.start, tz)}–${fmtTimeIn(session.end, tz)} at ${locName}`}
       actions={
@@ -372,7 +374,7 @@ function SessionCreator({ locations, defaultLocation, settings, tz, onCreate, on
   }, [valid, startIso, endIso, settings])
 
   return (
-    <Card title="Start a practice" subtitle="Checks are scheduled for you">
+    <Card className="card-bare" title="Start a practice" subtitle="Checks are scheduled for you">
       <form
         onSubmit={(e) => {
           e.preventDefault()
