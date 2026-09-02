@@ -725,6 +725,11 @@ input[type='checkbox'], input[type='range'] { accent-color: var(--accent); }
 }
 .rt-kind { display: block; font-size: 9.5px; font-weight: 700; letter-spacing: 0.08em; color: var(--ink-3); }
 
+/* The field's real current time — separated from the radar frame's own
+   timestamp with a divider so the two are never mistaken for each other. */
+.radar-time-now { padding-right: 14px; border-right: 1px solid var(--line-2); }
+.radar-time-now .rt-kind { color: var(--green); }
+
 .radar-err {
   padding: 10px 14px; background: var(--surface-2); border-left: 3px solid var(--red);
   color: var(--red); font-size: 12.5px;

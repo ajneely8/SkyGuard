@@ -375,6 +375,17 @@ export default function RadarMap({ height = 440 }) {
 
         <div className="radar-bar-spacer" />
 
+        {/* The field's actual current clock — from its resolved address's real
+            IANA time zone, not the device's — separate from the radar frame's
+            own timestamp below, which can legitimately read a few minutes
+            behind "now". */}
+        {selectedLocation && (
+          <div className="radar-time radar-time-now">
+            <span className="rt-clock">{fmtTimeIn(new Date(now).toISOString(), tz)}</span>
+            <span className="rt-kind">LOCAL TIME{zone ? ` · ${zone}` : ''}</span>
+          </div>
+        )}
+
         <div className="radar-time">
           {/* Frame times are shown in the field's own time zone, so a coach in a
               different zone still reads the sideline clock. */}
