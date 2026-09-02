@@ -19,7 +19,7 @@ import LightningPanel from '../components/LightningPanel.jsx'
 import { IconAlert, IconDroplet, IconThermometer, IconGauge, WeatherIcon } from '../components/Icons.jsx'
 import { timeOutsideLabel, clothingLabel, bandRange } from '../lib/guidelines.js'
 import { METHOD_LABEL } from '../lib/wbgt.js'
-import { fmtF, fmtTimeIn, fmtNum, ageString, untilString, zoneLabel, differsFromDevice } from '../lib/format.js'
+import { fmtF, fmtTimeIn, fmtNum, ageString, untilString, zoneLabel } from '../lib/format.js'
 import { dayThrough, peakHour } from '../lib/forecast.js'
 
 export default function Home() {
@@ -58,7 +58,6 @@ export default function Home() {
   /* Every clock on this page reads in the field's zone, not the device's. */
   const tz = loc?.timezone || null
   const zone = zoneLabel(tz)
-  const tzDiffers = differsFromDevice(tz)
 
   /* Rest of the day, in the field's local hours. */
   const fc = forecasts[locId]?.data
@@ -318,18 +317,12 @@ export default function Home() {
         </Notice>
       )}
 
-      <LightningPanel locationId={locId} tz={tz} />
-
       {/* Location — the field's name already lives in the sidebar and the
           topbar selector on every screen, so this is just the map. */}
       <LocationHeroMap />
 
-      {tzDiffers && zone && (
-        <Notice kind="info" title={`Times shown in ${loc.name} local time (${zone})`}>
-          This device is in a different time zone. Every clock on this screen — radar frames, readings
-          and practice checks — is shown in the field's local time.
-        </Notice>
-      )}
+      {/* Lightning — its own section */}
+      <LightningPanel locationId={locId} tz={tz} />
 
       {/* Additional information */}
       <Card title={session ? 'Practice running' : 'Practice'}>
