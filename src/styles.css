@@ -624,7 +624,9 @@ input[type='checkbox'], input[type='range'] { accent-color: var(--accent); }
    sticky topbar, sidebar and mobile nav bar once the map is interacted
    with (zoomed, panned). Isolating it contains that stacking entirely
    inside the map's own box. */
-.radar-wrap { border-radius: var(--radius); overflow: hidden; border: 1px solid var(--line); position: relative; isolation: isolate; }
+/* Bleeds past the card-body padding so the map itself uses the full card
+   width instead of sitting inset — same bleed idiom as .answer below. */
+.radar-wrap { margin: 0 -20px; border-radius: 0; overflow: hidden; border-left: none; border-right: none; border-top: 1px solid var(--line); border-bottom: 1px solid var(--line); position: relative; isolation: isolate; }
 .radar-map-frame { position: relative; }
 .radar-map { width: 100%; background: #0b1220; }
 .leaflet-container { font: inherit; background: #0b1220; }
@@ -955,6 +957,7 @@ table.data td.num { font-family: var(--nums); font-variant-numeric: tabular-nums
   .card-head { padding: 14px 16px; }
   .card-body { padding: 16px; }
   .section-divider { margin: 16px -16px 10px; padding: 12px 16px 0; }
+  .radar-wrap { margin: 0 -16px; }
 
   .zone-banner { font-size: 13.5px; gap: 10px; margin-bottom: 14px !important; }
   .zone-banner svg { width: 17px; height: 17px; }
