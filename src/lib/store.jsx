@@ -515,6 +515,30 @@ export function StoreProvider({ children }) {
     [apply],
   )
 
+  /* ---- schedule templates ---- */
+
+  const saveScheduleTemplate = useCallback(
+    (input) => {
+      const created = {
+        id: uid('sched'),
+        name: input.name,
+        sport: input.sport,
+        locationId: input.locationId,
+        startTime: input.startTime, // "HH:MM", time-of-day only — reused across whatever date it's started on
+        endTime: input.endTime,
+        createdAt: new Date().toISOString(),
+      }
+      apply((s) => ({ ...s, scheduleTemplates: [created, ...s.scheduleTemplates] }))
+      return created
+    },
+    [apply],
+  )
+
+  const deleteScheduleTemplate = useCallback(
+    (id) => apply((s) => ({ ...s, scheduleTemplates: s.scheduleTemplates.filter((t) => t.id !== id) })),
+    [apply],
+  )
+
   /* ------------------------------------------------------------------ */
   /* Monitoring                                                          */
   /* ------------------------------------------------------------------ */
@@ -805,6 +829,8 @@ export function StoreProvider({ children }) {
     setSessionStatus,
     markCheckDone,
     deleteSession,
+    saveScheduleTemplate,
+    deleteScheduleTemplate,
     activeSessions,
     lastReading,
     nextCheck,

@@ -67,6 +67,10 @@ export function seedState() {
     },
     readings: [],
     sessions: [],
+    /** Reusable practice schedules — a name, sport, location and time-of-day
+     * range a coach saves once and starts a new practice from later, instead
+     * of re-entering the same details every day. */
+    scheduleTemplates: [],
     alerts: [],
   }
 }

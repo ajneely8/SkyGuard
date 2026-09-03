@@ -6,12 +6,20 @@
  * readings it produced, so the record builds itself.
  */
 
-import { useMemo, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { useStore } from '../lib/store.jsx'
 import { Card, Field, Notice, Empty } from '../components/ui.jsx'
 import { SPORTS } from '../lib/seed.js'
 import { timeOutsideLabel, clothingLabel, practiceEndLimit } from '../lib/guidelines.js'
-import { fmtTimeIn, fmtDate, untilString, zonedIso, todayStrIn, clockStrIn } from '../lib/format.js'
+import { fmtTimeIn, fmtDate, untilString, zonedIso, todayStrIn, clockStrIn, timeFmt } from '../lib/format.js'
+
+/** "15:30" -> "3:30 PM". The stored value is a bare time-of-day, not tied to
+ * any real date/zone, so this just reads its hour/minute back out again
+ * rather than route it through a real timezone-aware formatter. */
+function fmtClock12(hhmm) {
+  const [h, m] = (hhmm || '0:0').split(':').map(Number)
+  return timeFmt.format(new Date(2000, 0, 1, h, m))
+}
 
 export default function Practice() {
   const {
@@ -24,6 +32,8 @@ export default function Practice() {
     captureReading,
     markCheckDone,
     deleteSession,
+    saveScheduleTemplate,
+    deleteScheduleTemplate,
     current,
     guidelineNow,
     locationName,
@@ -65,6 +75,11 @@ export default function Practice() {
   }, [state.sessions, state.readings, guidelineNow])
 
   const [openId, setOpenId] = useState(null)
+  // Clicking "Use" on a saved schedule hands its values down to
+  // SessionCreator, which applies them to its own form fields — bumped so
+  // reusing the SAME schedule twice in a row still re-applies it even
+  // though the object reference would otherwise look unchanged.
+  const [templateToApply, setTemplateToApply] = useState(null)
 
   if (!selectedLocation) return <Empty>Add a location first.</Empty>
 
@@ -109,18 +124,53 @@ export default function Practice() {
           }}
         />
       ) : (
-        <SessionCreator
-          locations={state.locations}
-          defaultLocation={locId}
-          settings={state.settings}
-          tz={tz}
-          onCreate={(input) => {
-            const s = createSession(input)
-            setSelectedLocation(s.locationId)
-            return s
-          }}
-          onStart={(id) => setSessionStatus(id, 'active')}
-        />
+        <>
+          {state.scheduleTemplates.length > 0 && (
+            <Card className="card-bare" title="Saved schedules" subtitle="Start a practice from one you've saved before">
+              <div className="stack-sm">
+                {state.scheduleTemplates.map((t) => (
+                  <div key={t.id} className="item-row">
+                    <div style={{ flex: 1, minWidth: 0 }}>
+                      <div style={{ fontWeight: 650 }}>{t.name}</div>
+                      <div className="small muted">
+                        {t.sport} · {locationName(t.locationId)} · {fmtClock12(t.startTime)}–{fmtClock12(t.endTime)}
+                      </div>
+                    </div>
+                    <button
+                      className="btn btn-sm btn-primary"
+                      onClick={() => setTemplateToApply({ ...t, _applyKey: Date.now() })}
+                    >
+                      Use
+                    </button>
+                    <button
+                      className="btn btn-sm btn-ghost"
+                      onClick={() => {
+                        if (confirm(`Delete the "${t.name}" schedule?`)) deleteScheduleTemplate(t.id)
+                      }}
+                    >
+                      Delete
+                    </button>
+                  </div>
+                ))}
+              </div>
+            </Card>
+          )}
+
+          <SessionCreator
+            locations={state.locations}
+            defaultLocation={locId}
+            settings={state.settings}
+            tz={tz}
+            template={templateToApply}
+            onCreate={(input) => {
+              const s = createSession(input)
+              setSelectedLocation(s.locationId)
+              return s
+            }}
+            onStart={(id) => setSessionStatus(id, 'active')}
+            onSaveTemplate={saveScheduleTemplate}
+          />
+        </>
       )}
 
       {upcoming.length > 0 && (
@@ -348,7 +398,7 @@ function ActiveSession({ session, band, locName, tz, now, onEnd, onCheck }) {
 
 /* ------------------------------------------------------------------ */
 
-function SessionCreator({ locations, defaultLocation, settings, tz, onCreate, onStart }) {
+function SessionCreator({ locations, defaultLocation, settings, tz, template, onCreate, onStart, onSaveTemplate }) {
   const [sport, setSport] = useState('Football')
   const [locationId, setLocationId] = useState(defaultLocation || locations[0]?.id)
   // Defaults and entry are read in the field's zone, not the device's.
@@ -356,6 +406,20 @@ function SessionCreator({ locations, defaultLocation, settings, tz, onCreate, on
   const [start, setStart] = useState(() => clockStrIn(new Date(Date.now() + 15 * 60000), tz))
   const [end, setEnd] = useState(() => clockStrIn(new Date(Date.now() + 135 * 60000), tz))
   const [startNow, setStartNow] = useState(true)
+  const [saveAsSchedule, setSaveAsSchedule] = useState(false)
+  const [scheduleName, setScheduleName] = useState('')
+
+  // A "Use" click on a saved schedule (Practice.jsx) lands here as a fresh
+  // `template` prop — apply its sport/location/times to today's date,
+  // leaving the coach to just confirm (or tweak) before starting.
+  useEffect(() => {
+    if (!template) return
+    setSport(template.sport)
+    if (template.locationId) setLocationId(template.locationId)
+    setStart(template.startTime)
+    setEnd(template.endTime)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [template?._applyKey])
 
   const startIso = zonedIso(date, start, tz)
   const endIso = zonedIso(date, end, tz)
@@ -382,6 +446,9 @@ function SessionCreator({ locations, defaultLocation, settings, tz, onCreate, on
         onSubmit={(e) => {
           e.preventDefault()
           if (!valid) return
+          if (saveAsSchedule && scheduleName.trim()) {
+            onSaveTemplate({ name: scheduleName.trim(), sport, locationId, startTime: start, endTime: end })
+          }
           const s = onCreate({ sport, locationId, start: startIso, end: endIso })
           if (startNow && s) onStart(s.id)
         }}
@@ -414,6 +481,28 @@ function SessionCreator({ locations, defaultLocation, settings, tz, onCreate, on
           <span>Start now</span>
         </label>
 
+        <label className="row" style={{ gap: 8, marginBottom: saveAsSchedule ? 10 : 14 }}>
+          <input
+            type="checkbox"
+            checked={saveAsSchedule}
+            onChange={(e) => setSaveAsSchedule(e.target.checked)}
+            style={{ width: 18, height: 18 }}
+          />
+          <span>Save this as a schedule to reuse later</span>
+        </label>
+        {saveAsSchedule && (
+          <div style={{ marginBottom: 14 }}>
+            <Field label="Schedule name" id="scheduleName">
+              <input
+                id="scheduleName"
+                placeholder="e.g. Football — Weekday afternoon"
+                value={scheduleName}
+                onChange={(e) => setScheduleName(e.target.value)}
+              />
+            </Field>
+          </div>
+        )}
+
         {valid && (
           <div style={{ marginBottom: 16 }}>
             <div className="label">Checks</div>
@@ -427,8 +516,12 @@ function SessionCreator({ locations, defaultLocation, settings, tz, onCreate, on
           </div>
         )}
 
-        <button className="btn btn-lg btn-primary btn-block" type="submit" disabled={!valid}>
-          Start practice
+        <button
+          className="btn btn-lg btn-primary btn-block"
+          type="submit"
+          disabled={!valid || (saveAsSchedule && !scheduleName.trim())}
+        >
+          {startNow ? 'Start practice' : 'Save practice'}
         </button>
       </form>
     </Card>
