@@ -65,7 +65,14 @@ export default function Weather() {
   const todayStr = new Intl.DateTimeFormat('en-CA', { timeZone: tz || undefined }).format(new Date(now))
 
   return (
-    <div className="stack">
+    <div className="stack weather-page">
+      {/* Purely decorative sky wash behind the card — a soft gold sun glow
+          and a cool cloud glow, the kind of atmosphere most weather apps
+          put behind their forecast instead of a flat panel. */}
+      <div className="weather-sky" aria-hidden="true">
+        <div className="weather-sun-glow" />
+        <div className="weather-cloud-glow" />
+      </div>
       <Card className="card-bare" title="Weather" subtitle={`The next ${days.length || 7} days at ${loc.name}`}>
         {!fc ? (
           <div className="muted small" style={{ padding: '10px 2px' }}>

@@ -497,6 +497,24 @@ input[type='checkbox'], input[type='range'] { accent-color: var(--accent); }
 
 /* ---------------- weather (7-day) ---------------- */
 
+/* A soft sky wash behind the card instead of a flat panel — the kind of
+   atmosphere most weather apps put behind the forecast. Purely decorative,
+   sits behind the (transparent, card-bare) card via z-index, clipped to
+   the page so it never bleeds into the content below. */
+.weather-page { position: relative; }
+.weather-sky { position: absolute; top: -8px; left: -8px; right: -8px; height: 320px; overflow: hidden; z-index: 0; pointer-events: none; }
+.weather-sun-glow {
+  position: absolute; top: -90px; left: 4%; width: 260px; height: 260px; border-radius: 50%;
+  background: radial-gradient(circle, rgba(251, 191, 36, 0.22), transparent 70%);
+  filter: blur(6px);
+}
+.weather-cloud-glow {
+  position: absolute; top: -70px; right: 2%; width: 340px; height: 240px; border-radius: 50%;
+  background: radial-gradient(circle, rgba(56, 189, 248, 0.16), transparent 70%);
+  filter: blur(10px);
+}
+.weather-page > .card { position: relative; z-index: 1; background: transparent; }
+
 /* Same flat, scrollable, no-box treatment as .day-strip, and the same
    green/yellow/orange/red/darkred WBGT-band coloring used everywhere else
    in the app. */
