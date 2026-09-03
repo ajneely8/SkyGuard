@@ -18,6 +18,7 @@ import {
   IconCloudDrizzle,
   IconCloudRain,
   IconCloudSnow,
+  IconCloudSun,
   IconSun,
 } from '../components/Icons.jsx'
 
@@ -27,13 +28,15 @@ const thunderPct = (maxThunder) => (maxThunder ? Math.round((maxThunder.score / 
 
 const RAIN_ICONS = { drizzle: IconCloudDrizzle, rain: IconCloudRain, snow: IconCloudSnow }
 
-/** Only three looks on this page: sunny, some kind of rain, or a storm —
- * no plain "overcast" gray cloud with no story to tell. Every day's label
- * and icon come from this same bucket, so they never disagree. */
+/** Four looks on this page: sunny, partly cloudy (cloud + sun together),
+ * some kind of rain, or a storm — no plain gray "overcast" cloud with no
+ * story to tell. Every day's label and icon come from this same bucket, so
+ * they never disagree. */
 function simplifyDay(d, pct) {
   if (pct >= 50 || d.icon === 'storm') return { Icon: IconCloudLightning, label: 'Storms' }
   const RainIcon = RAIN_ICONS[d.icon]
   if (RainIcon) return { Icon: RainIcon, label: d.conditions }
+  if (d.icon === 'cloudSun' || d.icon === 'cloudMoon') return { Icon: IconCloudSun, label: 'Partly cloudy' }
   return { Icon: IconSun, label: 'Sunny' }
 }
 
@@ -66,9 +69,11 @@ export default function Weather() {
 
   return (
     <div className="stack weather-page">
-      {/* Purely decorative sky wash behind the card — a soft gold sun glow
-          and a cool cloud glow, the kind of atmosphere most weather apps
-          put behind their forecast instead of a flat panel. */}
+      {/* Purely decorative night sky behind the card — twinkling stars
+          plus a soft gold sun glow and a cool cloud glow, the kind of
+          atmosphere most weather apps put behind their forecast instead
+          of a flat panel. */}
+      <div className="weather-stars" aria-hidden="true" />
       <div className="weather-sky" aria-hidden="true">
         <div className="weather-sun-glow" />
         <div className="weather-cloud-glow" />

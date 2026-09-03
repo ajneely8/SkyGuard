@@ -502,6 +502,47 @@ input[type='checkbox'], input[type='range'] { accent-color: var(--accent); }
    sits behind the (transparent, card-bare) card via z-index, clipped to
    the page so it never bleeds into the content below. */
 .weather-page { position: relative; }
+
+/* A scattering of small stars across the whole page height, two layers
+   twinkling on their own offset cycles so it doesn't read as a uniform
+   blink. Pure CSS (stacked radial-gradients) — no per-star DOM nodes. */
+.weather-stars {
+  position: absolute; inset: 0; z-index: -1; pointer-events: none; overflow: hidden;
+  background-image:
+    radial-gradient(1.4px 1.4px at 7% 6%, #fff, transparent),
+    radial-gradient(1.1px 1.1px at 18% 22%, #fff, transparent),
+    radial-gradient(1.6px 1.6px at 31% 4%, #fff, transparent),
+    radial-gradient(1px 1px at 46% 16%, #fff, transparent),
+    radial-gradient(1.3px 1.3px at 58% 3%, #fff, transparent),
+    radial-gradient(1.1px 1.1px at 68% 20%, #fff, transparent),
+    radial-gradient(1.5px 1.5px at 79% 8%, #fff, transparent),
+    radial-gradient(1px 1px at 90% 24%, #fff, transparent),
+    radial-gradient(1.2px 1.2px at 97% 5%, #fff, transparent),
+    radial-gradient(1px 1px at 12% 34%, #fff, transparent),
+    radial-gradient(1.3px 1.3px at 37% 30%, #fff, transparent),
+    radial-gradient(1.1px 1.1px at 63% 33%, #fff, transparent),
+    radial-gradient(1.4px 1.4px at 85% 36%, #fff, transparent);
+  background-repeat: no-repeat;
+  opacity: 0.55;
+  animation: starTwinkleA 5s ease-in-out infinite;
+}
+.weather-stars::after {
+  content: ''; position: absolute; inset: 0;
+  background-image:
+    radial-gradient(1px 1px at 24% 12%, #fff, transparent),
+    radial-gradient(1.2px 1.2px at 52% 26%, #fff, transparent),
+    radial-gradient(1px 1px at 73% 14%, #fff, transparent),
+    radial-gradient(1.1px 1.1px at 4% 26%, #fff, transparent),
+    radial-gradient(1px 1px at 94% 33%, #fff, transparent);
+  background-repeat: no-repeat;
+  animation: starTwinkleB 4s ease-in-out infinite;
+}
+@keyframes starTwinkleA { 0%, 100% { opacity: 0.3; } 50% { opacity: 0.9; } }
+@keyframes starTwinkleB { 0%, 100% { opacity: 0.85; } 50% { opacity: 0.25; } }
+@media (prefers-reduced-motion: reduce) {
+  .weather-stars, .weather-stars::after { animation: none; opacity: 0.5; }
+}
+
 .weather-sky { position: absolute; top: -8px; left: -8px; right: -8px; height: 320px; overflow: hidden; z-index: 0; pointer-events: none; }
 .weather-sun-glow {
   position: absolute; top: -90px; left: 4%; width: 260px; height: 260px; border-radius: 50%;
@@ -587,10 +628,12 @@ input[type='checkbox'], input[type='range'] { accent-color: var(--accent); }
   .wc-lo { font-size: 14px; }
 }
 
-/* Drizzle weather icon: light blue cloud with three drops falling on a
+/* Drizzle weather icon: white cloud, three light-blue drops falling on a
    staggered loop, wherever WeatherIcon renders one (Home's hourly strip,
-   Weather's week strip). */
-.icon-drizzle { color: var(--sky); }
+   Weather's week strip). The cloud path has no color of its own — it
+   inherits this "color", while the drops carry their own explicit blue
+   stroke below, so the two read as distinct. */
+.icon-drizzle { color: var(--ink); }
 .drizzle-drop {
   stroke: var(--sky); stroke-width: 2; stroke-linecap: round;
   transform-box: fill-box; transform-origin: center;
@@ -640,8 +683,9 @@ input[type='checkbox'], input[type='range'] { accent-color: var(--accent); }
   .cs-sun { animation: none; }
 }
 
-/* Rain icon: heavier/faster falling drops than drizzle, deeper blue. */
-.icon-rain { color: var(--rain); }
+/* Rain icon: white cloud, heavier/faster falling drops than drizzle in a
+   deeper blue — same white-cloud/blue-drop split as drizzle above. */
+.icon-rain { color: var(--ink); }
 .rain-drop {
   stroke: var(--rain); stroke-width: 2; stroke-linecap: round;
   transform-box: fill-box; transform-origin: center;
