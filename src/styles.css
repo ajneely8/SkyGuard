@@ -488,6 +488,57 @@ input[type='checkbox'], input[type='range'] { accent-color: var(--accent); }
 }
 .day-legend { margin-top: 2px; }
 
+/* ---------------- weather (7-day) ---------------- */
+
+/* Same flat, scrollable, no-box treatment as .day-strip, and the same
+   green/yellow/orange/red/darkred WBGT-band coloring used everywhere else
+   in the app. */
+.week-strip { display: flex; overflow-x: auto; padding: 2px 0 12px; gap: 0; }
+.week-cell {
+  flex: 0 0 148px;
+  padding: 12px 18px; border-right: 1px solid var(--line-2); border-left: 3px solid transparent;
+  display: grid; gap: 3px; justify-items: start; text-align: left;
+}
+.week-cell:last-child { border-right: none; }
+.week-cell.tone-green   { border-left-color: var(--green); }
+.week-cell.tone-yellow  { border-left-color: var(--amber); }
+.week-cell.tone-orange  { border-left-color: var(--orange); }
+.week-cell.tone-red     { border-left-color: var(--red); }
+.week-cell.tone-darkred { border-left-color: var(--darkred); }
+.wc-day { font-size: 13px; font-weight: 700; color: var(--ink); }
+.wc-date { font-size: 11px; color: var(--ink-3); margin-bottom: 4px; }
+.wc-icon { color: var(--ink-3); width: 22px; height: 22px; margin: 2px 0; }
+.wc-cond { font-size: 11.5px; color: var(--ink-2); line-height: 1.3; margin-bottom: 6px; }
+.wc-hilo {
+  font-family: var(--nums); font-size: 20px; font-weight: 700; color: var(--ink);
+  font-variant-numeric: tabular-nums; line-height: 1.1;
+}
+.wc-lo { color: var(--ink-3); font-weight: 600; font-size: 16px; }
+.wc-hilo.tone-green   { color: var(--green); }
+.wc-hilo.tone-yellow  { color: var(--amber); }
+.wc-hilo.tone-orange  { color: var(--orange); }
+.wc-hilo.tone-red     { color: var(--red); }
+.wc-hilo.tone-darkred { color: var(--darkred); }
+.wc-wbgt {
+  font-family: var(--nums); font-size: 14px; font-weight: 700; color: var(--ink-2);
+  font-variant-numeric: tabular-nums; margin-top: 2px; margin-bottom: 8px;
+  padding-bottom: 8px; border-bottom: 1px solid var(--line-2); width: 100%;
+}
+.wc-wbgt.tone-green   { color: var(--green); }
+.wc-wbgt.tone-yellow  { color: var(--amber); }
+.wc-wbgt.tone-orange  { color: var(--orange); }
+.wc-wbgt.tone-red     { color: var(--red); }
+.wc-wbgt.tone-darkred { color: var(--darkred); }
+.wc-unit { display: block; font-size: 8.5px; font-weight: 700; letter-spacing: 0.08em; color: var(--ink-3); margin-top: 1px; }
+.wc-row { display: flex; justify-content: space-between; gap: 10px; width: 100%; font-size: 11.5px; color: var(--ink-2); }
+.wc-row .label { margin: 0; font-size: 10px; }
+
+@media (max-width: 640px) {
+  .week-cell { flex-basis: 128px; padding: 10px 14px; }
+  .wc-hilo { font-size: 18px; }
+  .wc-lo { font-size: 14px; }
+}
+
 /* ---------------- what moves the number ---------------- */
 
 .drv-list { display: grid; gap: 10px; }

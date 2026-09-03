@@ -1,25 +1,25 @@
 /**
- * Weather — the coming week at this field, one day per row.
+ * Weather — the coming week at this field, side to side, one card per day.
  *
  * The 7-day data has always been fetched (fetchForecast() in forecast.js
  * asks Open-Meteo for forecast_days=7) but nothing displayed it — Home only
- * ever used the hourly strip. This is that data finally shown.
+ * ever used the hourly strip. This is that data finally shown, with the same
+ * green/yellow/orange/red/darkred WBGT-band coloring used everywhere else
+ * in the app.
  */
 
 import { useEffect } from 'react'
 import { useStore } from '../lib/store.jsx'
 import { Card, Empty } from '../components/ui.jsx'
 import { WeatherIcon } from '../components/Icons.jsx'
-import { timeOutsideLabel } from '../lib/guidelines.js'
 import { fmtTimeIn } from '../lib/format.js'
 
 function dayLabel(iso, tz, todayStr) {
   const d = new Date(iso)
   const dateStr = new Intl.DateTimeFormat('en-CA', { timeZone: tz || undefined }).format(d) // YYYY-MM-DD, stable for comparison
-  const weekday = new Intl.DateTimeFormat(undefined, { weekday: 'long', timeZone: tz || undefined }).format(d)
+  const weekday = new Intl.DateTimeFormat(undefined, { weekday: 'short', timeZone: tz || undefined }).format(d)
   const date = new Intl.DateTimeFormat(undefined, { month: 'short', day: 'numeric', timeZone: tz || undefined }).format(d)
-  if (dateStr === todayStr) return `Today · ${date}`
-  return `${weekday} · ${date}`
+  return { top: dateStr === todayStr ? 'Today' : weekday, date }
 }
 
 export default function Weather() {
@@ -51,60 +51,48 @@ export default function Weather() {
         ) : days.length === 0 ? (
           <div className="muted small" style={{ padding: '10px 2px' }}>No forecast days available.</div>
         ) : (
-          <div className="rules-list">
+          <div className="week-strip">
             {days.map((d) => {
+              const label = dayLabel(d.date, tz, todayStr)
               const band = guidelineNow(d.peakWbgtF)
+              const tone = band?.tone || 'none'
               return (
-                <div key={d.date} className={`rule-band tone-${band?.tone || 'none'}`}>
-                  <div className="rb-range">
-                    <div className="rb-wbgt">{d.peakWbgtF != null ? `${d.peakWbgtF.toFixed(1)}°` : '—'}</div>
-                    <div className="rb-name">{dayLabel(d.date, tz, todayStr)}</div>
-                    {band && <span className={`badge badge-${band.tone}`}>{band.name}</span>}
+                <div key={d.date} className={`week-cell tone-${tone}`}>
+                  <div className="wc-day">{label.top}</div>
+                  <div className="wc-date">{label.date}</div>
+                  <WeatherIcon icon={d.icon} className="wc-icon" />
+                  <div className="wc-cond">{d.conditions || '—'}</div>
+                  <div className={`wc-hilo tone-${tone}`}>
+                    {d.highF != null ? Math.round(d.highF) : '—'}° <span className="wc-lo">{d.lowF != null ? Math.round(d.lowF) : '—'}°</span>
                   </div>
-                  <div className="rb-cols">
-                    <div>
-                      <div className="label">Conditions</div>
-                      <div className="rb-text row" style={{ gap: 6 }}>
-                        <WeatherIcon icon={d.icon} width={16} height={16} />
-                        {d.conditions || '—'}
-                      </div>
-                    </div>
-                    <div>
-                      <div className="label">High / Low</div>
-                      <div className="rb-value">
-                        {d.highF != null ? Math.round(d.highF) : '—'}° / {d.lowF != null ? Math.round(d.lowF) : '—'}°
-                      </div>
-                    </div>
-                    <div>
-                      <div className="label">Precip</div>
-                      <div className="rb-text">
-                        {d.precipProbMax != null ? `${Math.round(d.precipProbMax)}% chance` : '—'}
-                        {d.precipSumIn ? ` · ${d.precipSumIn.toFixed(2)}"` : ''}
-                      </div>
-                    </div>
-                    <div>
-                      <div className="label">Wind</div>
-                      <div className="rb-text">
-                        {d.windMaxMph != null ? `${Math.round(d.windMaxMph)} mph` : '—'}
-                        {d.gustMaxMph != null ? `, gusts ${Math.round(d.gustMaxMph)}` : ''}
-                      </div>
-                    </div>
-                    <div>
-                      <div className="label">UV index</div>
-                      <div className="rb-text">{d.uvMax != null ? Math.round(d.uvMax) : '—'}</div>
-                    </div>
-                    <div>
-                      <div className="label">Sun</div>
-                      <div className="rb-text">
-                        {d.sunrise ? fmtTimeIn(d.sunrise, tz) : '—'} – {d.sunset ? fmtTimeIn(d.sunset, tz) : '—'}
-                      </div>
-                    </div>
+                  <div className={`wc-wbgt tone-${tone}`}>
+                    {d.peakWbgtF != null ? `${d.peakWbgtF.toFixed(1)}°` : '—'}
+                    <span className="wc-unit">PEAK WBGT</span>
                   </div>
-                  {band && d.peakWbgtAt && (
-                    <div className="rb-note">
-                      Peak WBGT around {fmtTimeIn(d.peakWbgtAt, tz)} — {timeOutsideLabel(band)}
-                    </div>
-                  )}
+                  <div className="wc-row">
+                    <span className="label">Precip</span>
+                    <span>
+                      {d.precipProbMax != null ? `${Math.round(d.precipProbMax)}%` : '—'}
+                      {d.precipSumIn ? ` · ${d.precipSumIn.toFixed(2)}"` : ''}
+                    </span>
+                  </div>
+                  <div className="wc-row">
+                    <span className="label">Wind</span>
+                    <span>
+                      {d.windMaxMph != null ? `${Math.round(d.windMaxMph)} mph` : '—'}
+                      {d.gustMaxMph != null ? ` g${Math.round(d.gustMaxMph)}` : ''}
+                    </span>
+                  </div>
+                  <div className="wc-row">
+                    <span className="label">UV</span>
+                    <span>{d.uvMax != null ? Math.round(d.uvMax) : '—'}</span>
+                  </div>
+                  <div className="wc-row">
+                    <span className="label">Sun</span>
+                    <span>
+                      {d.sunrise ? fmtTimeIn(d.sunrise, tz) : '—'} – {d.sunset ? fmtTimeIn(d.sunset, tz) : '—'}
+                    </span>
+                  </div>
                 </div>
               )
             })}
