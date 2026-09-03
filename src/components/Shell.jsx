@@ -1,4 +1,4 @@
-/** App chrome. Five screens, no icons. */
+/** App chrome. Six screens, no icons. */
 
 import { NavLink, Outlet, useLocation, Navigate } from 'react-router-dom'
 import { useStore } from '../lib/store.jsx'
@@ -9,6 +9,7 @@ const NAV = [
   { to: '/app', label: 'Home', end: true },
   { to: '/app/locations', label: 'Locations' },
   { to: '/app/practice', label: 'Practice' },
+  { to: '/app/weather', label: 'Weather' },
   { to: '/app/rules', label: 'Rules' },
   { to: '/app/lightning', label: 'Lightning' },
 ]
