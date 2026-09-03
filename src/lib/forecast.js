@@ -237,7 +237,7 @@ export function localDay(iso, timeZone) {
  *
  * @returns {{rows: object[], isTomorrow: boolean, endHour: number}}
  */
-export function dayThrough(hours, timeZone, { endHour = 21, from = Date.now() } = {}) {
+export function dayThrough(hours, timeZone, { endHour = 23, from = Date.now() } = {}) {
   if (!hours?.length) return { rows: [], isTomorrow: false, endHour }
 
   const nowIso = new Date(from).toISOString()
@@ -262,7 +262,7 @@ export function dayThrough(hours, timeZone, { endHour = 21, from = Date.now() } 
     rows = hours.filter((h) => {
       if (localDay(h.ts, timeZone) !== tomorrow) return false
       const hh = localHour(h.ts, timeZone)
-      return hh >= 6 && hh <= endHour
+      return hh <= endHour
     })
     isTomorrow = rows.length > 0
   }

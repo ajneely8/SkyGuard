@@ -59,7 +59,7 @@ export default function Home() {
   /* Rest of the day, in the field's local hours. */
   const fc = forecasts[locId]?.data
   const dayView = useMemo(
-    () => (fc ? dayThrough(fc.hours, tz, { endHour: 21, from: now }) : { rows: [], isTomorrow: false }),
+    () => (fc ? dayThrough(fc.hours, tz, { endHour: 23, from: now }) : { rows: [], isTomorrow: false }),
     // `now` ticks every second; only recompute when the hour rolls over.
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [fc, tz, Math.floor(now / 600000)],
