@@ -503,11 +503,12 @@ input[type='checkbox'], input[type='range'] { accent-color: var(--accent); }
    the page so it never bleeds into the content below. */
 .weather-page { position: relative; }
 
-/* A scattering of small stars across the whole page height, two layers
-   twinkling on their own offset cycles so it doesn't read as a uniform
-   blink. Pure CSS (stacked radial-gradients) — no per-star DOM nodes. */
+/* A scattering of small stars across the sky band, two layers twinkling on
+   their own offset cycles so it doesn't read as a uniform blink. Pure CSS
+   (stacked radial-gradients) — no per-star DOM nodes. Only rendered inside
+   a night SkyScene. */
 .weather-stars {
-  position: absolute; inset: 0; z-index: -1; pointer-events: none; overflow: hidden;
+  position: absolute; inset: 0; pointer-events: none; overflow: hidden;
   background-image:
     radial-gradient(1.4px 1.4px at 7% 6%, #fff, transparent),
     radial-gradient(1.1px 1.1px at 18% 22%, #fff, transparent),
@@ -543,17 +544,54 @@ input[type='checkbox'], input[type='range'] { accent-color: var(--accent); }
   .weather-stars, .weather-stars::after { animation: none; opacity: 0.5; }
 }
 
-.weather-sky { position: absolute; top: -8px; left: -8px; right: -8px; height: 320px; overflow: hidden; z-index: 0; pointer-events: none; }
-.weather-sun-glow {
-  position: absolute; top: -90px; left: 4%; width: 260px; height: 260px; border-radius: 50%;
-  background: radial-gradient(circle, rgba(251, 191, 36, 0.22), transparent 70%);
-  filter: blur(6px);
+/* The decorative band behind the page's cards — three moods (night,
+   sunny-with-clouds, clear sunny), picked in Weather.jsx from the searched
+   city's own current hour so it matches what time it actually is there. */
+.weather-sky-scene { position: absolute; top: -8px; left: -8px; right: -8px; height: 320px; overflow: hidden; z-index: 0; pointer-events: none; }
+.weather-sky-scene.scene-night     { background: linear-gradient(180deg, #050a1c 0%, #0b1230 45%, #142449 75%, #1c2f57 100%); }
+.weather-sky-scene.scene-cloud-day { background: linear-gradient(180deg, #1b6fd1 0%, #3f96e6 50%, #7dc1f2 100%); }
+.weather-sky-scene.scene-clear-day { background: linear-gradient(180deg, #0f5fc4 0%, #2f89e0 55%, #6fb8ef 100%); }
+
+/* Glowing sun disc for the two day scenes — brighter and more central than
+   the old static glow blob, since it's now the scene's main subject. */
+.weather-sun {
+  position: absolute; top: 18px; left: 8%; width: 110px; height: 110px; border-radius: 50%;
+  background: radial-gradient(circle, #fffaf0 0%, #ffe9a8 35%, rgba(255, 233, 168, 0.45) 65%, transparent 78%);
+  box-shadow: 0 0 70px 26px rgba(255, 233, 168, 0.3);
+  animation: sunPulse 4s ease-in-out infinite;
 }
-.weather-cloud-glow {
-  position: absolute; top: -70px; right: 2%; width: 340px; height: 240px; border-radius: 50%;
-  background: radial-gradient(circle, rgba(56, 189, 248, 0.16), transparent 70%);
-  filter: blur(10px);
+@media (prefers-reduced-motion: reduce) {
+  .weather-sun { animation: none; }
 }
+
+/* Crescent moon for the night scene — one solid disc with a same-color
+   "bite" taken out via an offset box-shadow, the classic CSS crescent. The
+   bite color matches the night gradient's own top stop. */
+.weather-moon {
+  position: absolute; top: 26px; left: 9%; width: 58px; height: 58px; border-radius: 50%;
+  background: #f4f1e6;
+  box-shadow: -16px -6px 0 6px #050a1c, 0 0 44px 14px rgba(244, 241, 230, 0.32);
+}
+
+/* Soft cloud bank near the bottom of the band — stacked blurred ellipses,
+   no image assets. Dimmer and blue-tinted for the night scene, bright white
+   for the daytime one. */
+.weather-scene-clouds {
+  position: absolute; inset: 0; pointer-events: none;
+  background-image:
+    radial-gradient(70px 28px at 18% 82%, rgba(255, 255, 255, 0.85), transparent 70%),
+    radial-gradient(100px 36px at 52% 90%, rgba(255, 255, 255, 0.75), transparent 70%),
+    radial-gradient(80px 30px at 82% 78%, rgba(255, 255, 255, 0.8), transparent 70%),
+    radial-gradient(55px 22px at 35% 66%, rgba(255, 255, 255, 0.5), transparent 70%),
+    radial-gradient(60px 24px at 68% 60%, rgba(255, 255, 255, 0.4), transparent 70%);
+}
+.weather-scene-clouds-night {
+  background-image:
+    radial-gradient(70px 28px at 18% 82%, rgba(200, 210, 235, 0.45), transparent 70%),
+    radial-gradient(100px 36px at 52% 90%, rgba(200, 210, 235, 0.38), transparent 70%),
+    radial-gradient(80px 30px at 82% 78%, rgba(200, 210, 235, 0.4), transparent 70%);
+}
+
 .weather-page > .card { position: relative; z-index: 1; background: transparent; }
 
 /* Hero card: location name, current temp, condition + today's high/low,
@@ -581,7 +619,11 @@ input[type='checkbox'], input[type='range'] { accent-color: var(--accent); }
    once a city has been picked from these results. Sized to fill the page
    rather than sit as a small centered box — this is the whole page until
    a city is picked, so it should read that way. */
-.weather-search-card { margin: 24px 0 0; text-align: center; padding: 8px 4px 40px; }
+/* Extra top padding clears the SkyScene's sun/moon (they sit ~18-130px
+   into the band) so the centered title never collides with them — the
+   detail page's hero card doesn't need this since its own "SEARCHED CITY"
+   row already sits low enough to clear them on its own. */
+.weather-search-card { margin: 24px 0 0; text-align: center; padding: 96px 4px 40px; }
 .weather-search-card .card-head h2 { font-size: 30px; }
 .weather-search-card .card-head .small { font-size: 15px; }
 .weather-search-form { display: flex; gap: 10px; margin-top: 20px; }

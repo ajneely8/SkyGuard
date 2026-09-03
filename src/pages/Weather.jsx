@@ -117,6 +117,33 @@ function buildOutlook(hours, tz) {
   return `${BUCKET_ARRIVING[changeBucket]} will arrive by ${fmtTimeIn(changeHour.ts, tz)}.${gustText}`
 }
 
+/**
+ * The decorative band behind the page's cards — a night sky (moon, stars,
+ * dim clouds), a sunny sky with clouds, or a clear sunny sky, picked from
+ * the searched city's own current hour so it actually reflects what time
+ * it is there right now, not the viewer's own clock.
+ */
+function SkyScene({ scene }) {
+  return (
+    <div className={`weather-sky-scene ${scene}`} aria-hidden="true">
+      {scene === 'scene-night' && (
+        <>
+          <div className="weather-stars" />
+          <div className="weather-moon" />
+          <div className="weather-scene-clouds weather-scene-clouds-night" />
+        </>
+      )}
+      {scene === 'scene-cloud-day' && (
+        <>
+          <div className="weather-sun" />
+          <div className="weather-scene-clouds" />
+        </>
+      )}
+      {scene === 'scene-clear-day' && <div className="weather-sun" />}
+    </div>
+  )
+}
+
 /* ---------- air quality (US AQI, EPA breakpoints + official colors) ---------- */
 
 const AQI_LEVELS = [
@@ -315,13 +342,15 @@ export default function Weather() {
   }, [recentsKey])
 
   if (!picked) {
+    // No city picked yet, so there's no "current hour" to key off — guess
+    // day/night from the viewer's own clock instead, just so this screen
+    // isn't stuck looking like high noon at 2am.
+    const guessHour = new Date().getHours()
+    const searchScene = guessHour >= 6 && guessHour < 20 ? 'scene-clear-day' : 'scene-night'
+
     return (
       <div className="stack weather-page">
-        <div className="weather-stars" aria-hidden="true" />
-        <div className="weather-sky" aria-hidden="true">
-          <div className="weather-sun-glow" />
-          <div className="weather-cloud-glow" />
-        </div>
+        <SkyScene scene={searchScene} />
         <Card className="card-bare weather-search-card" title="Weather" subtitle="Look up any city's forecast">
           <form className="weather-search-form" onSubmit={runSearch}>
             <input
@@ -419,17 +448,14 @@ export default function Weather() {
   const sunriseTimes = [days[0]?.sunrise, days[1]?.sunrise].filter(Boolean).map((iso) => new Date(iso).getTime())
   const sunsetTimes = [days[0]?.sunset, days[1]?.sunset].filter(Boolean).map((iso) => new Date(iso).getTime())
 
+  // The decorative band reflects the searched city's own current hour —
+  // night, sunny-with-clouds, or clear sunny — not the viewer's clock.
+  const skyIsDay = nowHour?.isDay ?? true
+  const detailScene = !skyIsDay ? 'scene-night' : heroCond?.bucket === 'sun' ? 'scene-clear-day' : 'scene-cloud-day'
+
   return (
     <div className="stack weather-page">
-      {/* Purely decorative night sky behind the cards — twinkling stars
-          plus a soft gold sun glow and a cool cloud glow, the kind of
-          atmosphere most weather apps put behind their forecast instead
-          of a flat panel. */}
-      <div className="weather-stars" aria-hidden="true" />
-      <div className="weather-sky" aria-hidden="true">
-        <div className="weather-sun-glow" />
-        <div className="weather-cloud-glow" />
-      </div>
+      <SkyScene scene={detailScene} />
 
       {fc && nowHour && (
         <Card className="card-bare weather-hero-card">
