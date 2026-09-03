@@ -703,12 +703,20 @@ input[type='checkbox'], input[type='range'] { accent-color: var(--accent); }
 .hr-icon { color: var(--ink-3); flex: 0 0 auto; }
 .hr-temp { font-family: var(--nums); font-size: 16px; font-weight: 700; color: var(--ink); font-variant-numeric: tabular-nums; }
 
+/* The one hour slot that actually contains sunrise trades its temperature
+   for the word "Sunrise" and its rounded hour label for the exact minute,
+   so it needs a little more room than a plain "81°" cell. */
+.hour-cell-sun-event { flex-basis: 84px; }
+.hr-temp-word { font-family: inherit; font-size: 13px; font-variant-numeric: normal; white-space: nowrap; }
+
 @media (max-width: 480px) {
   .hero-temp { font-size: 52px; }
   .hero-loc-name { font-size: 19px; }
   .hour-cell { flex-basis: 58px; padding: 0 6px; }
+  .hour-cell-sun-event { flex-basis: 76px; }
   .hr-time { font-size: 12px; }
   .hr-temp { font-size: 15px; }
+  .hr-temp-word { font-size: 12px; }
 }
 
 /* Apple-Weather-style row list: day / icon / low / a range bar / high,
@@ -840,6 +848,9 @@ input[type='checkbox'], input[type='range'] { accent-color: var(--accent); }
 /* Partly-cloudy-at-night icon: same neutral cloud, just a pale static
    crescent instead of the sun's gold pulse — night doesn't glow. */
 .cm-moon { color: var(--snow); }
+
+.icon-sunrise { color: var(--sun-gold); }
+.icon-sunset { color: var(--orange); }
 
 /* Rain icon: white cloud, heavier/faster falling drops than drizzle in a
    deeper blue — same white-cloud/blue-drop split as drizzle above. */

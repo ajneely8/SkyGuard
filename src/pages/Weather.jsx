@@ -29,6 +29,8 @@ import {
   IconCloudMoon,
   IconSun,
   IconMoon,
+  IconSunrise,
+  IconSunset,
 } from '../components/Icons.jsx'
 
 const RAIN_ICONS = { drizzle: IconCloudDrizzle, rain: IconCloudRain, snow: IconCloudSnow }
@@ -63,7 +65,7 @@ const scorePct = (thunder) => (thunder ? Math.round((thunder.score / 8) * 100) :
  * sun together), some kind of rain, or a storm — no plain gray "overcast"
  * cloud with no story to tell. Shared by both the daily rows and the
  * hourly strip so an hour and the day it belongs to never disagree. */
-function simplifyCondition(icon, conditions, pct) {
+function simplifyCondition(icon, conditions, pct, isDay = true) {
   if (pct >= 50 || icon === 'storm') return { Icon: IconCloudLightning, label: 'Storms', bucket: 'storm' }
   const RainIcon = RAIN_ICONS[icon]
   if (RainIcon) return { Icon: RainIcon, label: conditions, bucket: 'rain' }
@@ -74,6 +76,12 @@ function simplifyCondition(icon, conditions, pct) {
   if (icon === 'cloudSun') return { Icon: IconCloudSun, label: 'Partly cloudy', bucket: 'cloud' }
   if (icon === 'cloudMoon') return { Icon: IconCloudMoon, label: 'Partly cloudy', bucket: 'cloud' }
   if (icon === 'moon') return { Icon: IconMoon, label: 'Clear', bucket: 'sun' }
+  // Everything else that isn't otherwise called out — a plain overcast or
+  // foggy hour, mainly — collapses into this bucket rather than a gray
+  // "overcast" glyph nobody asked for. But it must still respect isDay: a
+  // gold sun on an overcast hour that happens to be at 3am is a much worse
+  // bug than the plain-cloud label it's dodging.
+  if (!isDay) return { Icon: IconMoon, label: 'Clear', bucket: 'sun' }
   return { Icon: IconSun, label: 'Sunny', bucket: 'sun' }
 }
 
@@ -87,11 +95,11 @@ const BUCKET_ARRIVING = { storm: 'Storms', rain: 'Rain', cloud: 'Clouds', sun: '
  */
 function buildOutlook(hours, tz) {
   if (!hours.length) return null
-  const nowBucket = simplifyCondition(hours[0].icon, hours[0].conditions, scorePct(hours[0].thunder))
+  const nowBucket = simplifyCondition(hours[0].icon, hours[0].conditions, scorePct(hours[0].thunder), hours[0].isDay)
 
   let changeIdx = -1
   for (let i = 1; i < hours.length; i++) {
-    const b = simplifyCondition(hours[i].icon, hours[i].conditions, scorePct(hours[i].thunder)).bucket
+    const b = simplifyCondition(hours[i].icon, hours[i].conditions, scorePct(hours[i].thunder), hours[i].isDay).bucket
     if (b !== nowBucket.bucket) {
       changeIdx = i
       break
@@ -105,7 +113,7 @@ function buildOutlook(hours, tz) {
     return `${nowBucket.label} conditions will continue for the rest of the day.${gustText}`
   }
   const changeHour = hours[changeIdx]
-  const changeBucket = simplifyCondition(changeHour.icon, changeHour.conditions, scorePct(changeHour.thunder)).bucket
+  const changeBucket = simplifyCondition(changeHour.icon, changeHour.conditions, scorePct(changeHour.thunder), changeHour.isDay).bucket
   return `${BUCKET_ARRIVING[changeBucket]} will arrive by ${fmtTimeIn(changeHour.ts, tz)}.${gustText}`
 }
 
@@ -346,7 +354,7 @@ export default function Weather() {
                   const w = recentWeather[key]
                   const ready = w && !w.loading && !w.error
                   const { label: condLabel, bucket } = ready
-                    ? simplifyCondition(w.icon, w.conditions, 0)
+                    ? simplifyCondition(w.icon, w.conditions, 0, w.isDay)
                     : { label: null, bucket: 'cloud' }
                   const isDay = w?.isDay ?? true
                   const timeStr = ready && w.tz ? fmtCityTime(new Date(now).toISOString(), w.tz) : null
@@ -399,9 +407,17 @@ export default function Weather() {
 
   const upcoming = fc ? upcomingHours(fc.hours, 24, now) : []
   const nowHour = upcoming[0] || null
-  const heroCond = nowHour ? simplifyCondition(nowHour.icon, nowHour.conditions, scorePct(nowHour.thunder)) : null
+  const heroCond = nowHour ? simplifyCondition(nowHour.icon, nowHour.conditions, scorePct(nowHour.thunder), nowHour.isDay) : null
   const today = days[0] || null
   const outlook = buildOutlook(upcoming, tz)
+
+  // Sunrise and sunset each fall inside exactly one hour slot of the
+  // (rolling, up-to-24h) strip — today's and tomorrow's both feed in since
+  // the strip can run past midnight. Whichever slot's [start, next-start)
+  // window contains one gets swapped from "temp" to "Sunrise"/"Sunset" with
+  // the exact time.
+  const sunriseTimes = [days[0]?.sunrise, days[1]?.sunrise].filter(Boolean).map((iso) => new Date(iso).getTime())
+  const sunsetTimes = [days[0]?.sunset, days[1]?.sunset].filter(Boolean).map((iso) => new Date(iso).getTime())
 
   return (
     <div className="stack weather-page">
@@ -441,7 +457,31 @@ export default function Weather() {
 
           <div className="hour-strip">
             {upcoming.map((h, i) => {
-              const { Icon } = simplifyCondition(h.icon, h.conditions, scorePct(h.thunder))
+              const startMs = new Date(h.ts).getTime()
+              const endMs = upcoming[i + 1] ? new Date(upcoming[i + 1].ts).getTime() : startMs + 3600000
+              const sunriseMs = sunriseTimes.find((ms) => ms >= startMs && ms < endMs)
+              const sunsetMs = sunsetTimes.find((ms) => ms >= startMs && ms < endMs)
+
+              if (sunriseMs != null) {
+                return (
+                  <div key={h.ts} className="hour-cell hour-cell-sun-event">
+                    <div className="hr-time">{fmtCityTime(new Date(sunriseMs).toISOString(), tz)}</div>
+                    <IconSunrise className="hr-icon" width={24} height={24} />
+                    <div className="hr-temp hr-temp-word">Sunrise</div>
+                  </div>
+                )
+              }
+              if (sunsetMs != null) {
+                return (
+                  <div key={h.ts} className="hour-cell hour-cell-sun-event">
+                    <div className="hr-time">{fmtCityTime(new Date(sunsetMs).toISOString(), tz)}</div>
+                    <IconSunset className="hr-icon" width={24} height={24} />
+                    <div className="hr-temp hr-temp-word">Sunset</div>
+                  </div>
+                )
+              }
+
+              const { Icon } = simplifyCondition(h.icon, h.conditions, scorePct(h.thunder), h.isDay)
               return (
                 <div key={h.ts} className="hour-cell">
                   <div className="hr-time">{i === 0 ? 'Now' : fmtHour(h.ts, tz)}</div>

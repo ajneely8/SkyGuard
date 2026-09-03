@@ -54,6 +54,33 @@ export function IconSun({ className = '', ...rest }) {
   )
 }
 
+/** Half-sun sitting on the horizon with an upward chevron above it — used
+ * only for the hour cell whose slot actually contains sunrise, in place of
+ * that hour's normal condition icon. */
+export function IconSunrise({ className = '', ...rest }) {
+  return (
+    <svg {...base} {...rest} className={`icon-sunrise ${className}`}>
+      <path d="M8 6.5 12 2.5 16 6.5" />
+      <path d="M12 3.2V13" />
+      <path d="M6 17a6 6 0 0 1 12 0" />
+      <path d="M2 21h20" />
+    </svg>
+  )
+}
+
+/** Half-sun sitting on the horizon with a downward chevron above it — the
+ * sunset twin of IconSunrise, for the hour cell whose slot contains it. */
+export function IconSunset({ className = '', ...rest }) {
+  return (
+    <svg {...base} {...rest} className={`icon-sunset ${className}`}>
+      <path d="M8 6.5 12 10.5 16 6.5" />
+      <path d="M12 3.2v7.3" />
+      <path d="M6 17a6 6 0 0 1 12 0" />
+      <path d="M2 21h20" />
+    </svg>
+  )
+}
+
 export function IconMoon(props) {
   return (
     <svg {...base} {...props}>
