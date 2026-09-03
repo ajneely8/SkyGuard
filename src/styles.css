@@ -548,9 +548,19 @@ input[type='checkbox'], input[type='range'] { accent-color: var(--accent); }
    sunny-with-clouds, clear sunny), picked in Weather.jsx from the searched
    city's own current hour so it matches what time it actually is there. */
 .weather-sky-scene { position: absolute; top: -8px; left: -8px; right: -8px; height: 320px; overflow: hidden; z-index: 0; pointer-events: none; }
-.weather-sky-scene.scene-night     { background: linear-gradient(180deg, #050a1c 0%, #0b1230 45%, #142449 75%, #1c2f57 100%); }
+.weather-sky-scene.scene-night     { background: linear-gradient(180deg, #04070f 0%, #060a1a 30%, #0c1836 60%, #17285a 85%, #223a76 100%); }
 .weather-sky-scene.scene-cloud-day { background: linear-gradient(180deg, #1b6fd1 0%, #3f96e6 50%, #7dc1f2 100%); }
 .weather-sky-scene.scene-clear-day { background: linear-gradient(180deg, #0f5fc4 0%, #2f89e0 55%, #6fb8ef 100%); }
+
+/* A dark scrim over the whole scene, heavier toward the bottom where the
+   text-heavy hero content (outlook box, hour strip) sits. Without this a
+   bright day scene washes out light-gray text; with it the sky stays
+   colorful up top where only the sun/moon lives, and reads clearly lower
+   down regardless of how vivid the underlying gradient is. */
+.weather-sky-scene::after {
+  content: ''; position: absolute; inset: 0; pointer-events: none;
+  background: linear-gradient(180deg, rgba(0, 0, 0, 0.08) 0%, rgba(0, 0, 0, 0.22) 45%, rgba(0, 0, 0, 0.5) 100%);
+}
 
 /* Glowing sun disc for the two day scenes — brighter and more central than
    the old static glow blob, since it's now the scene's main subject. */
@@ -566,11 +576,13 @@ input[type='checkbox'], input[type='range'] { accent-color: var(--accent); }
 
 /* Crescent moon for the night scene — one solid disc with a same-color
    "bite" taken out via an offset box-shadow, the classic CSS crescent. The
-   bite color matches the night gradient's own top stop. */
+   bite color matches the night gradient's own top stop. A bigger, softer
+   glow than the day sun's — moonlight, not sunlight — so the scene reads
+   as more than just a flat dark rectangle. */
 .weather-moon {
-  position: absolute; top: 26px; left: 9%; width: 58px; height: 58px; border-radius: 50%;
-  background: #f4f1e6;
-  box-shadow: -16px -6px 0 6px #050a1c, 0 0 44px 14px rgba(244, 241, 230, 0.32);
+  position: absolute; top: 22px; left: 9%; width: 62px; height: 62px; border-radius: 50%;
+  background: #f6f3ea;
+  box-shadow: -17px -6px 0 6px #04070f, 0 0 90px 30px rgba(230, 232, 250, 0.22), 0 0 36px 10px rgba(246, 243, 234, 0.4);
 }
 
 /* Soft cloud bank near the bottom of the band — stacked blurred ellipses,
@@ -587,9 +599,10 @@ input[type='checkbox'], input[type='range'] { accent-color: var(--accent); }
 }
 .weather-scene-clouds-night {
   background-image:
-    radial-gradient(70px 28px at 18% 82%, rgba(200, 210, 235, 0.45), transparent 70%),
-    radial-gradient(100px 36px at 52% 90%, rgba(200, 210, 235, 0.38), transparent 70%),
-    radial-gradient(80px 30px at 82% 78%, rgba(200, 210, 235, 0.4), transparent 70%);
+    radial-gradient(80px 32px at 15% 84%, rgba(210, 218, 240, 0.6), transparent 70%),
+    radial-gradient(120px 42px at 50% 92%, rgba(210, 218, 240, 0.5), transparent 70%),
+    radial-gradient(90px 34px at 84% 80%, rgba(210, 218, 240, 0.55), transparent 70%),
+    radial-gradient(60px 24px at 32% 70%, rgba(210, 218, 240, 0.3), transparent 70%);
 }
 
 .weather-page > .card { position: relative; z-index: 1; background: transparent; }
@@ -597,7 +610,11 @@ input[type='checkbox'], input[type='range'] { accent-color: var(--accent); }
 /* Hero card: location name, current temp, condition + today's high/low,
    an outlook sentence, then a rolling 24-hour strip — modeled on a
    reference screenshot of Apple Weather's own header. */
-.weather-hero { text-align: center; padding: 4px 0 0; }
+/* A soft shadow on every bit of hero/hour-strip text — belt-and-suspenders
+   alongside the sky scene's own darkening scrim, so labels stay readable
+   even where a bright day scene's gradient is at its lightest. */
+.weather-hero, .hour-strip { text-align: center; text-shadow: 0 1px 3px rgba(0, 0, 0, 0.45); }
+.weather-hero { padding: 4px 0 0; }
 
 /* The hero card (now/outlook/hour-strip) and the 7-day list below it are two
    separate .card-body-padded cards stacked in the page's .stack — trimming
@@ -727,8 +744,9 @@ input[type='checkbox'], input[type='range'] { accent-color: var(--accent); }
 
 .weather-outlook {
   margin: 10px 0 0; padding: 10px 14px; border-radius: var(--radius);
-  background: rgba(255, 255, 255, 0.05); border: 1px solid var(--line-2);
-  font-size: 13px; line-height: 1.5; color: var(--ink-2); text-align: left;
+  background: rgba(0, 0, 0, 0.3); border: 1px solid rgba(255, 255, 255, 0.14);
+  font-size: 13px; line-height: 1.5; color: #fff; text-align: left;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.4);
 }
 
 .hour-strip { display: flex; overflow-x: auto; gap: 0; margin-top: 10px; padding-bottom: 2px; }
