@@ -67,6 +67,19 @@ export function IconCloud(props) {
   )
 }
 
+/** Cloud + falling drops, light blue, only used for drizzle conditions. */
+export function IconCloudDrizzle({ className = '', ...rest }) {
+  return (
+    <svg {...base} {...rest} className={`icon-drizzle ${className}`}>
+      <path d="M7.5 18.5a4.5 4.5 0 0 1-.5-8.97A5.5 5.5 0 0 1 17.6 8.1 4 4 0 0 1 17 16h-.1" />
+      <path d="M7.5 18.5H17" />
+      <line className="drizzle-drop" x1="9" y1="20" x2="8" y2="23" />
+      <line className="drizzle-drop drizzle-drop-2" x1="13" y1="20" x2="12" y2="23" />
+      <line className="drizzle-drop drizzle-drop-3" x1="17" y1="20" x2="16" y2="23" />
+    </svg>
+  )
+}
+
 export function IconCloudMoon(props) {
   return (
     <svg {...base} {...props}>
@@ -127,8 +140,8 @@ export function WeatherIcon({ icon, ...rest }) {
     case 'cloudSun': return <IconCloud {...rest} />
     case 'cloudMoon': return <IconCloudMoon {...rest} />
     case 'storm': return <IconBolt {...rest} />
+    case 'drizzle': return <IconCloudDrizzle {...rest} />
     case 'rain':
-    case 'drizzle':
     case 'snow':
     case 'fog':
     default:
