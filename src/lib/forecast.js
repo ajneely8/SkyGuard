@@ -257,6 +257,15 @@ export function dayThrough(hours, timeZone, { endHour = 23, from = Date.now() } 
   let rows = pick(today)
   let isTomorrow = false
 
+  // The strip should actually reach midnight, not stop one hour short of it —
+  // append the first hour of the next day (shown as "12:00 AM") when today's
+  // own hours ran through endHour and that next-day data is available.
+  if (rows.length && endHour >= 23) {
+    const tomorrow = localDay(new Date(from + 86400000).toISOString(), timeZone)
+    const midnight = hours.find((h) => localDay(h.ts, timeZone) === tomorrow && localHour(h.ts, timeZone) === 0)
+    if (midnight) rows = [...rows, midnight]
+  }
+
   if (!rows.length) {
     const tomorrow = localDay(new Date(from + 86400000).toISOString(), timeZone)
     rows = hours.filter((h) => {
