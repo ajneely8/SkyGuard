@@ -580,7 +580,7 @@ input[type='checkbox'], input[type='range'] { accent-color: var(--accent); }
    once a city has been picked from these results. Sized to fill the page
    rather than sit as a small centered box — this is the whole page until
    a city is picked, so it should read that way. */
-.weather-search-card { max-width: 760px; margin: 24px auto 0; text-align: center; padding: 8px 4px 40px; }
+.weather-search-card { margin: 24px 0 0; text-align: center; padding: 8px 4px 40px; }
 .weather-search-card .card-head h2 { font-size: 30px; }
 .weather-search-card .card-head .small { font-size: 15px; }
 .weather-search-form { display: flex; gap: 10px; margin-top: 20px; }
@@ -635,22 +635,45 @@ input[type='checkbox'], input[type='range'] { accent-color: var(--accent); }
 .sky-snow.is-day { background: linear-gradient(140deg, #7c8b9a 0%, #d3dce3 100%); }
 .sky-snow.is-night { background: linear-gradient(140deg, #232b33 0%, #47535e 100%); }
 
-/* A compact scattering of stars for the night cards — same stacked-radial-
-   gradient trick as the page's own starfield, just fewer points sized for
-   an ~84px-tall card instead of the whole viewport. */
+/* A dense scattering of stars for the night cards, twinkling on two offset
+   cycles (same stacked-radial-gradient + ::after trick as the page's own
+   starfield) so the card reads as genuinely starry, not just dotted. */
 .city-card-stars {
-  position: absolute; inset: 0; pointer-events: none;
+  position: absolute; inset: 0; pointer-events: none; overflow: hidden;
   background-image:
-    radial-gradient(1.2px 1.2px at 10% 20%, #fff, transparent),
-    radial-gradient(1px 1px at 22% 55%, #fff, transparent),
-    radial-gradient(1.3px 1.3px at 35% 15%, #fff, transparent),
-    radial-gradient(1px 1px at 50% 45%, #fff, transparent),
-    radial-gradient(1.1px 1.1px at 64% 65%, #fff, transparent),
-    radial-gradient(1px 1px at 78% 25%, #fff, transparent),
-    radial-gradient(1.2px 1.2px at 90% 50%, #fff, transparent),
-    radial-gradient(1px 1px at 96% 18%, #fff, transparent);
+    radial-gradient(1.3px 1.3px at 6% 18%, #fff, transparent),
+    radial-gradient(1px 1px at 13% 62%, #fff, transparent),
+    radial-gradient(1.4px 1.4px at 20% 32%, #fff, transparent),
+    radial-gradient(1px 1px at 27% 75%, #fff, transparent),
+    radial-gradient(1.2px 1.2px at 34% 12%, #fff, transparent),
+    radial-gradient(1px 1px at 41% 50%, #fff, transparent),
+    radial-gradient(1.3px 1.3px at 48% 85%, #fff, transparent),
+    radial-gradient(1px 1px at 55% 25%, #fff, transparent),
+    radial-gradient(1.1px 1.1px at 62% 65%, #fff, transparent),
+    radial-gradient(1px 1px at 69% 15%, #fff, transparent),
+    radial-gradient(1.3px 1.3px at 76% 45%, #fff, transparent),
+    radial-gradient(1px 1px at 83% 78%, #fff, transparent),
+    radial-gradient(1.2px 1.2px at 90% 22%, #fff, transparent),
+    radial-gradient(1px 1px at 96% 58%, #fff, transparent);
   background-repeat: no-repeat;
   opacity: 0.7;
+  animation: starTwinkleA 4.5s ease-in-out infinite;
+}
+.city-card-stars::after {
+  content: ''; position: absolute; inset: 0;
+  background-image:
+    radial-gradient(1px 1px at 10% 45%, #fff, transparent),
+    radial-gradient(1.1px 1.1px at 24% 20%, #fff, transparent),
+    radial-gradient(1px 1px at 38% 68%, #fff, transparent),
+    radial-gradient(1.1px 1.1px at 52% 38%, #fff, transparent),
+    radial-gradient(1px 1px at 66% 80%, #fff, transparent),
+    radial-gradient(1.1px 1.1px at 80% 30%, #fff, transparent),
+    radial-gradient(1px 1px at 93% 68%, #fff, transparent);
+  background-repeat: no-repeat;
+  animation: starTwinkleB 3.6s ease-in-out infinite;
+}
+@media (prefers-reduced-motion: reduce) {
+  .city-card-stars, .city-card-stars::after { animation: none; }
 }
 .hero-temp {
   font-family: var(--nums); font-size: 48px; font-weight: 300; line-height: 1;
