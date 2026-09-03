@@ -399,7 +399,7 @@ function ActiveSession({ session, band, locName, tz, now, onEnd, onCheck }) {
 /* ------------------------------------------------------------------ */
 
 function SessionCreator({ locations, defaultLocation, settings, tz, template, onCreate, onStart, onSaveTemplate }) {
-  const [sport, setSport] = useState('Football')
+  const [sport, setSport] = useState('Football Practice')
   const [locationId, setLocationId] = useState(defaultLocation || locations[0]?.id)
   // Defaults and entry are read in the field's zone, not the device's.
   const [date, setDate] = useState(() => todayStrIn(new Date(), tz))

@@ -12,7 +12,8 @@ import { DEFAULT_STRIKE_RULES } from './lightning.js'
 export const SCHEMA_VERSION = 5
 
 export const SPORTS = [
-  'Football',
+  'Football Practice',
+  'Football Game',
   'Marching Band',
   'Cross Country',
   'Volleyball',
