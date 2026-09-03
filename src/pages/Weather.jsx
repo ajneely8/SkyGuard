@@ -39,6 +39,22 @@ const RAIN_ICONS = { drizzle: IconCloudDrizzle, rain: IconCloudRain, snow: IconC
 const fmtHour = (iso, tz) =>
   new Intl.DateTimeFormat(undefined, { hour: 'numeric', timeZone: tz || undefined }).format(new Date(iso))
 
+/** "9:41 AM" — the saved-city card's own local clock, same idea as the
+ * Apple Weather list this is modeled on. */
+const fmtCityTime = (iso, tz) =>
+  new Intl.DateTimeFormat(undefined, { hour: 'numeric', minute: '2-digit', timeZone: tz || undefined }).format(new Date(iso))
+
+/** Which of the five card backgrounds (clear/cloud/rain/storm/snow) a saved
+ * city's card should use — day or night is applied separately as a class
+ * modifier so there are 5 gradients, not 10. Snow gets its own icy look even
+ * though it shares simplifyCondition's "rain" bucket with drizzle/rain, and
+ * simplifyCondition's "sun" bucket (it covers both sun and moon icons) maps
+ * to the "clear" background here. */
+function skyClassFor(icon, bucket, isDay) {
+  const sky = icon === 'snow' ? 'snow' : bucket === 'sun' ? 'clear' : bucket
+  return `sky-${sky} ${isDay ? 'is-day' : 'is-night'}`
+}
+
 /** A 0-8 modelled thunder score (see thunderRisk() in forecast.js) as a
  * rough risk percentage — a proxy, not a measured probability. */
 const scorePct = (thunder) => (thunder ? Math.round((thunder.score / 8) * 100) : 0)
@@ -147,6 +163,7 @@ export default function Weather() {
   const [fcError, setFcError] = useState(null)
   const [loadingFc, setLoadingFc] = useState(false)
   const [recents, setRecents] = useState(loadRecents)
+  const [recentWeather, setRecentWeather] = useState({}) // "lat,lon" -> snapshot, for the recent-city card backgrounds
 
   const runSearch = useCallback(async (e) => {
     e?.preventDefault?.()
@@ -200,6 +217,55 @@ export default function Weather() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [picked?.lat, picked?.lon])
 
+  // A quick "now" snapshot (temp, condition, day/night, today's H/L) for
+  // each recently-searched city, so its card can show a real background and
+  // real numbers instead of a plain name — same idea as Apple Weather's
+  // saved-city list. Only runs on the search screen, and only for cities
+  // that don't have a snapshot yet.
+  const recentsKey = picked ? '' : recents.map((r) => `${r.lat},${r.lon}`).join('|')
+  useEffect(() => {
+    if (picked || !recentsKey) return
+    let cancelled = false
+    recents.forEach((r) => {
+      const key = `${r.lat},${r.lon}`
+      setRecentWeather((m) => (m[key] ? m : { ...m, [key]: { loading: true } }))
+      Promise.all([
+        fetchForecast({ lat: r.lat, lon: r.lon }, state.settings.thresholds),
+        timezoneFor(r.lat, r.lon),
+      ])
+        .then(([fcData, tzInfo]) => {
+          if (cancelled) return
+          // hours[0] is ~3 hours in the past (fetchForecast asks for
+          // past_hours=3), not "now" — the same rolling-window pick the
+          // hero card uses is needed here too, or a city near sunset would
+          // show a stale sunny reading well after dark.
+          const hour = upcomingHours(fcData.hours, 1, now)[0] || fcData.hours?.[0] || null
+          const day = fcData.days?.[0] || null
+          setRecentWeather((m) => ({
+            ...m,
+            [key]: {
+              loading: false,
+              tempF: hour?.tempF ?? null,
+              icon: hour?.icon || 'cloud',
+              conditions: hour?.conditions || null,
+              isDay: hour?.isDay ?? true,
+              highF: day?.highF ?? null,
+              lowF: day?.lowF ?? null,
+              tz: tzInfo.timezone || null,
+            },
+          }))
+        })
+        .catch(() => {
+          if (cancelled) return
+          setRecentWeather((m) => ({ ...m, [key]: { loading: false, error: true } }))
+        })
+    })
+    return () => {
+      cancelled = true
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [recentsKey])
+
   if (!picked) {
     return (
       <div className="stack weather-page">
@@ -234,12 +300,44 @@ export default function Weather() {
           {results.length === 0 && recents.length > 0 && (
             <div className="weather-recents">
               <div className="weather-recents-label">Recently searched</div>
-              <div className="weather-search-results">
-                {recents.map((r) => (
-                  <button key={`${r.lat},${r.lon}`} type="button" className="weather-search-result" onClick={() => pickResult(r)}>
-                    {r.name}
-                  </button>
-                ))}
+              <div className="city-card-list">
+                {recents.map((r) => {
+                  const key = `${r.lat},${r.lon}`
+                  const w = recentWeather[key]
+                  const ready = w && !w.loading && !w.error
+                  const { label: condLabel, bucket } = ready
+                    ? simplifyCondition(w.icon, w.conditions, 0)
+                    : { label: null, bucket: 'cloud' }
+                  const isDay = w?.isDay ?? true
+                  const timeStr = ready && w.tz ? fmtCityTime(new Date(now).toISOString(), w.tz) : null
+                  const subLine = w?.loading
+                    ? 'Loading…'
+                    : w?.error
+                      ? 'Unavailable'
+                      : [timeStr, condLabel].filter(Boolean).join(' · ')
+                  return (
+                    <button
+                      key={key}
+                      type="button"
+                      className={`city-card ${skyClassFor(ready ? w.icon : 'cloud', bucket, isDay)}`}
+                      onClick={() => pickResult(r)}
+                    >
+                      {!isDay && <div className="city-card-stars" aria-hidden="true" />}
+                      <div className="city-card-top">
+                        <div className="city-card-name">{r.name.split(',')[0]}</div>
+                        <div className="city-card-temp">{ready && w.tempF != null ? `${Math.round(w.tempF)}°` : '—'}</div>
+                      </div>
+                      <div className="city-card-bottom">
+                        <div className="city-card-cond">{subLine}</div>
+                        {ready && w.highF != null && w.lowF != null && (
+                          <div className="city-card-hilo">
+                            H:{Math.round(w.highF)}° L:{Math.round(w.lowF)}°
+                          </div>
+                        )}
+                      </div>
+                    </button>
+                  )
+                })}
               </div>
             </div>
           )}

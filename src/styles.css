@@ -577,19 +577,81 @@ input[type='checkbox'], input[type='range'] { accent-color: var(--accent); }
 .hero-loc-name { font-size: 22px; font-weight: 600; color: var(--ink); margin-top: 2px; }
 
 /* City search — the Weather page starts here and only shows a forecast
-   once a city has been picked from these results. */
-.weather-search-card { max-width: 480px; margin: 40px auto 0; text-align: center; }
-.weather-search-form { display: flex; gap: 8px; margin-top: 8px; }
-.weather-search-form input { flex: 1; min-height: 42px; }
+   once a city has been picked from these results. Sized to fill the page
+   rather than sit as a small centered box — this is the whole page until
+   a city is picked, so it should read that way. */
+.weather-search-card { max-width: 760px; margin: 24px auto 0; text-align: center; padding: 8px 4px 40px; }
+.weather-search-card .card-head h2 { font-size: 30px; }
+.weather-search-card .card-head .small { font-size: 15px; }
+.weather-search-form { display: flex; gap: 10px; margin-top: 20px; }
+.weather-search-form input { flex: 1; min-height: 52px; font-size: 16px; padding: 0 16px; }
+.weather-search-form .btn { min-height: 52px; padding: 0 24px; font-size: 15px; }
 .weather-search-results { display: flex; flex-direction: column; gap: 4px; margin-top: 12px; text-align: left; }
 .weather-search-result {
   background: rgba(255, 255, 255, 0.04); border: 1px solid var(--line-2); border-radius: var(--radius);
   padding: 10px 12px; font-size: 14px; color: var(--ink); text-align: left; cursor: pointer;
 }
 .weather-search-result:hover { background: rgba(255, 255, 255, 0.08); border-color: var(--line); }
-.weather-recents { margin-top: 18px; }
-.weather-recents-label { font-size: 11px; font-weight: 700; letter-spacing: 0.08em; color: var(--ink-3); text-transform: uppercase; }
-.weather-recents .weather-search-results { margin-top: 8px; }
+.weather-recents { margin-top: 28px; }
+.weather-recents-label { font-size: 12px; font-weight: 700; letter-spacing: 0.08em; color: var(--ink-3); text-transform: uppercase; }
+
+/* Recently-searched cities, styled like Apple Weather's saved-city list: a
+   big rounded card per city with a background that reflects its actual
+   current sky — five weather looks (clear/cloud/rain/storm/snow), each in a
+   day and a night version, picked from the same forecast icon/isDay the
+   rest of the page already uses. */
+.city-card-list { display: flex; flex-direction: column; gap: 10px; margin-top: 10px; }
+.city-card {
+  position: relative; overflow: hidden; isolation: isolate;
+  border: none; border-radius: 18px; padding: 16px 18px; min-height: 84px;
+  text-align: left; cursor: pointer; color: #fff;
+  display: flex; flex-direction: column; justify-content: space-between;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.25);
+}
+.city-card::before {
+  content: ''; position: absolute; inset: 0; z-index: 0;
+  background: linear-gradient(180deg, rgba(0, 0, 0, 0.05), rgba(0, 0, 0, 0.32));
+}
+.city-card-top, .city-card-bottom, .city-card-stars { position: relative; z-index: 1; }
+.city-card-top { display: flex; align-items: flex-start; justify-content: space-between; gap: 10px; }
+.city-card-name { font-size: 18px; font-weight: 700; text-shadow: 0 1px 3px rgba(0, 0, 0, 0.35); }
+.city-card-temp {
+  font-family: var(--nums); font-size: 34px; font-weight: 300; line-height: 1;
+  font-variant-numeric: tabular-nums; text-shadow: 0 1px 3px rgba(0, 0, 0, 0.35);
+}
+.city-card-bottom { display: flex; align-items: flex-end; justify-content: space-between; gap: 10px; margin-top: 8px; }
+.city-card-cond { font-size: 13px; opacity: 0.92; text-shadow: 0 1px 2px rgba(0, 0, 0, 0.35); }
+.city-card-hilo { font-size: 13px; font-variant-numeric: tabular-nums; opacity: 0.92; text-shadow: 0 1px 2px rgba(0, 0, 0, 0.35); }
+
+/* Sky looks — a day gradient and a darker night gradient per weather bucket. */
+.sky-clear.is-day { background: linear-gradient(140deg, #2f7fd6 0%, #6bb8ef 55%, #ffcf7a 100%); }
+.sky-clear.is-night { background: linear-gradient(140deg, #0c1836 0%, #1b2b56 60%, #2c3d6e 100%); }
+.sky-cloud.is-day { background: linear-gradient(140deg, #5c7182 0%, #8b9caa 100%); }
+.sky-cloud.is-night { background: linear-gradient(140deg, #202834 0%, #333f4d 100%); }
+.sky-rain.is-day { background: linear-gradient(140deg, #3c5164 0%, #5d7286 100%); }
+.sky-rain.is-night { background: linear-gradient(140deg, #141c26 0%, #263241 100%); }
+.sky-storm.is-day { background: linear-gradient(140deg, #363047 0%, #514769 100%); }
+.sky-storm.is-night { background: linear-gradient(140deg, #131019 0%, #241d33 100%); }
+.sky-snow.is-day { background: linear-gradient(140deg, #7c8b9a 0%, #d3dce3 100%); }
+.sky-snow.is-night { background: linear-gradient(140deg, #232b33 0%, #47535e 100%); }
+
+/* A compact scattering of stars for the night cards — same stacked-radial-
+   gradient trick as the page's own starfield, just fewer points sized for
+   an ~84px-tall card instead of the whole viewport. */
+.city-card-stars {
+  position: absolute; inset: 0; pointer-events: none;
+  background-image:
+    radial-gradient(1.2px 1.2px at 10% 20%, #fff, transparent),
+    radial-gradient(1px 1px at 22% 55%, #fff, transparent),
+    radial-gradient(1.3px 1.3px at 35% 15%, #fff, transparent),
+    radial-gradient(1px 1px at 50% 45%, #fff, transparent),
+    radial-gradient(1.1px 1.1px at 64% 65%, #fff, transparent),
+    radial-gradient(1px 1px at 78% 25%, #fff, transparent),
+    radial-gradient(1.2px 1.2px at 90% 50%, #fff, transparent),
+    radial-gradient(1px 1px at 96% 18%, #fff, transparent);
+  background-repeat: no-repeat;
+  opacity: 0.7;
+}
 .hero-temp {
   font-family: var(--nums); font-size: 48px; font-weight: 300; line-height: 1;
   color: var(--ink); margin-top: 2px; font-variant-numeric: tabular-nums;
