@@ -556,6 +556,47 @@ input[type='checkbox'], input[type='range'] { accent-color: var(--accent); }
 }
 .weather-page > .card { position: relative; z-index: 1; background: transparent; }
 
+/* Hero card: location name, current temp, condition + today's high/low,
+   an outlook sentence, then a rolling 24-hour strip — modeled on a
+   reference screenshot of Apple Weather's own header. */
+.weather-hero { text-align: center; padding: 6px 0 4px; }
+.hero-loc-label { font-size: 11px; font-weight: 700; letter-spacing: 0.12em; color: var(--ink-3); }
+.hero-loc-name { font-size: 22px; font-weight: 600; color: var(--ink); margin-top: 2px; }
+.hero-temp {
+  font-family: var(--nums); font-size: 64px; font-weight: 300; line-height: 1;
+  color: var(--ink); margin-top: 4px; font-variant-numeric: tabular-nums;
+}
+.hero-cond-row { display: flex; align-items: baseline; justify-content: center; gap: 8px; margin-top: 2px; font-size: 14px; color: var(--ink-2); }
+.hero-hilo { font-variant-numeric: tabular-nums; color: var(--ink-2); }
+
+.weather-outlook {
+  margin: 14px 0 4px; padding: 12px 14px; border-radius: var(--radius);
+  background: rgba(255, 255, 255, 0.05); border: 1px solid var(--line-2);
+  font-size: 13px; line-height: 1.5; color: var(--ink-2); text-align: left;
+}
+
+.hour-strip { display: flex; overflow-x: auto; gap: 0; margin-top: 16px; padding-bottom: 4px; }
+.hour-cell {
+  flex: 0 0 66px; display: flex; flex-direction: column; align-items: center; gap: 8px;
+  padding: 0 8px; border-right: 1px solid var(--line-2);
+}
+.hour-cell:last-child { border-right: none; }
+/* Fixed height even though "12 AM" and "1 PM" are different widths, so
+   the icon and temp below stay pinned to the same row across every cell —
+   the actual fix is the shorter no-minutes time format (see fmtHour in
+   Weather.jsx); this is just a safety net. */
+.hr-time { font-size: 13px; font-weight: 600; color: var(--ink-2); height: 16px; white-space: nowrap; }
+.hr-icon { color: var(--ink-3); flex: 0 0 auto; }
+.hr-temp { font-family: var(--nums); font-size: 16px; font-weight: 700; color: var(--ink); font-variant-numeric: tabular-nums; }
+
+@media (max-width: 480px) {
+  .hero-temp { font-size: 52px; }
+  .hero-loc-name { font-size: 19px; }
+  .hour-cell { flex-basis: 58px; padding: 0 6px; }
+  .hr-time { font-size: 12px; }
+  .hr-temp { font-size: 15px; }
+}
+
 /* Apple-Weather-style row list: day / icon / low / a range bar / high,
    one row per day. Rows line up by construction (fixed-width columns),
    no variable-height-card alignment problem to fight. The bar is colored

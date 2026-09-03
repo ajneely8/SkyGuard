@@ -1,19 +1,27 @@
 /**
- * Weather — the coming week at this field, as a 10-day-forecast-style list
- * (day, icon, low, a range bar, high) rather than side-scrolling cards —
- * rows line up by construction instead of fighting variable card heights.
+ * Weather — a city-style hero (now, condition, high/low), a one-line
+ * outlook sentence, a rolling 24-hour strip, then the 10-day row list.
+ * Modeled on a reference screenshot of Apple Weather's layout.
  *
- * The 7-day data has always been fetched (fetchForecast() in forecast.js
- * asks Open-Meteo for forecast_days=7) but nothing displayed it — Home only
- * ever used the hourly strip. This is that data finally shown. The range
- * bar is colored by the day's WBGT band (green through darkred), not a
- * plain temperature gradient — it's telling you more than Apple Weather's
- * equivalent bar does.
+ * "Grab the weather from that exact city" already works: adding a location
+ * (Locations page, or the address search in onboarding) geocodes whatever
+ * text is typed — a full street address or just a city name — through the
+ * same Nominatim search, so a city name alone resolves fine. This page
+ * just displays whatever field is currently selected.
+ *
+ * The 7-day + hourly data has always been fetched (fetchForecast() in
+ * forecast.js asks Open-Meteo for forecast_days=7) but nothing displayed
+ * the daily list, the rolling hour strip, or an outlook sentence — Home
+ * only ever used a same-day hourly strip. This page uses upcomingHours()
+ * (already built, unused) for a true rolling "now + next 24 hours" window
+ * that runs into tomorrow instead of resetting at midnight.
  */
 
 import { useEffect } from 'react'
 import { useStore } from '../lib/store.jsx'
 import { Card, Empty } from '../components/ui.jsx'
+import { upcomingHours } from '../lib/forecast.js'
+import { fmtTimeIn } from '../lib/format.js'
 import {
   IconBolt,
   IconDroplet,
@@ -23,24 +31,64 @@ import {
   IconCloudSnow,
   IconCloudSun,
   IconSun,
+  IconMoon,
 } from '../components/Icons.jsx'
-
-/** A 0-8 modelled thunder score (see thunderRisk() in forecast.js) as a
- * rough risk percentage — a proxy, not a measured probability. */
-const thunderPct = (maxThunder) => (maxThunder ? Math.round((maxThunder.score / 8) * 100) : 0)
 
 const RAIN_ICONS = { drizzle: IconCloudDrizzle, rain: IconCloudRain, snow: IconCloudSnow }
 
-/** Four looks on this page: sunny, partly cloudy (cloud + sun together),
- * some kind of rain, or a storm — no plain gray "overcast" cloud with no
- * story to tell. Every day's label and icon come from this same bucket, so
- * they never disagree. */
-function simplifyDay(d, pct) {
-  if (pct >= 50 || d.icon === 'storm') return { Icon: IconCloudLightning, label: 'Storms' }
-  const RainIcon = RAIN_ICONS[d.icon]
-  if (RainIcon) return { Icon: RainIcon, label: d.conditions }
-  if (d.icon === 'cloudSun' || d.icon === 'cloudMoon') return { Icon: IconCloudSun, label: 'Partly cloudy' }
-  return { Icon: IconSun, label: 'Sunny' }
+/** "12 AM" / "1 PM" — no minutes, so the label never wraps to two lines
+ * inside a fixed-width hour cell and pushes the icon/temp below it down
+ * by a different amount cell to cell. */
+const fmtHour = (iso, tz) =>
+  new Intl.DateTimeFormat(undefined, { hour: 'numeric', timeZone: tz || undefined }).format(new Date(iso))
+
+/** A 0-8 modelled thunder score (see thunderRisk() in forecast.js) as a
+ * rough risk percentage — a proxy, not a measured probability. */
+const scorePct = (thunder) => (thunder ? Math.round((thunder.score / 8) * 100) : 0)
+
+/** Four looks used everywhere on this page: sunny, partly cloudy (cloud +
+ * sun together), some kind of rain, or a storm — no plain gray "overcast"
+ * cloud with no story to tell. Shared by both the daily rows and the
+ * hourly strip so an hour and the day it belongs to never disagree. */
+function simplifyCondition(icon, conditions, pct) {
+  if (pct >= 50 || icon === 'storm') return { Icon: IconCloudLightning, label: 'Storms', bucket: 'storm' }
+  const RainIcon = RAIN_ICONS[icon]
+  if (RainIcon) return { Icon: RainIcon, label: conditions, bucket: 'rain' }
+  if (icon === 'cloudSun' || icon === 'cloudMoon') return { Icon: IconCloudSun, label: 'Partly cloudy', bucket: 'cloud' }
+  if (icon === 'moon') return { Icon: IconMoon, label: 'Clear', bucket: 'sun' }
+  return { Icon: IconSun, label: 'Sunny', bucket: 'sun' }
+}
+
+const BUCKET_ARRIVING = { storm: 'Storms', rain: 'Rain', cloud: 'Clouds', sun: 'Clearing skies' }
+
+/**
+ * One Apple-Weather-style sentence: either "X will continue for the rest
+ * of the day" or "Y will arrive by <time>", plus a gust clause when the
+ * data has one. Built from the same rolling hour window the strip below
+ * uses, so the sentence and the strip can never disagree.
+ */
+function buildOutlook(hours, tz) {
+  if (!hours.length) return null
+  const nowBucket = simplifyCondition(hours[0].icon, hours[0].conditions, scorePct(hours[0].thunder))
+
+  let changeIdx = -1
+  for (let i = 1; i < hours.length; i++) {
+    const b = simplifyCondition(hours[i].icon, hours[i].conditions, scorePct(hours[i].thunder)).bucket
+    if (b !== nowBucket.bucket) {
+      changeIdx = i
+      break
+    }
+  }
+  const span = hours.slice(0, changeIdx === -1 ? hours.length : changeIdx + 1)
+  const maxGust = Math.max(0, ...span.map((h) => h.gustMph || 0))
+  const gustText = maxGust >= 15 ? ` Wind gusts are up to ${Math.round(maxGust)} mph.` : ''
+
+  if (changeIdx === -1) {
+    return `${nowBucket.label} conditions will continue for the rest of the day.${gustText}`
+  }
+  const changeHour = hours[changeIdx]
+  const changeBucket = simplifyCondition(changeHour.icon, changeHour.conditions, scorePct(changeHour.thunder)).bucket
+  return `${BUCKET_ARRIVING[changeBucket]} will arrive by ${fmtTimeIn(changeHour.ts, tz)}.${gustText}`
 }
 
 function dayLabel(iso, tz, todayStr) {
@@ -80,9 +128,15 @@ export default function Weather() {
   const weekLo = Math.min(...days.map((d) => d.lowF).filter((v) => v != null))
   const weekHi = Math.max(...days.map((d) => d.highF).filter((v) => v != null))
 
+  const upcoming = fc ? upcomingHours(fc.hours, 24, now) : []
+  const nowHour = upcoming[0] || null
+  const heroCond = nowHour ? simplifyCondition(nowHour.icon, nowHour.conditions, scorePct(nowHour.thunder)) : null
+  const today = days[0] || null
+  const outlook = buildOutlook(upcoming, tz)
+
   return (
     <div className="stack weather-page">
-      {/* Purely decorative night sky behind the card — twinkling stars
+      {/* Purely decorative night sky behind the cards — twinkling stars
           plus a soft gold sun glow and a cool cloud glow, the kind of
           atmosphere most weather apps put behind their forecast instead
           of a flat panel. */}
@@ -91,6 +145,41 @@ export default function Weather() {
         <div className="weather-sun-glow" />
         <div className="weather-cloud-glow" />
       </div>
+
+      {fc && nowHour && (
+        <Card className="card-bare weather-hero-card">
+          <div className="weather-hero">
+            <div className="hero-loc-label">MY LOCATION</div>
+            <div className="hero-loc-name">{loc.name}</div>
+            <div className="hero-temp">{nowHour.tempF != null ? Math.round(nowHour.tempF) : '—'}°</div>
+            <div className="hero-cond-row">
+              <span>{heroCond?.label || '—'}</span>
+              {today && (
+                <span className="hero-hilo">
+                  H:{today.highF != null ? Math.round(today.highF) : '—'}° L:
+                  {today.lowF != null ? Math.round(today.lowF) : '—'}°
+                </span>
+              )}
+            </div>
+          </div>
+
+          {outlook && <div className="weather-outlook">{outlook}</div>}
+
+          <div className="hour-strip">
+            {upcoming.map((h, i) => {
+              const { Icon } = simplifyCondition(h.icon, h.conditions, scorePct(h.thunder))
+              return (
+                <div key={h.ts} className="hour-cell">
+                  <div className="hr-time">{i === 0 ? 'Now' : fmtHour(h.ts, tz)}</div>
+                  <Icon className="hr-icon" width={24} height={24} />
+                  <div className="hr-temp">{h.tempF != null ? Math.round(h.tempF) : '—'}°</div>
+                </div>
+              )
+            })}
+          </div>
+        </Card>
+      )}
+
       <Card className="card-bare" title="Weather" subtitle={`The next ${days.length || 7} days at ${loc.name}`}>
         {!fc ? (
           <div className="muted small" style={{ padding: '10px 2px' }}>
@@ -104,10 +193,10 @@ export default function Weather() {
               const label = dayLabel(d.date, tz, todayStr)
               const band = guidelineNow(d.peakWbgtF)
               const tone = band?.tone || 'none'
-              const pct = thunderPct(d.maxThunder)
+              const pct = scorePct(d.maxThunder)
               const hasLightning = pct > 0
               const isRain = pct < 50 && d.icon !== 'storm' && !!RAIN_ICONS[d.icon]
-              const { Icon } = simplifyDay(d, pct)
+              const { Icon } = simplifyCondition(d.icon, d.conditions, pct)
               const barStart = d.lowF != null ? pctBetween(d.lowF, weekLo, weekHi) : 0
               const barEnd = d.highF != null ? pctBetween(d.highF, weekLo, weekHi) : 0
               return (
