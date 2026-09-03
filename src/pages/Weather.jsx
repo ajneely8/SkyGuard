@@ -104,6 +104,37 @@ function dayLabel(iso, tz, todayStr) {
 /** Where a value sits between lo/hi as a 0-100 percent, clamped. */
 const pctBetween = (v, lo, hi) => (hi <= lo ? 0 : Math.max(0, Math.min(100, ((v - lo) / (hi - lo)) * 100)))
 
+/* ---------- recently-searched cities, kept on this device only ---------- */
+
+const RECENTS_KEY = 'skyguard.weather.recentCities'
+const MAX_RECENTS = 8
+
+function loadRecents() {
+  try {
+    const raw = JSON.parse(localStorage.getItem(RECENTS_KEY) || '[]')
+    return Array.isArray(raw) ? raw : []
+  } catch {
+    return []
+  }
+}
+
+/** Adds a city to the front of the recents list, de-duping anything within
+ * ~0.01° (about half a mile) of it rather than by exact name — the same
+ * city searched two different ways shouldn't produce two entries. */
+function saveRecent(city) {
+  const list = loadRecents().filter(
+    (c) => Math.abs(c.lat - city.lat) > 0.01 || Math.abs(c.lon - city.lon) > 0.01,
+  )
+  list.unshift({ name: city.name, lat: city.lat, lon: city.lon })
+  const trimmed = list.slice(0, MAX_RECENTS)
+  try {
+    localStorage.setItem(RECENTS_KEY, JSON.stringify(trimmed))
+  } catch {
+    /* storage full or unavailable — recents are a convenience, not critical */
+  }
+  return trimmed
+}
+
 export default function Weather() {
   const { state, guidelineNow, now } = useStore()
 
@@ -115,6 +146,7 @@ export default function Weather() {
   const [fc, setFc] = useState(null)
   const [fcError, setFcError] = useState(null)
   const [loadingFc, setLoadingFc] = useState(false)
+  const [recents, setRecents] = useState(loadRecents)
 
   const runSearch = useCallback(async (e) => {
     e?.preventDefault?.()
@@ -133,10 +165,11 @@ export default function Weather() {
     }
   }, [query])
 
-  const pickResult = useCallback(async (r) => {
+  const pickResult = useCallback((r) => {
     setResults([])
     setQuery('')
-    setPicked({ name: r.label, lat: r.lat, lon: r.lon, timezone: null })
+    setPicked({ name: r.label ?? r.name, lat: r.lat, lon: r.lon, timezone: null })
+    setRecents(saveRecent({ name: r.label ?? r.name, lat: r.lat, lon: r.lon }))
   }, [])
 
   useEffect(() => {
@@ -196,6 +229,18 @@ export default function Weather() {
                   {r.label}
                 </button>
               ))}
+            </div>
+          )}
+          {results.length === 0 && recents.length > 0 && (
+            <div className="weather-recents">
+              <div className="weather-recents-label">Recently searched</div>
+              <div className="weather-search-results">
+                {recents.map((r) => (
+                  <button key={`${r.lat},${r.lon}`} type="button" className="weather-search-result" onClick={() => pickResult(r)}>
+                    {r.name}
+                  </button>
+                ))}
+              </div>
             </div>
           )}
         </Card>

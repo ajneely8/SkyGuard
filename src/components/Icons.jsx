@@ -161,11 +161,17 @@ export function IconCloudLightning({ className = '', ...rest }) {
   )
 }
 
-export function IconCloudMoon(props) {
+/** Small crescent moon above the cloud, muted — partly cloudy at night. Mirrors
+ * IconCloudSun's cloud silhouette exactly (arc + a bottom line to close it)
+ * so the two only differ by their accent glyph, not by looking like two
+ * unrelated shapes. The old version skipped that bottom line and read as a
+ * pair of floating swirls instead of a cloud. */
+export function IconCloudMoon({ className = '', ...rest }) {
   return (
-    <svg {...base} {...props}>
-      <path d="M15.2 8.1a5 5 0 0 0-4.6-2.6 5.6 5.6 0 0 0-1 11.1" />
-      <path d="M17.5 20.5a4 4 0 0 0 .3-8h-.3a5 5 0 0 0-9 2" />
+    <svg {...base} {...rest} className={`icon-cloud-moon ${className}`}>
+      <path className="cm-moon" d="M13.4 7.4a3.6 3.6 0 0 0-3.4-2 4 4 0 0 0-.6 7.9" />
+      <path d="M9 18.5a4.5 4.5 0 0 1-.5-8.9 5.5 5.5 0 0 1 9.9 3.2A4 4 0 0 1 18 18.5h-.1" />
+      <path d="M9 18.5h9" />
     </svg>
   )
 }

@@ -559,7 +559,14 @@ input[type='checkbox'], input[type='range'] { accent-color: var(--accent); }
 /* Hero card: location name, current temp, condition + today's high/low,
    an outlook sentence, then a rolling 24-hour strip — modeled on a
    reference screenshot of Apple Weather's own header. */
-.weather-hero { text-align: center; padding: 6px 0 4px; }
+.weather-hero { text-align: center; padding: 4px 0 0; }
+
+/* The hero card (now/outlook/hour-strip) and the 7-day list below it are two
+   separate .card-body-padded cards stacked in the page's .stack — trimming
+   both that gap and this card's own bottom padding pulls the day list up
+   right under the hour strip instead of leaving a tall gap above it. */
+.weather-page.stack { gap: 10px; }
+.weather-hero-card .card-body { padding-bottom: 6px; }
 .hero-loc-label { font-size: 11px; font-weight: 700; letter-spacing: 0.12em; color: var(--ink-3); }
 .hero-loc-row { display: flex; align-items: center; justify-content: center; gap: 10px; position: relative; }
 .hero-change-btn {
@@ -580,20 +587,23 @@ input[type='checkbox'], input[type='range'] { accent-color: var(--accent); }
   padding: 10px 12px; font-size: 14px; color: var(--ink); text-align: left; cursor: pointer;
 }
 .weather-search-result:hover { background: rgba(255, 255, 255, 0.08); border-color: var(--line); }
+.weather-recents { margin-top: 18px; }
+.weather-recents-label { font-size: 11px; font-weight: 700; letter-spacing: 0.08em; color: var(--ink-3); text-transform: uppercase; }
+.weather-recents .weather-search-results { margin-top: 8px; }
 .hero-temp {
-  font-family: var(--nums); font-size: 64px; font-weight: 300; line-height: 1;
-  color: var(--ink); margin-top: 4px; font-variant-numeric: tabular-nums;
+  font-family: var(--nums); font-size: 48px; font-weight: 300; line-height: 1;
+  color: var(--ink); margin-top: 2px; font-variant-numeric: tabular-nums;
 }
 .hero-cond-row { display: flex; align-items: baseline; justify-content: center; gap: 8px; margin-top: 2px; font-size: 14px; color: var(--ink-2); }
 .hero-hilo { font-variant-numeric: tabular-nums; color: var(--ink-2); }
 
 .weather-outlook {
-  margin: 14px 0 4px; padding: 12px 14px; border-radius: var(--radius);
+  margin: 10px 0 0; padding: 10px 14px; border-radius: var(--radius);
   background: rgba(255, 255, 255, 0.05); border: 1px solid var(--line-2);
   font-size: 13px; line-height: 1.5; color: var(--ink-2); text-align: left;
 }
 
-.hour-strip { display: flex; overflow-x: auto; gap: 0; margin-top: 16px; padding-bottom: 4px; }
+.hour-strip { display: flex; overflow-x: auto; gap: 0; margin-top: 10px; padding-bottom: 2px; }
 .hour-cell {
   flex: 0 0 66px; display: flex; flex-direction: column; align-items: center; gap: 8px;
   padding: 0 8px; border-right: 1px solid var(--line-2);
@@ -726,6 +736,10 @@ input[type='checkbox'], input[type='range'] { accent-color: var(--accent); }
 @media (prefers-reduced-motion: reduce) {
   .cs-sun { animation: none; }
 }
+
+/* Partly-cloudy-at-night icon: same neutral cloud, just a pale static
+   crescent instead of the sun's gold pulse — night doesn't glow. */
+.cm-moon { color: var(--snow); }
 
 /* Rain icon: white cloud, heavier/faster falling drops than drizzle in a
    deeper blue — same white-cloud/blue-drop split as drizzle above. */
