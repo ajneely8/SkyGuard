@@ -565,8 +565,9 @@ input[type='checkbox'], input[type='range'] { accent-color: var(--accent); }
    separate .card-body-padded cards stacked in the page's .stack — trimming
    both that gap and this card's own bottom padding pulls the day list up
    right under the hour strip instead of leaving a tall gap above it. */
-.weather-page.stack { gap: 10px; }
-.weather-hero-card .card-body { padding-bottom: 6px; }
+.weather-page.stack { gap: 0; }
+.weather-hero-card .card-body { padding-bottom: 4px; }
+.weather-days-card .card-head { padding-top: 4px; }
 .hero-loc-label { font-size: 11px; font-weight: 700; letter-spacing: 0.12em; color: var(--ink-3); }
 .hero-loc-row { display: flex; align-items: center; justify-content: center; gap: 10px; position: relative; }
 .hero-change-btn {

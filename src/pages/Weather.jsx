@@ -414,7 +414,7 @@ export default function Weather() {
         </Card>
       )}
 
-      <Card className="card-bare" title="Weather" subtitle={`The next ${days.length || 7} days at ${picked.name}`}>
+      <Card className="card-bare weather-days-card" title="Weather" subtitle={`The next ${days.length || 7} days at ${picked.name}`}>
         {!fc ? (
           <div className="muted small" style={{ padding: '10px 2px' }}>
             {fcError ? `Forecast unavailable: ${fcError}` : 'Loading the week…'}
