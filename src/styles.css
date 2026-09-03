@@ -741,16 +741,6 @@ input[type='checkbox'], input[type='range'] { accent-color: var(--accent); }
 .wr-bar-fill.tone-none    { background: var(--ink-3); }
 .wr-hi { flex: 0 0 30px; text-align: right; font-size: 13.5px; font-weight: 700; color: var(--ink); font-variant-numeric: tabular-nums; }
 .wr-badges { flex: 0 0 auto; display: flex; align-items: center; gap: 6px; }
-.wr-wbgt-chip {
-  font-family: var(--nums); font-size: 11px; font-weight: 700; font-variant-numeric: tabular-nums;
-  padding: 3px 7px; border-radius: 999px; background: var(--surface-2); color: var(--ink-2);
-  min-width: 40px; text-align: center;
-}
-.wr-wbgt-chip.tone-green   { color: var(--green); }
-.wr-wbgt-chip.tone-yellow  { color: var(--amber); }
-.wr-wbgt-chip.tone-orange  { color: var(--orange); }
-.wr-wbgt-chip.tone-red     { color: var(--red); }
-.wr-wbgt-chip.tone-darkred { color: var(--darkred); }
 .wr-chip { display: flex; align-items: center; gap: 2px; font-size: 10.5px; font-weight: 700; font-variant-numeric: tabular-nums; }
 .wr-chip-rain { color: var(--rain); }
 .wr-chip-lightning { color: var(--amber); }
@@ -759,7 +749,6 @@ input[type='checkbox'], input[type='range'] { accent-color: var(--accent); }
   .week-row { gap: 7px; padding: 10px 2px; }
   .wr-day { flex-basis: 40px; font-size: 12.5px; }
   .wr-lo, .wr-hi { flex-basis: 24px; font-size: 12px; }
-  .wr-wbgt-chip { min-width: 34px; font-size: 10px; padding: 2px 5px; }
   .wr-badges { gap: 4px; }
 }
 @media (max-width: 400px) {

@@ -449,9 +449,6 @@ export default function Weather() {
                   </div>
                   <span className="wr-hi">{d.highF != null ? Math.round(d.highF) : '—'}°</span>
                   <div className="wr-badges">
-                    <span className={`wr-wbgt-chip tone-${tone}`}>
-                      {d.peakWbgtF != null ? `${d.peakWbgtF.toFixed(1)}°` : '—'}
-                    </span>
                     {isRain && d.precipProbMax != null && (
                       <span className="wr-chip wr-chip-rain">
                         <IconDroplet width={11} height={11} />
