@@ -23,65 +23,85 @@ import { fetchForecast } from './forecast.js'
 import { uid } from './format.js'
 import { loadSession, clearSession } from './auth.js'
 
-const KEY = 'skyguard.app'
+const KEY_PREFIX = 'skyguard.app'
+/** The single shared blob this app used before data was split per account —
+ * kept only as a one-time migration source (see loadFor) so switching to
+ * the new per-account storage doesn't silently drop an existing user's
+ * locations/practice history the first time they sign in under it. */
+const LEGACY_KEY = KEY_PREFIX
+const keyFor = (accountId) => `${KEY_PREFIX}.${accountId || 'anon'}`
 
 const Ctx = createContext(null)
 
-function load() {
+function normalize(parsed) {
+  const base = seedState()
+  return {
+    ...base,
+    ...parsed,
+    settings: {
+      ...base.settings,
+      ...(parsed.settings || {}),
+      // Practice checks now default to every 15 minutes — carry anyone still
+      // sitting on the old 30-minute default forward. Nothing else in
+      // settings changes; there's no UI to have customized this away from
+      // the shipped default yet.
+      monitoringIntervalMin:
+        parsed.settings?.monitoringIntervalMin == null || parsed.settings.monitoringIntervalMin === 30
+          ? 15
+          : parsed.settings.monitoringIntervalMin,
+      lightning: { ...base.settings.lightning, ...(parsed.settings?.lightning || {}) },
+      // Strike radii now cap at 20 miles (was 30/20/10) — carry anyone
+      // still on the old shipped defaults forward the same way, leaving
+      // any of the three alone the moment it differs from its old default
+      // (there's no UI to have customized these yet, but this stays safe
+      // if one is ever added).
+      strikeRules: {
+        ...base.settings.strikeRules,
+        ...(parsed.settings?.strikeRules || {}),
+        cautionMiles:
+          parsed.settings?.strikeRules?.cautionMiles == null || parsed.settings.strikeRules.cautionMiles === 30
+            ? 20
+            : parsed.settings.strikeRules.cautionMiles,
+        advisoryMiles:
+          parsed.settings?.strikeRules?.advisoryMiles == null || parsed.settings.strikeRules.advisoryMiles === 20
+            ? 15
+            : parsed.settings.strikeRules.advisoryMiles,
+      },
+    },
+  }
+}
+
+/**
+ * Everything BUT who's signed in — locations, practice sessions/readings,
+ * settings — scoped to one account so signing in on a shared device shows
+ * that account's own history, not whatever the last person left behind.
+ */
+function loadFor(accountId) {
   try {
-    const raw = localStorage.getItem(KEY)
+    let raw = localStorage.getItem(keyFor(accountId))
+    if (!raw && accountId) raw = localStorage.getItem(LEGACY_KEY)
     if (!raw) return seedState()
     const parsed = JSON.parse(raw)
     if (parsed.version !== SCHEMA_VERSION) return seedState()
-    const base = seedState()
-    return {
-      ...base,
-      ...parsed,
-      // The session record is the ONLY source of truth for who is signed in.
-      //
-      // Restored synchronously because the route guard reads `account` on the
-      // very first render, before any effect can run — doing it in an effect
-      // bounced a signed-in user to /signin on every reload.
-      //
-      // It deliberately does not fall back to the `account` copy that gets
-      // persisted alongside the rest of the state: that copy is not validated
-      // against the accounts store, so falling back to it kept a user "signed
-      // in" after their session was cleared or their account deleted.
-      account: loadSession(),
-      settings: {
-        ...base.settings,
-        ...(parsed.settings || {}),
-        // Practice checks now default to every 15 minutes — carry anyone still
-        // sitting on the old 30-minute default forward. Nothing else in
-        // settings changes; there's no UI to have customized this away from
-        // the shipped default yet.
-        monitoringIntervalMin:
-          parsed.settings?.monitoringIntervalMin == null || parsed.settings.monitoringIntervalMin === 30
-            ? 15
-            : parsed.settings.monitoringIntervalMin,
-        lightning: { ...base.settings.lightning, ...(parsed.settings?.lightning || {}) },
-        // Strike radii now cap at 20 miles (was 30/20/10) — carry anyone
-        // still on the old shipped defaults forward the same way, leaving
-        // any of the three alone the moment it differs from its old default
-        // (there's no UI to have customized these yet, but this stays safe
-        // if one is ever added).
-        strikeRules: {
-          ...base.settings.strikeRules,
-          ...(parsed.settings?.strikeRules || {}),
-          cautionMiles:
-            parsed.settings?.strikeRules?.cautionMiles == null || parsed.settings.strikeRules.cautionMiles === 30
-              ? 20
-              : parsed.settings.strikeRules.cautionMiles,
-          advisoryMiles:
-            parsed.settings?.strikeRules?.advisoryMiles == null || parsed.settings.strikeRules.advisoryMiles === 20
-              ? 15
-              : parsed.settings.strikeRules.advisoryMiles,
-        },
-      },
-    }
+    return normalize(parsed)
   } catch {
     return seedState()
   }
+}
+
+function load() {
+  // The session record is the ONLY source of truth for who is signed in.
+  //
+  // Restored synchronously because the route guard reads `account` on the
+  // very first render, before any effect can run — doing it in an effect
+  // bounced a signed-in user to /signin on every reload.
+  //
+  // It deliberately does not fall back to the `account` copy that gets
+  // persisted alongside the rest of the state: that copy is not validated
+  // against the accounts store, so falling back to it kept a user "signed
+  // in" after their session was cleared or their account deleted.
+  const session = loadSession()
+  return { ...loadFor(session?.id), account: session }
 }
 
 export function StoreProvider({ children }) {
@@ -115,7 +135,7 @@ export function StoreProvider({ children }) {
 
   useEffect(() => {
     try {
-      localStorage.setItem(KEY, JSON.stringify(state))
+      localStorage.setItem(keyFor(state.account?.id), JSON.stringify(state))
     } catch (e) {
       console.warn('Could not persist state', e)
     }
@@ -726,11 +746,26 @@ export function StoreProvider({ children }) {
 
   /* ---- account ---- */
 
-  const setAccount = useCallback((account) => apply((s) => ({ ...s, account })), [apply])
+  const setAccount = useCallback(
+    (account) =>
+      apply((s) => {
+        if (s.account?.id === account?.id) return { ...s, account }
+        // A different account than whatever was last active (including the
+        // very first sign-in) — load THAT account's own locations/practice
+        // history/settings instead of carrying over whichever account's
+        // data happened to be sitting in memory.
+        return { ...loadFor(account?.id), account }
+      }),
+    [apply],
+  )
 
   const signOut = useCallback(() => {
     clearSession()
-    apply((s) => ({ ...s, account: null }))
+    // Drop the departing account's locations/sessions/etc from memory too,
+    // not just the account field — otherwise the very next persistence
+    // write (this state change itself) dumps a copy of their data into the
+    // signed-out "anon" bucket instead of leaving it only in their own key.
+    apply(() => ({ ...seedState(), account: null }))
   }, [apply])
 
   const patchSettings = useCallback(

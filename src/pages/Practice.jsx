@@ -71,12 +71,12 @@ export default function Practice() {
   return (
     <div className="stack">
       {band && obs && (
-        <div className={`answer a-${band.tone}`} style={{ margin: 0 }}>
+        <div className="answer" style={{ margin: 0 }}>
           <div className="answer-band">{band.name.toUpperCase()}</div>
           <div className="answer-grid">
             <div>
               <div className="label">WBGT now</div>
-              <div className={`answer-big tone-${band.tone}`}>{obs.wbgtF.toFixed(1)}°F</div>
+              <div className="answer-big">{obs.wbgtF.toFixed(1)}°F</div>
             </div>
             <div>
               <div className="label">How long outside</div>

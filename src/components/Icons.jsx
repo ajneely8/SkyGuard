@@ -89,10 +89,14 @@ export function IconMoon(props) {
   )
 }
 
-export function IconCloud(props) {
+export function IconCloud({ className = '', ...rest }) {
   return (
-    <svg {...base} {...props}>
-      <path d="M7.5 18.5a4.5 4.5 0 0 1-.5-8.97A5.5 5.5 0 0 1 17.6 8.1 4 4 0 0 1 17 16h-.1" />
+    <svg {...base} {...rest} className={`icon-plain-cloud ${className}`}>
+      <path
+        className="cloud-fill"
+        d="M7.5 18.5a4.5 4.5 0 0 1-.5-8.97A5.5 5.5 0 0 1 17.6 8.1 4 4 0 0 1 17 16h-.1"
+        fill="currentColor"
+      />
       <path d="M7.5 18.5H17" />
     </svg>
   )
@@ -106,7 +110,11 @@ export function IconCloudSun({ className = '', ...rest }) {
         <circle cx="8" cy="7.5" r="2.6" />
         <path d="M8 2.3v1.4M8 11.6v.6M3.3 7.5h1M12.7 6.9h.9M4.5 4l.7.7M11 3.6l-.7.8" />
       </g>
-      <path d="M9 18.5a4.5 4.5 0 0 1-.5-8.9 5.5 5.5 0 0 1 9.9 3.2A4 4 0 0 1 18 18.5h-.1" />
+      <path
+        className="cloud-fill"
+        d="M9 18.5a4.5 4.5 0 0 1-.5-8.9 5.5 5.5 0 0 1 9.9 3.2A4 4 0 0 1 18 18.5h-.1"
+        fill="currentColor"
+      />
       <path d="M9 18.5h9" />
     </svg>
   )
@@ -134,7 +142,11 @@ export function IconCloudRain({ className = '', ...rest }) {
 export function IconCloudSnow({ className = '', ...rest }) {
   return (
     <svg {...base} {...rest} className={`icon-snow ${className}`}>
-      <path d="M7.5 16.5a4.5 4.5 0 0 1-.5-8.97A5.5 5.5 0 0 1 17.6 6.1 4 4 0 0 1 17 14h-.1" />
+      <path
+        className="cloud-fill"
+        d="M7.5 16.5a4.5 4.5 0 0 1-.5-8.97A5.5 5.5 0 0 1 17.6 6.1 4 4 0 0 1 17 14h-.1"
+        fill="currentColor"
+      />
       <path d="M7.5 16.5H17" />
       <circle className="snow-flake" cx="9" cy="19.5" r="0.9" fill="currentColor" stroke="none" />
       <circle className="snow-flake snow-flake-2" cx="12.5" cy="21" r="0.9" fill="currentColor" stroke="none" />
@@ -147,7 +159,11 @@ export function IconCloudSnow({ className = '', ...rest }) {
 export function IconFog({ className = '', ...rest }) {
   return (
     <svg {...base} {...rest} className={`icon-fog ${className}`}>
-      <path d="M6.5 14.5a4.5 4.5 0 0 1-.4-8.97A5.5 5.5 0 0 1 16.1 4.6 4 4 0 0 1 15.5 12" />
+      <path
+        className="cloud-fill"
+        d="M6.5 14.5a4.5 4.5 0 0 1-.4-8.97A5.5 5.5 0 0 1 16.1 4.6 4 4 0 0 1 15.5 12 4 4 0 0 1 15 14.5Z"
+        fill="currentColor"
+      />
       <line className="fog-band" x1="4" y1="16.5" x2="20" y2="16.5" />
       <line className="fog-band fog-band-2" x1="6" y1="20" x2="18" y2="20" />
     </svg>
@@ -177,7 +193,12 @@ export function IconCloudDrizzle({ className = '', ...rest }) {
 export function IconCloudLightning({ className = '', ...rest }) {
   return (
     <svg {...base} {...rest} className={`icon-cloud-lightning ${className}`}>
-      <path d="M7.5 16.5a4.5 4.5 0 0 1-.5-8.97A5.5 5.5 0 0 1 17.6 6.1 4 4 0 0 1 17 14h-.1" />
+      <path
+        className="cloud-fill"
+        d="M7.5 16.5a4.5 4.5 0 0 1-.5-8.97A5.5 5.5 0 0 1 17.6 6.1 4 4 0 0 1 17 14h-.1"
+        fill="currentColor"
+      />
+      <path d="M7.5 16.5H17" />
       <path
         className="cl-bolt"
         d="M12.8 12.5 9.3 17.5h2.7l-1 4 4.2-5.5h-2.6l1.2-3.5Z"
@@ -197,7 +218,11 @@ export function IconCloudMoon({ className = '', ...rest }) {
   return (
     <svg {...base} {...rest} className={`icon-cloud-moon ${className}`}>
       <path className="cm-moon" d="M13.4 7.4a3.6 3.6 0 0 0-3.4-2 4 4 0 0 0-.6 7.9" />
-      <path d="M9 18.5a4.5 4.5 0 0 1-.5-8.9 5.5 5.5 0 0 1 9.9 3.2A4 4 0 0 1 18 18.5h-.1" />
+      <path
+        className="cloud-fill"
+        d="M9 18.5a4.5 4.5 0 0 1-.5-8.9 5.5 5.5 0 0 1 9.9 3.2A4 4 0 0 1 18 18.5h-.1"
+        fill="currentColor"
+      />
       <path d="M9 18.5h9" />
     </svg>
   )

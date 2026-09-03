@@ -118,10 +118,10 @@ function buildOutlook(hours, tz) {
 }
 
 /**
- * The decorative band behind the page's cards — a night sky (moon, stars,
- * dim clouds), a sunny sky with clouds, or a clear sunny sky, picked from
- * the searched city's own current hour so it actually reflects what time
- * it is there right now, not the viewer's own clock.
+ * The decorative band behind the page's cards — a night sky (stars, dim
+ * clouds), a sunny sky with clouds, or a clear sunny sky, picked from the
+ * searched city's own current hour so it actually reflects what time it is
+ * there right now, not the viewer's own clock.
  */
 function SkyScene({ scene }) {
   return (
@@ -129,7 +129,6 @@ function SkyScene({ scene }) {
       {scene === 'scene-night' && (
         <>
           <div className="weather-stars" />
-          <div className="weather-moon" />
           <div className="weather-scene-clouds weather-scene-clouds-night" />
         </>
       )}
@@ -175,14 +174,15 @@ function dayLabel(iso, tz, todayStr) {
 /** Where a value sits between lo/hi as a 0-100 percent, clamped. */
 const pctBetween = (v, lo, hi) => (hi <= lo ? 0 : Math.max(0, Math.min(100, ((v - lo) / (hi - lo)) * 100)))
 
-/* ---------- recently-searched cities, kept on this device only ---------- */
+/* ---------- recently-searched cities, kept on this device, per account ---------- */
 
-const RECENTS_KEY = 'skyguard.weather.recentCities'
+const RECENTS_KEY_PREFIX = 'skyguard.weather.recentCities'
 const MAX_RECENTS = 8
+const recentsKeyFor = (accountId) => `${RECENTS_KEY_PREFIX}.${accountId || 'anon'}`
 
-function loadRecents() {
+function loadRecents(accountId) {
   try {
-    const raw = JSON.parse(localStorage.getItem(RECENTS_KEY) || '[]')
+    const raw = JSON.parse(localStorage.getItem(recentsKeyFor(accountId)) || '[]')
     return Array.isArray(raw) ? raw : []
   } catch {
     return []
@@ -192,14 +192,14 @@ function loadRecents() {
 /** Adds a city to the front of the recents list, de-duping anything within
  * ~0.01° (about half a mile) of it rather than by exact name — the same
  * city searched two different ways shouldn't produce two entries. */
-function saveRecent(city) {
-  const list = loadRecents().filter(
+function saveRecent(accountId, city) {
+  const list = loadRecents(accountId).filter(
     (c) => Math.abs(c.lat - city.lat) > 0.01 || Math.abs(c.lon - city.lon) > 0.01,
   )
   list.unshift({ name: city.name, lat: city.lat, lon: city.lon })
   const trimmed = list.slice(0, MAX_RECENTS)
   try {
-    localStorage.setItem(RECENTS_KEY, JSON.stringify(trimmed))
+    localStorage.setItem(recentsKeyFor(accountId), JSON.stringify(trimmed))
   } catch {
     /* storage full or unavailable — recents are a convenience, not critical */
   }
@@ -218,8 +218,17 @@ export default function Weather() {
   const [fcError, setFcError] = useState(null)
   const [loadingFc, setLoadingFc] = useState(false)
   const [aqi, setAqi] = useState(null) // { value } | { error: true } | null while loading
-  const [recents, setRecents] = useState(loadRecents)
+  const accountId = state.account?.id
+  const [recents, setRecents] = useState(() => loadRecents(accountId))
   const [recentWeather, setRecentWeather] = useState({}) // "lat,lon" -> snapshot, for the recent-city card backgrounds
+
+  // Recents are per-account (a shared device shouldn't mix one coach's
+  // searched cities into another's list) — reload whenever the signed-in
+  // account changes rather than only once at mount.
+  useEffect(() => {
+    setRecents(loadRecents(accountId))
+    setRecentWeather({})
+  }, [accountId])
 
   const runSearch = useCallback(async (e) => {
     e?.preventDefault?.()
@@ -242,8 +251,8 @@ export default function Weather() {
     setResults([])
     setQuery('')
     setPicked({ name: r.label ?? r.name, lat: r.lat, lon: r.lon, timezone: null })
-    setRecents(saveRecent({ name: r.label ?? r.name, lat: r.lat, lon: r.lon }))
-  }, [])
+    setRecents(saveRecent(accountId, { name: r.label ?? r.name, lat: r.lat, lon: r.lon }))
+  }, [accountId])
 
   useEffect(() => {
     if (!picked) return

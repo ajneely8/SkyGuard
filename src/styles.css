@@ -377,30 +377,16 @@ input[type='checkbox'], input[type='range'] { accent-color: var(--accent); }
 
 .answer {
   margin: 16px -20px 0; padding: 18px 22px 20px 19px; border-top: 1px solid var(--line-2);
-  background: var(--surface-2); border-left: 3px solid transparent;
+  background: var(--surface-2);
 }
-.answer.a-green   { border-left-color: var(--green); }
-.answer.a-yellow  { border-left-color: var(--amber); }
-.answer.a-orange  { border-left-color: var(--orange); }
-.answer.a-red     { border-left-color: var(--red); }
-.answer.a-darkred { border-left-color: var(--darkred); }
 
 .answer-band {
   font-size: 11px; font-weight: 700; letter-spacing: 0.09em; margin-bottom: 16px; text-transform: uppercase;
+  color: var(--ink-2);
 }
-.a-green .answer-band   { color: var(--green); }
-.a-yellow .answer-band  { color: var(--amber); }
-.a-orange .answer-band  { color: var(--orange); }
-.a-red .answer-band     { color: var(--red); }
-.a-darkred .answer-band { color: var(--darkred); }
 
 .answer-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 18px; }
 .answer-big { font-size: 20px; font-weight: 700; letter-spacing: -0.01em; line-height: 1.2; color: #fff; }
-.answer-big.tone-green   { color: var(--green); }
-.answer-big.tone-yellow  { color: var(--amber); }
-.answer-big.tone-orange  { color: var(--orange); }
-.answer-big.tone-red     { color: var(--red); }
-.answer-big.tone-darkred { color: var(--darkred); }
 .answer-mid { font-size: 14px; font-weight: 500; line-height: 1.45; }
 .answer-detail { margin-top: 16px; font-size: 13.5px; line-height: 1.55; color: var(--ink-2); }
 .answer-detail strong { color: var(--ink); }
@@ -544,10 +530,12 @@ input[type='checkbox'], input[type='range'] { accent-color: var(--accent); }
   .weather-stars, .weather-stars::after { animation: none; opacity: 0.5; }
 }
 
-/* The decorative band behind the page's cards — three moods (night,
-   sunny-with-clouds, clear sunny), picked in Weather.jsx from the searched
-   city's own current hour so it matches what time it actually is there. */
-.weather-sky-scene { position: absolute; top: -8px; left: -8px; right: -8px; height: 320px; overflow: hidden; z-index: 0; pointer-events: none; }
+/* The decorative backdrop behind the ENTIRE page's cards — three moods
+   (night, sunny-with-clouds, clear sunny), picked in Weather.jsx from the
+   searched city's own current hour so it matches what time it actually is
+   there. Stretches the full height of .weather-page (not just a top band)
+   so the whole screen carries the scene, not just the hero card. */
+.weather-sky-scene { position: absolute; top: -8px; left: -8px; right: -8px; bottom: 0; overflow: hidden; z-index: 0; pointer-events: none; }
 .weather-sky-scene.scene-night     { background: linear-gradient(180deg, #04070f 0%, #060a1a 30%, #0c1836 60%, #17285a 85%, #223a76 100%); }
 .weather-sky-scene.scene-cloud-day { background: linear-gradient(180deg, #1b6fd1 0%, #3f96e6 50%, #7dc1f2 100%); }
 .weather-sky-scene.scene-clear-day { background: linear-gradient(180deg, #0f5fc4 0%, #2f89e0 55%, #6fb8ef 100%); }
@@ -574,22 +562,14 @@ input[type='checkbox'], input[type='range'] { accent-color: var(--accent); }
   .weather-sun { animation: none; }
 }
 
-/* Crescent moon for the night scene — one solid disc with a same-color
-   "bite" taken out via an offset box-shadow, the classic CSS crescent. The
-   bite color matches the night gradient's own top stop. A bigger, softer
-   glow than the day sun's — moonlight, not sunlight — so the scene reads
-   as more than just a flat dark rectangle. */
-.weather-moon {
-  position: absolute; top: 22px; left: 9%; width: 62px; height: 62px; border-radius: 50%;
-  background: #f6f3ea;
-  box-shadow: -17px -6px 0 6px #04070f, 0 0 90px 30px rgba(230, 232, 250, 0.22), 0 0 36px 10px rgba(246, 243, 234, 0.4);
-}
-
-/* Soft cloud bank near the bottom of the band — stacked blurred ellipses,
-   no image assets. Dimmer and blue-tinted for the night scene, bright white
-   for the daytime one. */
+/* Soft cloud bank sitting just below the sun/moon — stacked blurred
+   ellipses, no image assets. Anchored to a fixed top offset + height (not
+   inset:0) since the scene itself now stretches the whole page; without
+   that these would smear across the entire page height instead of reading
+   as a cloud layer near the top. Dimmer and blue-tinted for the night
+   scene, bright white for the daytime one. */
 .weather-scene-clouds {
-  position: absolute; inset: 0; pointer-events: none;
+  position: absolute; top: 120px; left: 0; right: 0; height: 160px; pointer-events: none;
   background-image:
     radial-gradient(70px 28px at 18% 82%, rgba(255, 255, 255, 0.85), transparent 70%),
     radial-gradient(100px 36px at 52% 90%, rgba(255, 255, 255, 0.75), transparent 70%),
