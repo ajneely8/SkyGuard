@@ -30,6 +30,7 @@ import {
   IconCloudRain,
   IconCloudSnow,
   IconCloudSun,
+  IconCloudMoon,
   IconSun,
   IconMoon,
 } from '../components/Icons.jsx'
@@ -54,7 +55,12 @@ function simplifyCondition(icon, conditions, pct) {
   if (pct >= 50 || icon === 'storm') return { Icon: IconCloudLightning, label: 'Storms', bucket: 'storm' }
   const RainIcon = RAIN_ICONS[icon]
   if (RainIcon) return { Icon: RainIcon, label: conditions, bucket: 'rain' }
-  if (icon === 'cloudSun' || icon === 'cloudMoon') return { Icon: IconCloudSun, label: 'Partly cloudy', bucket: 'cloud' }
+  // Night stays night: a gold sun (or a sun peeking out of a cloud) at
+  // 4am reads as a real bug, not a stylistic choice — the API's own
+  // is_day flag already picked 'cloudMoon'/'moon' for these hours, so use
+  // the moon-bearing icons, not the sun ones, for them.
+  if (icon === 'cloudSun') return { Icon: IconCloudSun, label: 'Partly cloudy', bucket: 'cloud' }
+  if (icon === 'cloudMoon') return { Icon: IconCloudMoon, label: 'Partly cloudy', bucket: 'cloud' }
   if (icon === 'moon') return { Icon: IconMoon, label: 'Clear', bucket: 'sun' }
   return { Icon: IconSun, label: 'Sunny', bucket: 'sun' }
 }

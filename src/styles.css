@@ -673,7 +673,7 @@ input[type='checkbox'], input[type='range'] { accent-color: var(--accent); }
   0%   { transform: translateY(-3px); opacity: 0; }
   20%  { opacity: 1; }
   80%  { opacity: 1; }
-  100% { transform: translateY(3px); opacity: 0; }
+  100% { transform: translateY(6px); opacity: 0; }
 }
 @media (prefers-reduced-motion: reduce) {
   .drizzle-drop { animation: none; opacity: 1; }

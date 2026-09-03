@@ -85,15 +85,20 @@ export function IconCloudSun({ className = '', ...rest }) {
   )
 }
 
-/** Cloud + heavier, faster rain lines than drizzle, deeper blue. */
+/** Cloud + heavier, faster rain lines than drizzle, deeper blue. The
+ * cloud is a solid filled silhouette, not just an outline. */
 export function IconCloudRain({ className = '', ...rest }) {
   return (
     <svg {...base} {...rest} className={`icon-rain ${className}`}>
-      <path d="M7.5 16.5a4.5 4.5 0 0 1-.5-8.97A5.5 5.5 0 0 1 17.6 6.1 4 4 0 0 1 17 14h-.1" />
+      <path
+        className="cloud-fill"
+        d="M7.5 16.5a4.5 4.5 0 0 1-.5-8.97A5.5 5.5 0 0 1 17.6 6.1 4 4 0 0 1 17 14h-.1"
+        fill="currentColor"
+      />
       <path d="M7.5 16.5H17" />
-      <line className="rain-drop" x1="8.5" y1="18" x2="7" y2="22.5" />
-      <line className="rain-drop rain-drop-2" x1="12" y1="18" x2="10.5" y2="22.5" />
-      <line className="rain-drop rain-drop-3" x1="15.5" y1="18" x2="14" y2="22.5" />
+      <line className="rain-drop" x1="8.5" y1="18" x2="7" y2="23.5" />
+      <line className="rain-drop rain-drop-2" x1="12" y1="18" x2="10.5" y2="23.5" />
+      <line className="rain-drop rain-drop-3" x1="15.5" y1="18" x2="14" y2="23.5" />
     </svg>
   )
 }
@@ -122,15 +127,20 @@ export function IconFog({ className = '', ...rest }) {
   )
 }
 
-/** Cloud + falling drops, light blue, only used for drizzle conditions. */
+/** Cloud + falling drops, light blue, only used for drizzle conditions.
+ * The cloud is a solid filled silhouette, not just an outline. */
 export function IconCloudDrizzle({ className = '', ...rest }) {
   return (
     <svg {...base} {...rest} className={`icon-drizzle ${className}`}>
-      <path d="M7.5 18.5a4.5 4.5 0 0 1-.5-8.97A5.5 5.5 0 0 1 17.6 8.1 4 4 0 0 1 17 16h-.1" />
+      <path
+        className="cloud-fill"
+        d="M7.5 18.5a4.5 4.5 0 0 1-.5-8.97A5.5 5.5 0 0 1 17.6 8.1 4 4 0 0 1 17 16h-.1"
+        fill="currentColor"
+      />
       <path d="M7.5 18.5H17" />
-      <line className="drizzle-drop" x1="9" y1="20" x2="8" y2="23" />
-      <line className="drizzle-drop drizzle-drop-2" x1="13" y1="20" x2="12" y2="23" />
-      <line className="drizzle-drop drizzle-drop-3" x1="17" y1="20" x2="16" y2="23" />
+      <line className="drizzle-drop" x1="9" y1="20" x2="8" y2="24" />
+      <line className="drizzle-drop drizzle-drop-2" x1="13" y1="20" x2="12" y2="24" />
+      <line className="drizzle-drop drizzle-drop-3" x1="17" y1="20" x2="16" y2="24" />
     </svg>
   )
 }
