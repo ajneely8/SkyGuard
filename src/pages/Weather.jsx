@@ -11,11 +11,30 @@
 import { useEffect } from 'react'
 import { useStore } from '../lib/store.jsx'
 import { Card, Empty } from '../components/ui.jsx'
-import { WeatherIcon, IconBolt, IconCloudLightning } from '../components/Icons.jsx'
+import {
+  IconBolt,
+  IconCloudLightning,
+  IconCloudDrizzle,
+  IconCloudRain,
+  IconCloudSnow,
+  IconSun,
+} from '../components/Icons.jsx'
 
 /** A 0-8 modelled thunder score (see thunderRisk() in forecast.js) as a
  * rough risk percentage — a proxy, not a measured probability. */
 const thunderPct = (maxThunder) => (maxThunder ? Math.round((maxThunder.score / 8) * 100) : 0)
+
+const RAIN_ICONS = { drizzle: IconCloudDrizzle, rain: IconCloudRain, snow: IconCloudSnow }
+
+/** Only three looks on this page: sunny, some kind of rain, or a storm —
+ * no plain "overcast" gray cloud with no story to tell. Every day's label
+ * and icon come from this same bucket, so they never disagree. */
+function simplifyDay(d, pct) {
+  if (pct >= 50 || d.icon === 'storm') return { Icon: IconCloudLightning, label: 'Storms' }
+  const RainIcon = RAIN_ICONS[d.icon]
+  if (RainIcon) return { Icon: RainIcon, label: d.conditions }
+  return { Icon: IconSun, label: 'Sunny' }
+}
 
 function dayLabel(iso, tz, todayStr) {
   const d = new Date(iso)
@@ -61,13 +80,13 @@ export default function Weather() {
               const tone = band?.tone || 'none'
               const pct = thunderPct(d.maxThunder)
               const hasLightning = pct > 0
-              const stormy = pct >= 50
+              const { Icon, label: condLabel } = simplifyDay(d, pct)
               return (
                 <div key={d.date} className={`week-cell ${hasLightning ? 'has-lightning' : ''}`}>
                   <div className="wc-day">{label.top}</div>
                   <div className="wc-date">{label.date}</div>
-                  {stormy ? <IconCloudLightning className="wc-icon" /> : <WeatherIcon icon={d.icon} className="wc-icon" />}
-                  <div className="wc-cond">{d.conditions || '—'}</div>
+                  <Icon className="wc-icon" />
+                  <div className="wc-cond">{condLabel}</div>
                   <div className={`wc-hilo tone-${tone}`}>
                     {d.highF != null ? Math.round(d.highF) : '—'}° <span className="wc-lo">{d.lowF != null ? Math.round(d.lowF) : '—'}°</span>
                   </div>
@@ -77,10 +96,7 @@ export default function Weather() {
                   </div>
                   <div className="wc-row">
                     <span className="label">Precip</span>
-                    <span>
-                      {d.precipProbMax != null ? `${Math.round(d.precipProbMax)}%` : '—'}
-                      {d.precipSumIn ? ` · ${d.precipSumIn.toFixed(2)}"` : ''}
-                    </span>
+                    <span>{d.precipProbMax != null ? `${Math.round(d.precipProbMax)}%` : '—'}</span>
                   </div>
                   <div className="wc-row">
                     <span className="label">Wind</span>
