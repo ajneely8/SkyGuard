@@ -11,8 +11,7 @@
 import { useEffect } from 'react'
 import { useStore } from '../lib/store.jsx'
 import { Card, Empty } from '../components/ui.jsx'
-import { WeatherIcon, IconBolt } from '../components/Icons.jsx'
-import { fmtTimeIn } from '../lib/format.js'
+import { WeatherIcon, IconBolt, IconCloudLightning } from '../components/Icons.jsx'
 
 /** A 0-8 modelled thunder score (see thunderRisk() in forecast.js) as a
  * rough risk percentage — a proxy, not a measured probability. */
@@ -62,11 +61,12 @@ export default function Weather() {
               const tone = band?.tone || 'none'
               const pct = thunderPct(d.maxThunder)
               const hasLightning = pct > 0
+              const stormy = pct >= 50
               return (
                 <div key={d.date} className={`week-cell ${hasLightning ? 'has-lightning' : ''}`}>
                   <div className="wc-day">{label.top}</div>
                   <div className="wc-date">{label.date}</div>
-                  <WeatherIcon icon={d.icon} className="wc-icon" />
+                  {stormy ? <IconCloudLightning className="wc-icon" /> : <WeatherIcon icon={d.icon} className="wc-icon" />}
                   <div className="wc-cond">{d.conditions || '—'}</div>
                   <div className={`wc-hilo tone-${tone}`}>
                     {d.highF != null ? Math.round(d.highF) : '—'}° <span className="wc-lo">{d.lowF != null ? Math.round(d.lowF) : '—'}°</span>
@@ -89,12 +89,6 @@ export default function Weather() {
                   <div className="wc-row">
                     <span className="label">UV</span>
                     <span>{d.uvMax != null ? Math.round(d.uvMax) : '—'}</span>
-                  </div>
-                  <div className="wc-row">
-                    <span className="label">Sun</span>
-                    <span>
-                      {d.sunrise ? fmtTimeIn(d.sunrise, tz) : '—'} – {d.sunset ? fmtTimeIn(d.sunset, tz) : '—'}
-                    </span>
                   </div>
                   {hasLightning && (
                     <div className="wc-row wc-lightning">

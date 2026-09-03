@@ -591,6 +591,15 @@ input[type='checkbox'], input[type='range'] { accent-color: var(--accent); }
   .sun-rays, .sun-disc { animation: none; }
 }
 
+/* Cloud-with-lightning icon: swapped in for the day's normal weather icon
+   once modelled lightning risk hits 50%+ (see Weather.jsx), bolt flashing
+   inside the cloud silhouette. */
+.icon-cloud-lightning { color: var(--amber); }
+.cl-bolt { transform-box: fill-box; transform-origin: center; animation: wcBoltFlash 1.4s ease-in-out infinite; }
+@media (prefers-reduced-motion: reduce) {
+  .cl-bolt { animation: none; }
+}
+
 /* ---------------- what moves the number ---------------- */
 
 .drv-list { display: grid; gap: 10px; }

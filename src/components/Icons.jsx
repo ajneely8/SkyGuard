@@ -84,6 +84,22 @@ export function IconCloudDrizzle({ className = '', ...rest }) {
   )
 }
 
+/** Cloud + a flashing bolt, amber — used in place of the normal weather
+ * icon once modelled lightning risk hits 50% or higher (see Weather.jsx). */
+export function IconCloudLightning({ className = '', ...rest }) {
+  return (
+    <svg {...base} {...rest} className={`icon-cloud-lightning ${className}`}>
+      <path d="M7.5 16.5a4.5 4.5 0 0 1-.5-8.97A5.5 5.5 0 0 1 17.6 6.1 4 4 0 0 1 17 14h-.1" />
+      <path
+        className="cl-bolt"
+        d="M12.8 12.5 9.3 17.5h2.7l-1 4 4.2-5.5h-2.6l1.2-3.5Z"
+        fill="currentColor"
+        stroke="none"
+      />
+    </svg>
+  )
+}
+
 export function IconCloudMoon(props) {
   return (
     <svg {...base} {...props}>
