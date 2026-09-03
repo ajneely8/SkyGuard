@@ -11,8 +11,12 @@
 import { useEffect } from 'react'
 import { useStore } from '../lib/store.jsx'
 import { Card, Empty } from '../components/ui.jsx'
-import { WeatherIcon } from '../components/Icons.jsx'
+import { WeatherIcon, IconBolt } from '../components/Icons.jsx'
 import { fmtTimeIn } from '../lib/format.js'
+
+/** A 0-8 modelled thunder score (see thunderRisk() in forecast.js) as a
+ * rough risk percentage — a proxy, not a measured probability. */
+const thunderPct = (maxThunder) => (maxThunder ? Math.round((maxThunder.score / 8) * 100) : 0)
 
 function dayLabel(iso, tz, todayStr) {
   const d = new Date(iso)
@@ -56,8 +60,10 @@ export default function Weather() {
               const label = dayLabel(d.date, tz, todayStr)
               const band = guidelineNow(d.peakWbgtF)
               const tone = band?.tone || 'none'
+              const pct = thunderPct(d.maxThunder)
+              const hasLightning = pct > 0
               return (
-                <div key={d.date} className={`week-cell tone-${tone}`}>
+                <div key={d.date} className={`week-cell ${hasLightning ? 'has-lightning' : ''}`}>
                   <div className="wc-day">{label.top}</div>
                   <div className="wc-date">{label.date}</div>
                   <WeatherIcon icon={d.icon} className="wc-icon" />
@@ -78,10 +84,7 @@ export default function Weather() {
                   </div>
                   <div className="wc-row">
                     <span className="label">Wind</span>
-                    <span>
-                      {d.windMaxMph != null ? `${Math.round(d.windMaxMph)} mph` : '—'}
-                      {d.gustMaxMph != null ? ` g${Math.round(d.gustMaxMph)}` : ''}
-                    </span>
+                    <span>{d.windMaxMph != null ? `${Math.round(d.windMaxMph)} mph` : '—'}</span>
                   </div>
                   <div className="wc-row">
                     <span className="label">UV</span>
@@ -93,6 +96,15 @@ export default function Weather() {
                       {d.sunrise ? fmtTimeIn(d.sunrise, tz) : '—'} – {d.sunset ? fmtTimeIn(d.sunset, tz) : '—'}
                     </span>
                   </div>
+                  {hasLightning && (
+                    <div className="wc-row wc-lightning">
+                      <span className="label">Lightning</span>
+                      <span className="wc-lightning-value">
+                        <IconBolt className="wc-bolt" width={13} height={13} />
+                        {pct}%
+                      </span>
+                    </div>
+                  )}
                 </div>
               )
             })}
