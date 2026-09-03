@@ -17,9 +17,11 @@
   --accent: #2563eb;
   --accent-2: #3b76ef;
   --accent-3: #1d4ed8;
-  /* Light blue for the drizzle weather icon only — decorative, not a
-     safety-status color like the ones below. */
+  /* Light blue for the drizzle weather icon, warm gold for the sun icon —
+     decorative, not safety-status colors like the ones below (deliberately
+     not --amber, so a sunny day never reads as a caution indicator). */
   --sky: #38bdf8;
+  --sun-gold: #fbbf24;
 
   /* ink */
   --ink: #f8fafc;
@@ -573,6 +575,20 @@ input[type='checkbox'], input[type='range'] { accent-color: var(--accent); }
 }
 @media (prefers-reduced-motion: reduce) {
   .drizzle-drop { animation: none; opacity: 1; }
+}
+
+/* Sun weather icon: warm gold, rays slowly spinning with the disc pulsing
+   underneath — only used for clear/sunny conditions via WeatherIcon. */
+.icon-sun { color: var(--sun-gold); }
+.sun-rays { transform-box: fill-box; transform-origin: center; animation: sunSpin 9s linear infinite; }
+.sun-disc { transform-box: fill-box; transform-origin: center; animation: sunPulse 2.6s ease-in-out infinite; }
+@keyframes sunSpin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+@keyframes sunPulse {
+  0%, 100% { opacity: 1; filter: drop-shadow(0 0 0 transparent); }
+  50%      { opacity: 0.85; filter: drop-shadow(0 0 3px var(--sun-gold)); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .sun-rays, .sun-disc { animation: none; }
 }
 
 /* ---------------- what moves the number ---------------- */
