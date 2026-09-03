@@ -556,76 +556,61 @@ input[type='checkbox'], input[type='range'] { accent-color: var(--accent); }
 }
 .weather-page > .card { position: relative; z-index: 1; background: transparent; }
 
-/* Same flat, scrollable, no-box treatment as .day-strip, and the same
-   green/yellow/orange/red/darkred WBGT-band coloring used everywhere else
-   in the app. */
-.week-strip { display: flex; overflow-x: auto; padding: 2px 0 12px; gap: 0; }
-.week-cell {
-  flex: 0 0 160px;
-  padding: 16px 20px; border-right: 1px solid var(--line-2);
-  display: grid; gap: 8px; justify-items: start; text-align: left;
+/* Apple-Weather-style row list: day / icon / low / a range bar / high,
+   one row per day. Rows line up by construction (fixed-width columns),
+   no variable-height-card alignment problem to fight. The bar is colored
+   by the day's WBGT band instead of a plain temperature gradient — it
+   carries more information than the thing it's modeled on. */
+.week-list { display: flex; flex-direction: column; }
+.week-row {
+  display: flex; align-items: center; gap: 10px;
+  padding: 11px 4px; border-bottom: 1px solid var(--line-2);
 }
-.week-cell:last-child { border-right: none; }
-.wc-day { font-size: 13px; font-weight: 700; color: var(--ink); }
-.wc-date { font-size: 11px; color: var(--ink-3); margin-top: -6px; }
-.wc-icon { color: var(--ink-3); width: 22px; height: 22px; margin: 4px 0; }
-.wc-cond { font-size: 11.5px; color: var(--ink-2); line-height: 1.3; margin-bottom: 2px; }
-.wc-hilo {
-  font-family: var(--nums); font-size: 20px; font-weight: 700; color: var(--ink);
-  font-variant-numeric: tabular-nums; line-height: 1.1;
+.week-row:last-child { border-bottom: none; }
+.wr-day {
+  flex: 0 0 46px; font-size: 13.5px; font-weight: 700; color: var(--ink);
+  display: flex; flex-direction: column; line-height: 1.3;
 }
-.wc-lo { color: var(--ink-3); font-weight: 600; font-size: 16px; }
-.wc-hilo.tone-green   { color: var(--green); }
-.wc-hilo.tone-yellow  { color: var(--amber); }
-.wc-hilo.tone-orange  { color: var(--orange); }
-.wc-hilo.tone-red     { color: var(--red); }
-.wc-hilo.tone-darkred { color: var(--darkred); }
-.wc-wbgt {
-  font-family: var(--nums); font-size: 14px; font-weight: 700; color: var(--ink-2);
-  font-variant-numeric: tabular-nums; margin-top: 2px; margin-bottom: 6px;
-  padding-bottom: 10px; border-bottom: 1px solid var(--line-2); width: 100%;
+.wr-date { font-size: 10px; font-weight: 500; color: var(--ink-3); }
+.wr-icon { flex: 0 0 auto; color: var(--ink-3); }
+.wr-lo { flex: 0 0 26px; text-align: right; font-size: 13px; color: var(--ink-3); font-variant-numeric: tabular-nums; }
+.wr-bar-track {
+  flex: 1 1 auto; min-width: 36px; height: 4px; border-radius: 2px;
+  background: var(--line-2); position: relative;
 }
-.wc-wbgt.tone-green   { color: var(--green); }
-.wc-wbgt.tone-yellow  { color: var(--amber); }
-.wc-wbgt.tone-orange  { color: var(--orange); }
-.wc-wbgt.tone-red     { color: var(--red); }
-.wc-wbgt.tone-darkred { color: var(--darkred); }
-.wc-unit { display: block; font-size: 8.5px; font-weight: 700; letter-spacing: 0.08em; color: var(--ink-3); margin-top: 2px; }
-.wc-row { display: flex; justify-content: space-between; align-items: center; gap: 14px; width: 100%; font-size: 11.5px; color: var(--ink-2); }
-.wc-row .label { margin: 0; font-size: 10px; }
-
-/* Rain chance and lightning risk — same treatment: a callout row with a
-   colored, animated icon, not just another plain stat line. Rain only on
-   days actually bucketed as rain (see isRain in Weather.jsx); lightning
-   whenever the modelled score is non-zero. */
-.wc-rain { margin-top: 2px; padding-top: 8px; border-top: 1px solid var(--line-2); }
-.wc-rain .label { color: var(--rain); }
-.wc-rain-value { display: flex; align-items: center; gap: 4px; color: var(--rain); font-weight: 700; }
-.wc-drop { color: var(--rain); animation: wcDropBob 1.6s ease-in-out infinite; }
-@keyframes wcDropBob {
-  0%, 100% { transform: translateY(0); opacity: 1; }
-  50%      { transform: translateY(2px); opacity: 0.7; }
+.wr-bar-fill { position: absolute; top: 0; bottom: 0; border-radius: 2px; }
+.wr-bar-fill.tone-green   { background: var(--green); }
+.wr-bar-fill.tone-yellow  { background: var(--amber); }
+.wr-bar-fill.tone-orange  { background: var(--orange); }
+.wr-bar-fill.tone-red     { background: var(--red); }
+.wr-bar-fill.tone-darkred { background: var(--darkred); }
+.wr-bar-fill.tone-none    { background: var(--ink-3); }
+.wr-hi { flex: 0 0 30px; text-align: right; font-size: 13.5px; font-weight: 700; color: var(--ink); font-variant-numeric: tabular-nums; }
+.wr-badges { flex: 0 0 auto; display: flex; align-items: center; gap: 6px; }
+.wr-wbgt-chip {
+  font-family: var(--nums); font-size: 11px; font-weight: 700; font-variant-numeric: tabular-nums;
+  padding: 3px 7px; border-radius: 999px; background: var(--surface-2); color: var(--ink-2);
+  min-width: 40px; text-align: center;
 }
-@media (prefers-reduced-motion: reduce) {
-  .wc-drop { animation: none; }
-}
-
-.wc-lightning { margin-top: 2px; padding-top: 8px; border-top: 1px solid var(--line-2); }
-.wc-lightning .label { color: var(--amber); }
-.wc-lightning-value { display: flex; align-items: center; gap: 4px; color: var(--amber); font-weight: 700; }
-.wc-bolt { color: var(--amber); animation: wcBoltFlash 1.8s ease-in-out infinite; }
-@keyframes wcBoltFlash {
-  0%, 100% { opacity: 1; filter: drop-shadow(0 0 0 transparent); }
-  50% { opacity: 0.55; filter: drop-shadow(0 0 4px var(--amber)); }
-}
-@media (prefers-reduced-motion: reduce) {
-  .wc-bolt { animation: none; }
-}
+.wr-wbgt-chip.tone-green   { color: var(--green); }
+.wr-wbgt-chip.tone-yellow  { color: var(--amber); }
+.wr-wbgt-chip.tone-orange  { color: var(--orange); }
+.wr-wbgt-chip.tone-red     { color: var(--red); }
+.wr-wbgt-chip.tone-darkred { color: var(--darkred); }
+.wr-chip { display: flex; align-items: center; gap: 2px; font-size: 10.5px; font-weight: 700; font-variant-numeric: tabular-nums; }
+.wr-chip-rain { color: var(--rain); }
+.wr-chip-lightning { color: var(--amber); }
 
 @media (max-width: 640px) {
-  .week-cell { flex-basis: 138px; padding: 12px 16px; }
-  .wc-hilo { font-size: 18px; }
-  .wc-lo { font-size: 14px; }
+  .week-row { gap: 7px; padding: 10px 2px; }
+  .wr-day { flex-basis: 40px; font-size: 12.5px; }
+  .wr-lo, .wr-hi { flex-basis: 24px; font-size: 12px; }
+  .wr-wbgt-chip { min-width: 34px; font-size: 10px; padding: 2px 5px; }
+  .wr-badges { gap: 4px; }
+}
+@media (max-width: 400px) {
+  .week-row { flex-wrap: wrap; }
+  .wr-badges { flex-basis: 100%; justify-content: flex-end; margin-top: 4px; }
 }
 
 /* Drizzle weather icon: white cloud, three light-blue drops falling on a

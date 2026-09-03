@@ -1,11 +1,14 @@
 /**
- * Weather — the coming week at this field, side to side, one card per day.
+ * Weather — the coming week at this field, as a 10-day-forecast-style list
+ * (day, icon, low, a range bar, high) rather than side-scrolling cards —
+ * rows line up by construction instead of fighting variable card heights.
  *
  * The 7-day data has always been fetched (fetchForecast() in forecast.js
  * asks Open-Meteo for forecast_days=7) but nothing displayed it — Home only
- * ever used the hourly strip. This is that data finally shown, with the same
- * green/yellow/orange/red/darkred WBGT-band coloring used everywhere else
- * in the app.
+ * ever used the hourly strip. This is that data finally shown. The range
+ * bar is colored by the day's WBGT band (green through darkred), not a
+ * plain temperature gradient — it's telling you more than Apple Weather's
+ * equivalent bar does.
  */
 
 import { useEffect } from 'react'
@@ -48,6 +51,9 @@ function dayLabel(iso, tz, todayStr) {
   return { top: dateStr === todayStr ? 'Today' : weekday, date }
 }
 
+/** Where a value sits between lo/hi as a 0-100 percent, clamped. */
+const pctBetween = (v, lo, hi) => (hi <= lo ? 0 : Math.max(0, Math.min(100, ((v - lo) / (hi - lo)) * 100)))
+
 export default function Weather() {
   const { selectedLocation, forecasts, loadForecast, guidelineNow, now } = useStore()
   const loc = selectedLocation
@@ -66,6 +72,13 @@ export default function Weather() {
   const days = fc?.days || []
   const tz = loc.timezone || null
   const todayStr = new Intl.DateTimeFormat('en-CA', { timeZone: tz || undefined }).format(new Date(now))
+
+  // The bar for each day is scaled against the WEEK's low/high, not just
+  // that day's own — otherwise every bar would span edge to edge and the
+  // "this day is hotter than that one" comparison Apple's version gives
+  // you for free would be lost.
+  const weekLo = Math.min(...days.map((d) => d.lowF).filter((v) => v != null))
+  const weekHi = Math.max(...days.map((d) => d.highF).filter((v) => v != null))
 
   return (
     <div className="stack weather-page">
@@ -86,7 +99,7 @@ export default function Weather() {
         ) : days.length === 0 ? (
           <div className="muted small" style={{ padding: '10px 2px' }}>No forecast days available.</div>
         ) : (
-          <div className="week-strip">
+          <div className="week-list">
             {days.map((d) => {
               const label = dayLabel(d.date, tz, todayStr)
               const band = guidelineNow(d.peakWbgtF)
@@ -94,50 +107,41 @@ export default function Weather() {
               const pct = thunderPct(d.maxThunder)
               const hasLightning = pct > 0
               const isRain = pct < 50 && d.icon !== 'storm' && !!RAIN_ICONS[d.icon]
-              const { Icon, label: condLabel } = simplifyDay(d, pct)
+              const { Icon } = simplifyDay(d, pct)
+              const barStart = d.lowF != null ? pctBetween(d.lowF, weekLo, weekHi) : 0
+              const barEnd = d.highF != null ? pctBetween(d.highF, weekLo, weekHi) : 0
               return (
-                <div key={d.date} className={`week-cell ${hasLightning ? 'has-lightning' : ''}`}>
-                  <div className="wc-day">{label.top}</div>
-                  <div className="wc-date">{label.date}</div>
-                  <Icon className="wc-icon" />
-                  <div className="wc-cond">{condLabel}</div>
-                  <div className={`wc-hilo tone-${tone}`}>
-                    {d.highF != null ? Math.round(d.highF) : '—'}° <span className="wc-lo">{d.lowF != null ? Math.round(d.lowF) : '—'}°</span>
+                <div key={d.date} className="week-row">
+                  <div className="wr-day">
+                    {label.top}
+                    <span className="wr-date">{label.date}</span>
                   </div>
-                  <div className={`wc-wbgt tone-${tone}`}>
-                    {d.peakWbgtF != null ? `${d.peakWbgtF.toFixed(1)}°` : '—'}
-                    <span className="wc-unit">PEAK WBGT</span>
+                  <Icon className="wr-icon" width={20} height={20} />
+                  <span className="wr-lo">{d.lowF != null ? Math.round(d.lowF) : '—'}°</span>
+                  <div className="wr-bar-track">
+                    <div
+                      className={`wr-bar-fill tone-${tone}`}
+                      style={{ left: `${barStart}%`, width: `${Math.max(6, barEnd - barStart)}%` }}
+                    />
                   </div>
-                  <div className="wc-row">
-                    <span className="label">Precip</span>
-                    <span>{d.precipProbMax != null ? `${Math.round(d.precipProbMax)}%` : '—'}</span>
-                  </div>
-                  <div className="wc-row">
-                    <span className="label">Wind</span>
-                    <span>{d.windMaxMph != null ? `${Math.round(d.windMaxMph)} mph` : '—'}</span>
-                  </div>
-                  <div className="wc-row">
-                    <span className="label">UV</span>
-                    <span>{d.uvMax != null ? Math.round(d.uvMax) : '—'}</span>
-                  </div>
-                  {isRain && d.precipProbMax != null && (
-                    <div className="wc-row wc-rain">
-                      <span className="label">Rain</span>
-                      <span className="wc-rain-value">
-                        <IconDroplet className="wc-drop" width={13} height={13} />
+                  <span className="wr-hi">{d.highF != null ? Math.round(d.highF) : '—'}°</span>
+                  <div className="wr-badges">
+                    <span className={`wr-wbgt-chip tone-${tone}`}>
+                      {d.peakWbgtF != null ? `${d.peakWbgtF.toFixed(1)}°` : '—'}
+                    </span>
+                    {isRain && d.precipProbMax != null && (
+                      <span className="wr-chip wr-chip-rain">
+                        <IconDroplet width={11} height={11} />
                         {Math.round(d.precipProbMax)}%
                       </span>
-                    </div>
-                  )}
-                  {hasLightning && (
-                    <div className="wc-row wc-lightning">
-                      <span className="label">Lightning</span>
-                      <span className="wc-lightning-value">
-                        <IconBolt className="wc-bolt" width={13} height={13} />
+                    )}
+                    {hasLightning && (
+                      <span className="wr-chip wr-chip-lightning">
+                        <IconBolt width={11} height={11} />
                         {pct}%
                       </span>
-                    </div>
-                  )}
+                    )}
+                  </div>
                 </div>
               )
             })}
