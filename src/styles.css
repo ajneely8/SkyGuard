@@ -561,7 +561,25 @@ input[type='checkbox'], input[type='range'] { accent-color: var(--accent); }
    reference screenshot of Apple Weather's own header. */
 .weather-hero { text-align: center; padding: 6px 0 4px; }
 .hero-loc-label { font-size: 11px; font-weight: 700; letter-spacing: 0.12em; color: var(--ink-3); }
+.hero-loc-row { display: flex; align-items: center; justify-content: center; gap: 10px; position: relative; }
+.hero-change-btn {
+  position: absolute; right: 0; background: none; border: none; color: var(--accent);
+  font-size: 12px; font-weight: 600; cursor: pointer; padding: 2px 4px;
+}
+.hero-change-btn:hover { text-decoration: underline; }
 .hero-loc-name { font-size: 22px; font-weight: 600; color: var(--ink); margin-top: 2px; }
+
+/* City search — the Weather page starts here and only shows a forecast
+   once a city has been picked from these results. */
+.weather-search-card { max-width: 480px; margin: 40px auto 0; text-align: center; }
+.weather-search-form { display: flex; gap: 8px; margin-top: 8px; }
+.weather-search-form input { flex: 1; min-height: 42px; }
+.weather-search-results { display: flex; flex-direction: column; gap: 4px; margin-top: 12px; text-align: left; }
+.weather-search-result {
+  background: rgba(255, 255, 255, 0.04); border: 1px solid var(--line-2); border-radius: var(--radius);
+  padding: 10px 12px; font-size: 14px; color: var(--ink); text-align: left; cursor: pointer;
+}
+.weather-search-result:hover { background: rgba(255, 255, 255, 0.08); border-color: var(--line); }
 .hero-temp {
   font-family: var(--nums); font-size: 64px; font-weight: 300; line-height: 1;
   color: var(--ink); margin-top: 4px; font-variant-numeric: tabular-nums;

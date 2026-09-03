@@ -1,26 +1,22 @@
 /**
- * Weather — a city-style hero (now, condition, high/low), a one-line
- * outlook sentence, a rolling 24-hour strip, then the 10-day row list.
- * Modeled on a reference screenshot of Apple Weather's layout.
+ * Weather — its own city search, decoupled from the app's saved locations.
+ * The page starts blank: type a city, pick a result, and only then does the
+ * hero (now, condition, high/low), outlook sentence, rolling 24-hour strip,
+ * and 10-day row list appear. Modeled on a reference screenshot of Apple
+ * Weather's layout.
  *
- * "Grab the weather from that exact city" already works: adding a location
- * (Locations page, or the address search in onboarding) geocodes whatever
- * text is typed — a full street address or just a city name — through the
- * same Nominatim search, so a city name alone resolves fine. This page
- * just displays whatever field is currently selected.
- *
- * The 7-day + hourly data has always been fetched (fetchForecast() in
- * forecast.js asks Open-Meteo for forecast_days=7) but nothing displayed
- * the daily list, the rolling hour strip, or an outlook sentence — Home
- * only ever used a same-day hourly strip. This page uses upcomingHours()
- * (already built, unused) for a true rolling "now + next 24 hours" window
- * that runs into tomorrow instead of resetting at midnight.
+ * This is deliberately independent of selectedLocation/forecasts/loadForecast
+ * — a district's saved fields stay on Locations/Home, this page is "look up
+ * any city's weather" and fetches its own forecast for whatever coordinate
+ * was searched.
  */
 
-import { useEffect } from 'react'
+import { useEffect, useState, useCallback } from 'react'
 import { useStore } from '../lib/store.jsx'
-import { Card, Empty } from '../components/ui.jsx'
-import { upcomingHours } from '../lib/forecast.js'
+import { Card } from '../components/ui.jsx'
+import { fetchForecast, upcomingHours } from '../lib/forecast.js'
+import { searchPlaces } from '../lib/weather.js'
+import { timezoneFor } from '../lib/geo.js'
 import { fmtTimeIn } from '../lib/format.js'
 import {
   IconBolt,
@@ -109,22 +105,106 @@ function dayLabel(iso, tz, todayStr) {
 const pctBetween = (v, lo, hi) => (hi <= lo ? 0 : Math.max(0, Math.min(100, ((v - lo) / (hi - lo)) * 100)))
 
 export default function Weather() {
-  const { selectedLocation, forecasts, loadForecast, guidelineNow, now } = useStore()
-  const loc = selectedLocation
-  const locId = loc?.id
+  const { state, guidelineNow, now } = useStore()
+
+  const [query, setQuery] = useState('')
+  const [searching, setSearching] = useState(false)
+  const [searchError, setSearchError] = useState(null)
+  const [results, setResults] = useState([])
+  const [picked, setPicked] = useState(null) // { name, lat, lon, timezone }
+  const [fc, setFc] = useState(null)
+  const [fcError, setFcError] = useState(null)
+  const [loadingFc, setLoadingFc] = useState(false)
+
+  const runSearch = useCallback(async (e) => {
+    e?.preventDefault?.()
+    const q = query.trim()
+    if (!q) return
+    setSearching(true)
+    setSearchError(null)
+    try {
+      const found = await searchPlaces(q)
+      setResults(found)
+      if (found.length === 0) setSearchError('No cities matched that search.')
+    } catch {
+      setSearchError('City search failed. Try again.')
+    } finally {
+      setSearching(false)
+    }
+  }, [query])
+
+  const pickResult = useCallback(async (r) => {
+    setResults([])
+    setQuery('')
+    setPicked({ name: r.label, lat: r.lat, lon: r.lon, timezone: null })
+  }, [])
 
   useEffect(() => {
-    if (!locId) return
-    loadForecast(locId)
+    if (!picked) return
+    let cancelled = false
+    setLoadingFc(true)
+    setFcError(null)
+    Promise.all([
+      fetchForecast({ lat: picked.lat, lon: picked.lon }, state.settings.thresholds),
+      timezoneFor(picked.lat, picked.lon),
+    ])
+      .then(([forecastData, tzInfo]) => {
+        if (cancelled) return
+        setFc(forecastData)
+        setPicked((p) => (p ? { ...p, timezone: tzInfo.timezone || null } : p))
+      })
+      .catch((err) => {
+        if (cancelled) return
+        setFc(null)
+        setFcError(err?.message || 'Forecast unavailable')
+      })
+      .finally(() => {
+        if (!cancelled) setLoadingFc(false)
+      })
+    return () => {
+      cancelled = true
+    }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [locId])
+  }, [picked?.lat, picked?.lon])
 
-  if (!loc) return <Empty>Add a location first.</Empty>
+  if (!picked) {
+    return (
+      <div className="stack weather-page">
+        <div className="weather-stars" aria-hidden="true" />
+        <div className="weather-sky" aria-hidden="true">
+          <div className="weather-sun-glow" />
+          <div className="weather-cloud-glow" />
+        </div>
+        <Card className="card-bare weather-search-card" title="Weather" subtitle="Look up any city's forecast">
+          <form className="weather-search-form" onSubmit={runSearch}>
+            <input
+              type="text"
+              placeholder="Search a city…"
+              value={query}
+              onChange={(e) => setQuery(e.target.value)}
+              autoFocus
+            />
+            <button type="submit" className="btn btn-primary" disabled={searching || !query.trim()}>
+              {searching ? 'Searching…' : 'Search'}
+            </button>
+          </form>
+          {searchError && <div className="muted small" style={{ padding: '8px 2px' }}>{searchError}</div>}
+          {results.length > 0 && (
+            <div className="weather-search-results">
+              {results.map((r) => (
+                <button key={`${r.lat},${r.lon}`} type="button" className="weather-search-result" onClick={() => pickResult(r)}>
+                  {r.label}
+                </button>
+              ))}
+            </div>
+          )}
+        </Card>
+      </div>
+    )
+  }
 
-  const entry = forecasts[locId]
-  const fc = entry?.data
   const days = fc?.days || []
-  const tz = loc.timezone || null
+  const tz = picked.timezone || null
   const todayStr = new Intl.DateTimeFormat('en-CA', { timeZone: tz || undefined }).format(new Date(now))
 
   // The bar for each day is scaled against the WEEK's low/high, not just
@@ -155,8 +235,13 @@ export default function Weather() {
       {fc && nowHour && (
         <Card className="card-bare weather-hero-card">
           <div className="weather-hero">
-            <div className="hero-loc-label">MY LOCATION</div>
-            <div className="hero-loc-name">{loc.name}</div>
+            <div className="hero-loc-row">
+              <span className="hero-loc-label">SEARCHED CITY</span>
+              <button type="button" className="hero-change-btn" onClick={() => { setPicked(null); setFc(null); setFcError(null) }}>
+                Change city
+              </button>
+            </div>
+            <div className="hero-loc-name">{picked.name}</div>
             <div className="hero-temp">{nowHour.tempF != null ? Math.round(nowHour.tempF) : '—'}°</div>
             <div className="hero-cond-row">
               <span>{heroCond?.label || '—'}</span>
@@ -186,10 +271,10 @@ export default function Weather() {
         </Card>
       )}
 
-      <Card className="card-bare" title="Weather" subtitle={`The next ${days.length || 7} days at ${loc.name}`}>
+      <Card className="card-bare" title="Weather" subtitle={`The next ${days.length || 7} days at ${picked.name}`}>
         {!fc ? (
           <div className="muted small" style={{ padding: '10px 2px' }}>
-            {entry?.error ? `Forecast unavailable: ${entry.error}` : 'Loading the week…'}
+            {fcError ? `Forecast unavailable: ${fcError}` : 'Loading the week…'}
           </div>
         ) : days.length === 0 ? (
           <div className="muted small" style={{ padding: '10px 2px' }}>No forecast days available.</div>
