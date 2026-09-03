@@ -757,6 +757,31 @@ input[type='checkbox'], input[type='range'] { accent-color: var(--accent); }
   .wr-badges { flex-basis: 100%; justify-content: flex-end; margin-top: 4px; }
 }
 
+/* Air quality card — modeled on Apple Weather's own AQI tile: a label, a
+   big "value - category" headline, one line of EPA guidance, and a bar
+   spanning the EPA color bands with a dot marking today's reading. Colors
+   are the EPA's own AQI palette, not the app's WBGT tone tokens — the two
+   scales measure different things and shouldn't share a legend. */
+.weather-aqi-card { margin-top: 18px; }
+.aqi-label { font-size: 12px; font-weight: 700; letter-spacing: 0.08em; color: var(--ink-3); text-transform: uppercase; }
+.aqi-headline { font-size: 22px; font-weight: 700; color: var(--ink); margin-top: 6px; }
+.aqi-headline-dash { color: var(--ink-3); font-weight: 400; }
+.aqi-desc { font-size: 13px; line-height: 1.5; color: var(--ink-2); margin-top: 4px; max-width: 56ch; }
+.aqi-bar-track {
+  position: relative; height: 8px; border-radius: 999px; margin-top: 16px;
+  background: linear-gradient(90deg,
+    #22c55e 0%, #22c55e 16.6%,
+    #eab308 16.6%, #eab308 33.3%,
+    #f97316 33.3%, #f97316 50%,
+    #ef4444 50%, #ef4444 66.6%,
+    #a855f7 66.6%, #a855f7 100%);
+}
+.aqi-bar-dot {
+  position: absolute; top: 50%; width: 16px; height: 16px; border-radius: 50%;
+  background: #fff; border: 3px solid var(--surface); box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.25);
+  transform: translate(-50%, -50%);
+}
+
 /* Drizzle weather icon: white cloud, three light-blue drops falling on a
    staggered loop, wherever WeatherIcon renders one (Home's hourly strip,
    Weather's week strip). The cloud path has no color of its own — it

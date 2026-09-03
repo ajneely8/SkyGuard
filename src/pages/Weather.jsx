@@ -15,7 +15,7 @@ import { useEffect, useState, useCallback } from 'react'
 import { useStore } from '../lib/store.jsx'
 import { Card } from '../components/ui.jsx'
 import { fetchForecast, upcomingHours } from '../lib/forecast.js'
-import { searchPlaces } from '../lib/weather.js'
+import { searchPlaces, fetchAirQuality } from '../lib/weather.js'
 import { timezoneFor } from '../lib/geo.js'
 import { fmtTimeIn } from '../lib/format.js'
 import {
@@ -109,6 +109,26 @@ function buildOutlook(hours, tz) {
   return `${BUCKET_ARRIVING[changeBucket]} will arrive by ${fmtTimeIn(changeHour.ts, tz)}.${gustText}`
 }
 
+/* ---------- air quality (US AQI, EPA breakpoints + official colors) ---------- */
+
+const AQI_LEVELS = [
+  { max: 50, label: 'Good', color: '#22c55e', note: 'Air quality is considered satisfactory.' },
+  { max: 100, label: 'Moderate', color: '#eab308', note: 'Unusually sensitive people should consider limiting prolonged outdoor exertion.' },
+  { max: 150, label: 'Unhealthy for Sensitive Groups', color: '#f97316', note: 'People with heart or lung disease, older adults, and children should limit prolonged outdoor exertion.' },
+  { max: 200, label: 'Unhealthy', color: '#ef4444', note: 'Everyone may begin to experience health effects; sensitive groups may experience more serious effects.' },
+  { max: 300, label: 'Very Unhealthy', color: '#a855f7', note: 'Health alert: everyone may experience more serious health effects.' },
+  { max: Infinity, label: 'Hazardous', color: '#7f1d1d', note: 'Health warning of emergency conditions — the entire population is likely to be affected.' },
+]
+
+/** The EPA category (name, color, guidance) for a US AQI value. */
+const classifyAqi = (value) => AQI_LEVELS.find((l) => value <= l.max) || AQI_LEVELS[AQI_LEVELS.length - 1]
+
+/** Where a value sits on the bar's own 0-300 domain — AQI can run to 500,
+ * but everything from "Very Unhealthy" up is a rare extreme, so the visible
+ * scale is spent on the range schools actually see most days. */
+const AQI_BAR_MAX = 300
+const aqiBarPct = (value) => Math.max(0, Math.min(100, (value / AQI_BAR_MAX) * 100))
+
 function dayLabel(iso, tz, todayStr) {
   const d = new Date(iso)
   const dateStr = new Intl.DateTimeFormat('en-CA', { timeZone: tz || undefined }).format(d) // YYYY-MM-DD, stable for comparison
@@ -162,6 +182,7 @@ export default function Weather() {
   const [fc, setFc] = useState(null)
   const [fcError, setFcError] = useState(null)
   const [loadingFc, setLoadingFc] = useState(false)
+  const [aqi, setAqi] = useState(null) // { value } | { error: true } | null while loading
   const [recents, setRecents] = useState(loadRecents)
   const [recentWeather, setRecentWeather] = useState({}) // "lat,lon" -> snapshot, for the recent-city card backgrounds
 
@@ -215,6 +236,25 @@ export default function Weather() {
       cancelled = true
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [picked?.lat, picked?.lon])
+
+  // Air quality is fetched separately from the forecast — a provider hiccup
+  // here shouldn't take down the rest of the page, so it gets its own
+  // loading/error state instead of riding along in the fc Promise.all.
+  useEffect(() => {
+    if (!picked) return
+    let cancelled = false
+    setAqi(null)
+    fetchAirQuality({ lat: picked.lat, lon: picked.lon })
+      .then((data) => {
+        if (!cancelled) setAqi(data)
+      })
+      .catch(() => {
+        if (!cancelled) setAqi({ error: true })
+      })
+    return () => {
+      cancelled = true
+    }
   }, [picked?.lat, picked?.lon])
 
   // A quick "now" snapshot (temp, condition, day/night, today's H/L) for
@@ -468,6 +508,32 @@ export default function Weather() {
           </div>
         )}
       </Card>
+
+      {fc && (
+        <Card className="card-bare weather-aqi-card">
+          <div className="aqi-label">Air Quality</div>
+          {aqi == null ? (
+            <div className="muted small" style={{ padding: '4px 2px' }}>Loading…</div>
+          ) : aqi.error || aqi.value == null ? (
+            <div className="muted small" style={{ padding: '4px 2px' }}>Air quality unavailable</div>
+          ) : (
+            (() => {
+              const level = classifyAqi(aqi.value)
+              return (
+                <>
+                  <div className="aqi-headline">
+                    {aqi.value} <span className="aqi-headline-dash">-</span> {level.label}
+                  </div>
+                  <div className="aqi-desc">{level.note}</div>
+                  <div className="aqi-bar-track">
+                    <div className="aqi-bar-dot" style={{ left: `${aqiBarPct(aqi.value)}%` }} />
+                  </div>
+                </>
+              )
+            })()
+          )}
+        </Card>
+      )}
     </div>
   )
 }

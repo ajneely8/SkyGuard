@@ -20,6 +20,7 @@ import { queueNominatim } from './geo.js'
 
 const OM_FORECAST = 'https://api.open-meteo.com/v1/forecast'
 const OM_GEOCODE = 'https://geocoding-api.open-meteo.com/v1/search'
+const OM_AIR_QUALITY = 'https://air-quality-api.open-meteo.com/v1/air-quality'
 const NOMINATIM = 'https://nominatim.openstreetmap.org/search'
 const NWS_ALERTS = 'https://api.weather.gov/alerts/active'
 
@@ -150,6 +151,25 @@ function fallbackSolar(cloudCover, isDay) {
   const cc = cloudCover == null ? 40 : cloudCover
   const clearSky = 850 // W/m^2, mid-day mid-latitude approximation
   return Math.max(0, clearSky * (1 - 0.75 * (cc / 100)))
+}
+
+/**
+ * Current US AQI for a coordinate (Open-Meteo's air-quality endpoint,
+ * itself blending regional monitor networks and CAMS model output — no
+ * API key required).
+ * @returns {Promise<{value:number}>}
+ */
+export async function fetchAirQuality({ lat, lon }) {
+  const params = new URLSearchParams({
+    latitude: String(lat),
+    longitude: String(lon),
+    current: 'us_aqi',
+    timezone: 'GMT',
+  })
+  const data = await getJson(`${OM_AIR_QUALITY}?${params}`, { timeout: 8000 })
+  const value = data?.current?.us_aqi
+  if (value == null) throw new Error('Air quality provider returned no reading')
+  return { value: Math.round(value) }
 }
 
 /**
