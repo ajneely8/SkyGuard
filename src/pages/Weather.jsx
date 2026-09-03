@@ -13,6 +13,7 @@ import { useStore } from '../lib/store.jsx'
 import { Card, Empty } from '../components/ui.jsx'
 import {
   IconBolt,
+  IconDroplet,
   IconCloudLightning,
   IconCloudDrizzle,
   IconCloudRain,
@@ -80,6 +81,7 @@ export default function Weather() {
               const tone = band?.tone || 'none'
               const pct = thunderPct(d.maxThunder)
               const hasLightning = pct > 0
+              const isRain = pct < 50 && d.icon !== 'storm' && !!RAIN_ICONS[d.icon]
               const { Icon, label: condLabel } = simplifyDay(d, pct)
               return (
                 <div key={d.date} className={`week-cell ${hasLightning ? 'has-lightning' : ''}`}>
@@ -106,6 +108,15 @@ export default function Weather() {
                     <span className="label">UV</span>
                     <span>{d.uvMax != null ? Math.round(d.uvMax) : '—'}</span>
                   </div>
+                  {isRain && d.precipProbMax != null && (
+                    <div className="wc-row wc-rain">
+                      <span className="label">Rain</span>
+                      <span className="wc-rain-value">
+                        <IconDroplet className="wc-drop" width={13} height={13} />
+                        {Math.round(d.precipProbMax)}%
+                      </span>
+                    </div>
+                  )}
                   {hasLightning && (
                     <div className="wc-row wc-lightning">
                       <span className="label">Lightning</span>

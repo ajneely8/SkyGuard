@@ -535,9 +535,22 @@ input[type='checkbox'], input[type='range'] { accent-color: var(--accent); }
 .wc-row { display: flex; justify-content: space-between; align-items: center; gap: 14px; width: 100%; font-size: 11.5px; color: var(--ink-2); }
 .wc-row .label { margin: 0; font-size: 10px; }
 
-/* Lightning risk — modelled, so it appears only when the day's convective
-   score is non-zero (see thunderPct() in Weather.jsx), with a flashing
-   bolt so it reads as an alert, not just another stat line. */
+/* Rain chance and lightning risk — same treatment: a callout row with a
+   colored, animated icon, not just another plain stat line. Rain only on
+   days actually bucketed as rain (see isRain in Weather.jsx); lightning
+   whenever the modelled score is non-zero. */
+.wc-rain { margin-top: 2px; padding-top: 8px; border-top: 1px solid var(--line-2); }
+.wc-rain .label { color: var(--rain); }
+.wc-rain-value { display: flex; align-items: center; gap: 4px; color: var(--rain); font-weight: 700; }
+.wc-drop { color: var(--rain); animation: wcDropBob 1.6s ease-in-out infinite; }
+@keyframes wcDropBob {
+  0%, 100% { transform: translateY(0); opacity: 1; }
+  50%      { transform: translateY(2px); opacity: 0.7; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .wc-drop { animation: none; }
+}
+
 .wc-lightning { margin-top: 2px; padding-top: 8px; border-top: 1px solid var(--line-2); }
 .wc-lightning .label { color: var(--amber); }
 .wc-lightning-value { display: flex; align-items: center; gap: 4px; color: var(--amber); font-weight: 700; }
