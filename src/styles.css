@@ -22,6 +22,8 @@
      not --amber, so a sunny day never reads as a caution indicator). */
   --sky: #38bdf8;
   --sun-gold: #fbbf24;
+  --rain: #0ea5e9;
+  --snow: #e2e8f0;
 
   /* ink */
   --ink: #f8fafc;
@@ -598,6 +600,63 @@ input[type='checkbox'], input[type='range'] { accent-color: var(--accent); }
 .cl-bolt { transform-box: fill-box; transform-origin: center; animation: wcBoltFlash 1.4s ease-in-out infinite; }
 @media (prefers-reduced-motion: reduce) {
   .cl-bolt { animation: none; }
+}
+
+/* Partly-cloudy icon: only the small sun peeking above the cloud is gold
+   and pulses — the cloud itself stays the same neutral gray as .icon-cloud. */
+.cs-sun { color: var(--sun-gold); animation: sunPulse 2.6s ease-in-out infinite; transform-box: fill-box; transform-origin: center; }
+@media (prefers-reduced-motion: reduce) {
+  .cs-sun { animation: none; }
+}
+
+/* Rain icon: heavier/faster falling drops than drizzle, deeper blue. */
+.icon-rain { color: var(--rain); }
+.rain-drop {
+  stroke: var(--rain); stroke-width: 2; stroke-linecap: round;
+  transform-box: fill-box; transform-origin: center;
+  animation: drizzleFall 0.7s linear infinite;
+  opacity: 0;
+}
+.rain-drop-2 { animation-delay: 0.15s; }
+.rain-drop-3 { animation-delay: 0.3s; }
+@media (prefers-reduced-motion: reduce) {
+  .rain-drop { animation: none; opacity: 1; }
+}
+
+/* Snow icon: small flakes drifting down with a little side-to-side sway. */
+.icon-snow { color: var(--snow); }
+.snow-flake {
+  transform-box: fill-box; transform-origin: center;
+  animation: snowDrift 2.4s ease-in-out infinite;
+  opacity: 0;
+}
+.snow-flake-2 { animation-delay: 0.6s; }
+.snow-flake-3 { animation-delay: 1.2s; }
+@keyframes snowDrift {
+  0%   { transform: translate(0, -2px); opacity: 0; }
+  15%  { opacity: 1; }
+  50%  { transform: translate(1.5px, 1px); }
+  85%  { opacity: 1; }
+  100% { transform: translate(-1px, 3px); opacity: 0; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .snow-flake { animation: none; opacity: 1; }
+}
+
+/* Fog icon: horizontal bands drifting side to side. */
+.icon-fog { color: var(--ink-3); }
+.fog-band {
+  stroke: var(--ink-3); stroke-width: 2; stroke-linecap: round;
+  transform-box: fill-box; transform-origin: center;
+  animation: fogDrift 3.2s ease-in-out infinite;
+}
+.fog-band-2 { animation-delay: 0.5s; animation-direction: reverse; }
+@keyframes fogDrift {
+  0%, 100% { transform: translateX(-1.5px); opacity: 0.6; }
+  50%      { transform: translateX(1.5px); opacity: 1; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .fog-band { animation: none; }
 }
 
 /* ---------------- what moves the number ---------------- */
